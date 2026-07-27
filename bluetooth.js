@@ -19,11 +19,8 @@ const BLE = {
     service: null,
 
     writeCharacteristic: null,
-    notifyCharacteristic: null,
+    notifyCharacteristic: null
 
-
-    // Used later when we decode probe identity
-    lastActiveProbe: null
 };
 
 
@@ -67,7 +64,6 @@ function handleBluetoothNotification(event){
 
 
 
-
     appState.bluetooth.lastRawHex = hex;
     appState.bluetooth.lastPayload = hex;
     appState.bluetooth.lastUpdatedAt =
@@ -82,195 +78,212 @@ function handleBluetoothNotification(event){
 
 
 
+
+
     /*
-        Packet format discovered:
+        Packet format:
 
-        Header:
-
-        byte 0:
+        Byte 0:
         55
 
-        byte 1:
+        Byte 1:
         00
 
 
-        Status packets:
+        Probe slots:
 
-        55 00 xx xx xx xx FF FF FF FF FF FF FF FF 00
+        Probe 1:
+        bytes 2-3
 
+        Probe 2:
+        bytes 4-5
 
-        Temperature packets:
+        Probe 3:
+        bytes 6-7
 
-        55 00 FF FF FF FF TT TT FF FF FF FF FF FF 00
+        Probe 4:
+        bytes 8-9
+
+        Probe 5:
+        bytes 10-11
+
+        Probe 6:
+        bytes 12-13
 
 
         Temperature:
+        16-bit big endian
+        value / 10
 
-        TT TT = BIG ENDIAN
 
-        Example:
-
-        01 16
-
-        = 278
-
-        = 27.8°C
+        FFFF = disconnected
     */
 
 
 
+    const probeSlots = [
+
+        {
+            offset: 2,
+            probeId: 1
+        },
+
+        {
+            offset: 4,
+            probeId: 2
+        },
+
+        {
+            offset: 6,
+            probeId: 3
+        },
+
+        {
+            offset: 8,
+            probeId: 4
+        },
+
+        {
+            offset: 10,
+            probeId: 5
+        },
+
+        {
+            offset: 12,
+            probeId: 6
+        }
+
+    ];
 
 
-    /*
-        Ignore status packets
-
-        These contain probe/channel information
-        but no temperature.
-    */
 
 
-    if(bytes[2] !== 0xFF){
+
+
+    probeSlots.forEach(slot => {
+
+
+        const offset = slot.offset;
+
+
+
+        if(offset + 1 >= bytes.length){
+
+            return;
+
+        }
+
+
+
+
+        const high = bytes[offset];
+
+        const low = bytes[offset + 1];
+
+
+
+
+
+        const raw =
+            (high << 8) |
+            low;
+
+
+
+
+
+
+        const probe =
+            appState.probes.find(
+                p => p.id === slot.probeId
+            );
+
+
+
+        if(!probe){
+
+            return;
+
+        }
+
+
+
+
 
 
         console.log(
-            "Status packet:",
-            bytes[2],
-            bytes[3],
-            bytes[4],
-            bytes[5]
+            "Probe",
+            slot.probeId,
+            "raw:",
+            raw
         );
 
 
-        BLE.lastActiveProbe =
-            bytes[3];
+
+
+
+
+        if(raw === 0xFFFF){
+
+
+            console.log(
+                "Probe",
+                slot.probeId,
+                "disconnected"
+            );
+
+
+            probe.temperature = null;
+
+
+            return;
+
+        }
+
+
+
+
+
+
+        if(raw === 0){
+
+            return;
+
+        }
+
+
+
+
+
+
+
+        const temperature =
+            raw / 10;
+
+
+
 
 
         console.log(
-            "Stored probe identifier:",
-            BLE.lastActiveProbe
-        );
-
-
-        return;
-
-    }
-
-
-
-
-
-
-    /*
-        Temperature starts at byte 6
-    */
-
-
-    const raw =
-        (bytes[6] << 8) |
-        bytes[7];
-
-
-
-    console.log(
-        "Temperature raw:",
-        raw
-    );
-
-
-
-
-    /*
-        No probe connected
-    */
-
-
-    if(raw === 0xFFFF || raw === 0){
-
-
-        console.log(
-            "No valid temperature"
-        );
-
-
-        return;
-
-    }
-
-
-
-
-
-    const temperature =
-        raw / 10;
-
-
-
-    console.log(
-        "Temperature:",
-        temperature,
-        "°C"
-    );
-
-
-
-
-
-
-    /*
-        Temporary mapping
-
-        Until we identify the real probe ID,
-        put temperature on first free probe.
-
-        This avoids wrong 6000°C values.
-    */
-
-
-    let targetProbe = null;
-
-
-
-    if(BLE.lastActiveProbe){
-
-
-        console.log(
-            "Possible probe ID:",
-            BLE.lastActiveProbe
-        );
-
-    }
-
-
-
-
-
-    targetProbe =
-        appState.probes.find(
-            p =>
-                p.temperature === null ||
-                p.temperature === undefined
+            "Probe",
+            slot.probeId,
+            "temperature:",
+            temperature,
+            "°C"
         );
 
 
 
-    if(!targetProbe){
-
-        targetProbe =
-            appState.probes[0];
-
-    }
 
 
 
-
-    if(targetProbe){
-
-
-        targetProbe.temperature =
-            temperature;
+        probe.temperature = temperature;
 
 
-    }
+
+    });
+
+
 
 
 
@@ -303,14 +316,18 @@ async function connectBluetooth(){
 
 
 
+
+
         BLE.device =
             await navigator.bluetooth.requestDevice({
+
 
                 filters: [
                     {
                         namePrefix: "Grill"
                     }
                 ],
+
 
 
                 optionalServices: [
@@ -335,6 +352,7 @@ async function connectBluetooth(){
 
 
 
+
         BLE.device.addEventListener(
             "gattserverdisconnected",
             onBluetoothDisconnected
@@ -345,8 +363,11 @@ async function connectBluetooth(){
 
 
 
+
         BLE.server =
             await BLE.device.gatt.connect();
+
+
 
 
 
@@ -363,7 +384,6 @@ async function connectBluetooth(){
             await BLE.server.getPrimaryService(
                 BLE.SERVICE
             );
-
 
 
 
@@ -390,8 +410,10 @@ async function connectBluetooth(){
 
 
 
+
         await BLE.notifyCharacteristic
             .startNotifications();
+
 
 
 
@@ -450,9 +472,9 @@ async function connectBluetooth(){
 
 
 
+
     }
     catch(error){
-
 
 
         console.error(error);
@@ -488,6 +510,7 @@ async function connectBluetooth(){
         render();
 
 
+
     }
 
 }
@@ -511,9 +534,10 @@ async function sendCommand(bytes){
 
 
 
-    await BLE.writeCharacteristic
-        .writeValue(
-            new Uint8Array(bytes)
-        );
+
+    await BLE.writeCharacteristic.writeValue(
+        new Uint8Array(bytes)
+    );
+
 
 }
