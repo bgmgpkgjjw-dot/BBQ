@@ -141,26 +141,41 @@ function finishCookSession(){
     const session =
         getCurrentSession();
 
+
     if(!session){
+
+        console.warn(
+            "No active cook session found"
+        );
+
         return;
+
     }
+
 
 
     session.finishedAt =
         new Date().toISOString();
 
 
+
     session.duration =
         calculateDuration(
-
             session.startedAt,
-
             session.finishedAt
-
         );
 
 
+
     saveSessions();
+
+
+
+    console.log(
+        "Cook session saved:",
+        session
+    );
+
 
 }
 
@@ -224,12 +239,14 @@ function recordTemperatureHistory(){
 
 function getCurrentSession(){
 
+    if(!appState.currentSessionId){
+        return null;
+    }
+
+
     return appState.sessions.find(
-
         s =>
-        s.id ===
-        appState.currentSessionId
-
+        s.id === appState.currentSessionId
     );
 
 }
