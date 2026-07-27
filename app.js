@@ -323,7 +323,11 @@ function renderScreen(){
                 renderTemperatureChart,
                 50
             );
+           
+            if(appState.selectedHistory){
 
+            return historyDetailView();
+            }
             return historyView();
     
 

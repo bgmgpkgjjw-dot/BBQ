@@ -563,3 +563,167 @@ function openHistorySession(id){
 
 
 }
+
+function historyDetailView(){
+
+
+    const session =
+        appState.selectedHistory;
+
+
+    if(!session){
+
+        return historyView();
+
+    }
+
+
+
+    const samples =
+        session.temperatureHistory || [];
+
+
+
+    const maxDome =
+        samples.length
+        ?
+        Math.max(
+            ...samples.map(
+                x => x.dome || 0
+            )
+        )
+        :
+        "—";
+
+
+
+    const maxMeat =
+        samples.length
+        ?
+        Math.max(
+            ...samples.map(
+                x => x.meat || 0
+            )
+        )
+        :
+        "—";
+
+
+
+    return `
+
+
+    <button
+    class="button secondary"
+    onclick="closeHistoryDetail()">
+
+    ← Terug
+
+    </button>
+
+
+
+    <div class="card">
+
+
+        <h2>
+        🔥 ${session.recipe}
+        </h2>
+
+
+        <p>
+        Gestart:
+        ${new Date(session.startedAt).toLocaleString("nl-NL")}
+        </p>
+
+
+        <p>
+        Duur:
+        ${session.duration || "—"}
+        </p>
+
+
+    </div>
+
+
+
+
+    <div class="card">
+
+        <h3>
+        Temperatuur data
+        </h3>
+
+
+        <p>
+        🌡 Metingen:
+        ${samples.length}
+        </p>
+
+
+        <p>
+        🔥 Max dome:
+        ${maxDome}°C
+        </p>
+
+
+        <p>
+        🥩 Max vlees:
+        ${maxMeat}°C
+        </p>
+
+
+    </div>
+
+
+
+    <div class="card">
+
+
+        <h3>
+        Timeline
+        </h3>
+
+
+        ${
+            samples.slice(-10).map(
+                s => `
+
+                <div class="ingredient-row">
+
+                    <span>
+                    ${new Date(s.timestamp)
+                    .toLocaleTimeString("nl-NL")}
+                    </span>
+
+                    <strong>
+                    ${s.dome ?? "—"}° /
+                    ${s.meat ?? "—"}°
+                    </strong>
+
+                </div>
+
+                `
+            ).join("")
+        }
+
+
+    </div>
+
+
+    `;
+
+
+}
+
+
+
+
+
+function closeHistoryDetail(){
+
+    appState.selectedHistory = null;
+
+    render();
+
+}
