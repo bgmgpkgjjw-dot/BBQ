@@ -73,29 +73,131 @@ function updateLiveUi() {
 }
 
 function renderProbeCard(probe) {
+
     const target = getProbeTarget(probe);
     const progress = getProgress(probe);
 
+    const isDome = probe.type === "dome";
+
+
     return `
-    <div class="probe-card ${getProbeStatus(probe)}">
-      <div class="probe-title">
-        <span>${probe.type === "meat" ? "🥩" : "🔥"} ${probe.name}</span>
-        <span class="probe-id">P${probe.id}</span>
-      </div>
 
-      <div class="probe-temperature" data-probe-temperature data-probe-id="${probe.id}">
-        ${formatTemperatureValue(probe.temperature)}
-      </div>
+    <div class="probe-card premium-probe ${getProbeStatus(probe)} ${isDome ? "dome-card" : "meat-card"}">
 
-      <div class="probe-info">
-        ${target ? `Doel ${target}°C` : "Geen doel"}
-      </div>
 
-      <div class="progress-bar">
-        <div class="progress-value" style="width:${progress}%"></div>
-      </div>
+        <div class="probe-title">
+
+            <span>
+                ${isDome ? "🔥 Kamado Dome" : "🥩 " + probe.name}
+            </span>
+
+
+            <span class="probe-id">
+                P${probe.id}
+            </span>
+
+        </div>
+
+
+
+        ${
+        isDome
+
+        ?
+
+        `
+
+        <div class="dome-gauge">
+
+
+            <div class="gauge-circle">
+
+
+                <div class="gauge-value"
+                     data-probe-temperature
+                     data-probe-id="${probe.id}">
+
+                    ${formatTemperatureValue(probe.temperature)}
+
+                </div>
+
+
+                <div class="gauge-label">
+                    Dome
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+        `
+
+
+        :
+
+
+        `
+
+
+        <div class="thermometer-box">
+
+
+            <div class="thermometer-icon">
+                🌡️
+            </div>
+
+
+            <div class="thermometer-value"
+                 data-probe-temperature
+                 data-probe-id="${probe.id}">
+
+                ${formatTemperatureValue(probe.temperature)}
+
+            </div>
+
+
+        </div>
+
+
+        `
+
+        }
+
+
+
+
+        <div class="probe-info">
+
+            ${
+                target
+                ?
+                `Doel ${target}°C`
+                :
+                "Geen doel"
+            }
+
+        </div>
+
+
+
+
+        <div class="progress-bar">
+
+            <div 
+            class="progress-value"
+            style="width:${progress}%">
+            </div>
+
+        </div>
+
+
     </div>
-  `;
+
+    `;
+
 }
 
 function formatElapsedTime() {
