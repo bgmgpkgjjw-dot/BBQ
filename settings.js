@@ -98,6 +98,47 @@ function setBluetoothStatus(status, error = ""){
 }
 
 
+function parseTemperaturePayload(payload){
+
+    if(!payload) return null;
+
+    const values = payload.split(/[^0-9.-]+/).filter(Boolean);
+
+    if(values.length >= 1){
+        const temp = Number(values[0]);
+        if(Number.isFinite(temp)) return temp;
+    }
+
+    return null;
+
+}
+
+
+function applyTemperatureReading(rawValue){
+
+    const temperature = parseTemperaturePayload(rawValue);
+
+    if(temperature === null) return;
+
+    const domeProbe = appState.probes.find(p => p.active && p.type === "dome");
+    const meatProbe = appState.probes.find(p => p.active && p.type === "meat");
+
+    if(domeProbe){
+        domeProbe.temperature = temperature;
+    }
+
+    if(meatProbe){
+        meatProbe.temperature = temperature;
+    }
+
+    appState.bluetooth.lastPayload = rawValue;
+    appState.bluetooth.lastUpdatedAt = new Date().toISOString();
+
+    updateLiveUi();
+
+}
+
+
 async function connectBluetoothDevice(){
 
     if(!navigator.bluetooth || !navigator.bluetooth.requestDevice){
@@ -114,8 +155,16 @@ async function connectBluetoothDevice(){
         setBluetoothStatus("Requesting device...");
 
         const device = await navigator.bluetooth.requestDevice({
-            acceptAllDevices: true,
-            optionalServices: ["battery_service"]
+            filters: [
+                { namePrefix: "Grill" },
+                { namePrefix: "BT" },
+                { namePrefix: "Thermo" },
+                { namePrefix: "Probe" }
+            ],
+            optionalServices: [
+                appState.bluetooth.serviceUuid,
+                "battery_service"
+            ]
         });
 
 
@@ -130,21 +179,42 @@ async function connectBluetoothDevice(){
 
         try{
 
-            const service = await server.getPrimaryService("battery_service");
-            const characteristic = await service.getCharacteristic("battery_level");
-            const value = await characteristic.readValue();
-            const battery = value.getUint8(0);
+            const service = await server.getPrimaryService(appState.bluetooth.serviceUuid);
+            const characteristic = await service.getCharacteristic(appState.bluetooth.characteristicUuid);
 
-            appState.bluetooth.battery = battery;
-            appState.bluetooth.connected = true;
+            await characteristic.startNotifications();
 
-            setBluetoothStatus("Connected");
+            characteristic.addEventListener("characteristicvaluechanged", event => {
+                const value = event.target.value;
+                const decoder = new TextDecoder();
+                const rawValue = decoder.decode(value);
+                applyTemperatureReading(rawValue);
+            });
 
-        } catch(serviceError){
+            const initialValue = await characteristic.readValue();
+            const decoder = new TextDecoder();
+            const rawValue = decoder.decode(initialValue);
+
+            applyTemperatureReading(rawValue);
 
             appState.bluetooth.connected = true;
             appState.bluetooth.status = "Connected";
-            appState.bluetooth.error = "Battery service unavailable, but the device is connected.";
+            render();
+
+        } catch(serviceError){
+
+            try{
+                const batteryService = await server.getPrimaryService("battery_service");
+                const batteryCharacteristic = await batteryService.getCharacteristic("battery_level");
+                const batteryValue = await batteryCharacteristic.readValue();
+                appState.bluetooth.battery = batteryValue.getUint8(0);
+            } catch(batteryError){
+                appState.bluetooth.battery = null;
+            }
+
+            appState.bluetooth.connected = true;
+            appState.bluetooth.status = "Connected";
+            appState.bluetooth.error = serviceError?.message || "Device connected, but no temperature service was found.";
 
             render();
 
