@@ -14,7 +14,7 @@ const appState = {
 
 
 
-    // Recept dat momenteel bekeken wordt (id) + schaalfactor t.o.v. baseServings
+    // Recept dat momenteel bekeken wordt
     selectedRecipe: null,
 
     recipeScale: 1,
@@ -59,63 +59,93 @@ const appState = {
 
 
 
-    // Actieve cook
+    // ======================================================
+    // ACTIEVE COOK
+    // ======================================================
+
     cook: {
 
-
         active: false,
-
 
         name: "",
 
 
-        domeTarget: 110,
+        // Temperatuur doelen
 
+        domeTarget: 110,
 
         meatTarget: 92,
 
 
+
+        // Algemene informatie
+
         duration: "",
 
 
+        // Fase management
+
         phase: 0,
 
+        phases: [],
 
-        phases: []
+
+        // Premium cook tracking
+
+        startedAt: null,
+
+        lastPhaseChange: null,
+
+        completedPhases: [],
+
+
+        // Voor toekomstige uitbreidingen
+
+        estimatedFinish: null,
+
+        elapsedSeconds: 0,
+
+        notes: ""
 
     },
 
 
 
-    // Temperatuursensoren
+    // ======================================================
+    // TEMPERATUURSENSOREN
+    // ======================================================
+
     probes: [
 
         {
-
             id: 1,
 
             name: "Dome",
+
             type: "dome",
+
             temperature: null,
+
             active: true
 
         },
 
 
         {
-
             id: 2,
 
             name: "Vlees",
+
             type: "meat",
+
             temperature: null,
+
             active: true
 
         },
 
 
         {
-
             id: 3,
 
             name: "Probe 3",
@@ -130,7 +160,6 @@ const appState = {
 
 
         {
-
             id: 4,
 
             name: "Probe 4",
@@ -145,7 +174,6 @@ const appState = {
 
 
         {
-
             id: 5,
 
             name: "Probe 5",
@@ -160,7 +188,6 @@ const appState = {
 
 
         {
-
             id: 6,
 
             name: "Probe 6",
@@ -177,18 +204,17 @@ const appState = {
 
 
 
-    // Waarschuwingen
-    alerts: {
+    // ======================================================
+    // MELDINGEN / HISTORIE
+    // ======================================================
 
+    alerts: {
 
         enabled: true,
 
-
         meatTemperature: 65,
 
-
         domeDeviation: 8,
-
 
         history: []
 
@@ -196,25 +222,17 @@ const appState = {
 
 
 
-    // Recepten database
-    // NB: ingredients[].amount is de hoeveelheid bij baseServings.
-    // primaryIngredientId verwijst naar het ingredient dat de "hoofdmaat"
-    // is (bv. het vlees) — dat veld is ook direct instelbaar in de UI.
-   
+    // ======================================================
+    // APP INSTELLINGEN
+    // ======================================================
 
+    settings: {
 
-    // App instellingen
-    settings:{
+        notifications: true,
 
+        temperatureUnit: "C",
 
-        notifications:true,
-
-
-        temperatureUnit:"C",
-
-
-        firstRun:false
-
+        firstRun: false
 
     }
 
@@ -223,18 +241,24 @@ const appState = {
 
 
 
-// Hulpfunctie om state aan te passen
+
+
+// ==========================================================
+// STATE UPDATE HELPER
+// ==========================================================
+
 function updateState(callback){
 
 
     callback(appState);
 
 
-    // later koppelen we hier render()
+
     if(typeof render === "function"){
 
         render();
 
     }
+
 
 }

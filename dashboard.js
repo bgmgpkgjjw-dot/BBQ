@@ -3,8 +3,9 @@
 
    dashboard.js
 
-   Compact BBQ dashboard
+   Premium BBQ dashboard
    ========================================================== */
+
 
 
 function formatTemperatureValue(value){
@@ -20,6 +21,8 @@ function formatTemperatureValue(value){
     return `${Math.round(Number(value))}°`;
 
 }
+
+
 
 
 
@@ -47,10 +50,10 @@ function getProbeTarget(probe){
 
 
 
+
 function getProgress(probe){
 
-    const target =
-        getProbeTarget(probe);
+    const target = getProbeTarget(probe);
 
 
     if(!target || !probe.temperature){
@@ -70,14 +73,12 @@ function getProgress(probe){
 
 
 
+
 function getProbeStatus(probe){
 
-    const target =
-        getProbeTarget(probe);
+    const target = getProbeTarget(probe);
 
-
-    const temp =
-        Number(probe.temperature);
+    const temp = Number(probe.temperature);
 
 
     if(!temp){
@@ -130,18 +131,13 @@ function updateLiveUi(){
 
 
 
-
     document
-    .querySelectorAll(
-        "[data-probe-temperature]"
-    )
+    .querySelectorAll("[data-probe-temperature]")
     .forEach(el=>{
 
 
         const id =
-            Number(
-                el.dataset.probeId
-            );
+            Number(el.dataset.probeId);
 
 
         const probe =
@@ -161,9 +157,7 @@ function updateLiveUi(){
 
     });
 
-
 }
-
 
 
 
@@ -174,12 +168,9 @@ function updateLiveUi(){
 function renderProbeCard(probe){
 
 
-    const target =
-        getProbeTarget(probe);
+    const target = getProbeTarget(probe);
 
-
-    const progress =
-        getProgress(probe);
+    const progress = getProgress(probe);
 
 
     return `
@@ -195,11 +186,13 @@ function renderProbeCard(probe){
             ${probe.name}
         </span>
 
+
         <span class="probe-id">
             P${probe.id}
         </span>
 
     </div>
+
 
 
 
@@ -215,6 +208,7 @@ function renderProbeCard(probe){
 
 
 
+
     <div class="probe-info">
 
         ${
@@ -226,6 +220,7 @@ function renderProbeCard(probe){
         }
 
     </div>
+
 
 
 
@@ -253,6 +248,262 @@ function renderProbeCard(probe){
 
 
 
+function formatElapsedTime(){
+
+
+    if(!appState.cook.startedAt){
+        return "00:00";
+    }
+
+
+    const start =
+        new Date(appState.cook.startedAt);
+
+
+    const seconds =
+        Math.floor(
+            (Date.now()-start.getTime()) / 1000
+        );
+
+
+    const hours =
+        Math.floor(seconds/3600);
+
+
+    const minutes =
+        Math.floor(
+            (seconds%3600)/60
+        );
+
+
+    return `${String(hours).padStart(2,"0")}:${String(minutes).padStart(2,"0")}`;
+
+}
+
+
+
+
+
+
+
+function renderCookPanel(){
+
+
+if(!appState.cook.active){
+
+
+return `
+
+
+<div class="card cook-card">
+
+
+<h3>
+🔥 Actieve cook
+</h3>
+
+
+<p style="color:var(--muted)">
+Geen actieve cook
+</p>
+
+
+
+<button
+class="button secondary"
+onclick="startManualCook()">
+
+Start nieuwe cook
+
+</button>
+
+
+</div>
+
+
+`;
+
+}
+
+
+
+
+
+const phases =
+appState.cook.phases || [];
+
+
+const currentPhase =
+phases[appState.cook.phase]
+||
+["Voorbereiden",""];
+
+
+
+
+const phaseProgress =
+phases.length
+?
+Math.round(
+((appState.cook.phase + 1) / phases.length) * 100
+)
+:
+0;
+
+
+
+
+return `
+
+
+<div class="card cook-card premium-cook">
+
+
+<h3>
+🔥 Actieve cook
+</h3>
+
+
+
+
+<h2>
+${appState.cook.name}
+</h2>
+
+
+
+
+<div class="cook-status">
+
+🟢 Running
+
+</div>
+
+
+
+
+<div class="cook-grid">
+
+
+<div>
+
+<span>Fase</span>
+
+<strong>
+${appState.cook.phase + 1}/${Math.max(phases.length,1)}
+</strong>
+
+</div>
+
+
+
+<div>
+
+<span>Tijd</span>
+
+<strong>
+${formatElapsedTime()}
+</strong>
+
+</div>
+
+
+
+<div>
+
+<span>Dome</span>
+
+<strong>
+${appState.cook.domeTarget || "—"}°C
+</strong>
+
+</div>
+
+
+
+<div>
+
+<span>Kern</span>
+
+<strong>
+${appState.cook.meatTarget || "—"}°C
+</strong>
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="phase-box">
+
+
+<h3>
+${currentPhase[0]}
+</h3>
+
+
+<p>
+${currentPhase[1]}
+</p>
+
+
+</div>
+
+
+
+
+
+<div class="cook-progress">
+
+
+<div
+style="width:${phaseProgress}%">
+</div>
+
+
+</div>
+
+
+
+
+
+<button
+class="button"
+onclick="completePhase()">
+
+✅ Fase voltooid
+
+</button>
+
+
+
+<button
+class="button secondary"
+onclick="stopCook()">
+
+Stop cook
+
+</button>
+
+
+
+</div>
+
+
+`;
+
+}
+
+
+
+
+
+
+
 
 function dashboardView(){
 
@@ -268,8 +519,8 @@ p.type !== "unused"
 
 
 
-
 return `
+
 
 
 
@@ -308,9 +559,7 @@ appState.cook.active
 
 
 <p>
-
 Live temperatuur overzicht
-
 </p>
 
 
@@ -351,89 +600,30 @@ Geen actieve probes
 
 </div>
 
-<div class="card cook-card">
 
 
-<h3>
-🔥 Actieve cook
-</h3>
 
 
-${
-appState.cook.active
-
-?
-
-`
-
-<h2>
-${appState.cook.name}
-</h2>
+${renderCookPanel()}
 
 
-<div class="cook-info">
-
-<p>
-🌡 Dome:
-<strong>
-${appState.cook.domeTarget}°C
-</strong>
-</p>
 
 
-<p>
-🥩 Kern:
-<strong>
-${appState.cook.meatTarget || "—"}°C
-</strong>
-</p>
 
 
-<p>
-⏱ Duur:
-<strong>
-${appState.cook.duration || "—"}
-</strong>
-</p>
 
-
-</div>
-
-
-<button 
-class="button secondary"
-onclick="stopCook()">
-
-Stop cook
-
-</button>
-
-
-`
-
-:
-
-`
-
-<p style="color:var(--muted)">
-Geen actieve cook
-</p>
-
-
-<button 
+<button
 class="button secondary"
 onclick="navigate('recipes')">
 
-Kies recept
+🍖 Kies een recept
 
 </button>
 
-`
-
-}
 
 
-</div>
+
+<br>
 
 
 
@@ -446,65 +636,132 @@ onclick="startManualCook()">
 </button>
 
 
-<br>
-
-
-<button
-class="button secondary"
-onclick="navigate('recipes')">
-
-🍖 Kies een recept
-
-</button>
-
 
 `;
 
 }
 
+
+
+
+
+
+
+
 function startManualCook(){
 
 
-    appState.cook.active = true;
+appState.cook.active = true;
 
 
-    appState.cook.name =
-        "Nieuwe cook";
+appState.cook.name =
+"Nieuwe cook";
 
 
-    appState.cook.domeTarget =
-        110;
+appState.cook.domeTarget =
+110;
 
 
-    appState.cook.meatTarget =
-        null;
+appState.cook.meatTarget =
+null;
 
 
-    appState.cook.duration =
-        "";
+appState.cook.duration =
+"";
 
 
-    appState.cook.phase = 0;
+appState.cook.phase = 0;
 
 
-    appState.cook.phases = [];
+appState.cook.phases = [];
 
 
-    appState.screen="dashboard";
+appState.cook.startedAt =
+    new Date().toISOString();
 
 
-    render();
+appState.cook.lastPhaseChange =
+    new Date().toISOString();
+
+
+appState.cook.completedPhases = [];
+
+
+appState.screen="dashboard";
+
+
+render();
 
 }
 
+
+
+
+
+
+
+
+function completePhase(){
+
+
+if(!appState.cook.active){
+    return;
+}
+
+
+appState.cook.completedPhases.push(
+    appState.cook.phase
+);
+
+
+if(
+appState.cook.phase <
+(appState.cook.phases.length-1)
+){
+
+    appState.cook.phase++;
+
+}
+
+
+appState.cook.lastPhaseChange =
+new Date();
+
+
+render();
+
+
+}
+
+
+
+
+
+
+
+
 function stopCook(){
 
-    appState.cook.active = false;
 
-    appState.cook.name = "";
+appState.cook.active = false;
 
-    appState.cook.phases = [];
 
-    render();
+appState.cook.name = "";
+
+
+appState.cook.phases = [];
+
+
+appState.cook.phase = 0;
+
+
+appState.cook.startedAt = null;
+
+
+appState.cook.completedPhases = [];
+
+
+render();
+
 
 }
