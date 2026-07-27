@@ -27,6 +27,7 @@ function render(){
         app.querySelector(".topbar h1");
 
 
+
     const scrollTop =
         content?.scrollTop || 0;
 
@@ -45,19 +46,13 @@ function render(){
 
             <div class="topbar">
 
-
                 <h1></h1>
-
 
             </div>
 
 
 
-
-
             <div class="content"></div>
-
-
 
 
 
@@ -76,7 +71,6 @@ function render(){
 
 
 
-
                 <button
                 data-screen="recipes"
                 onclick="navigate('recipes')">
@@ -89,16 +83,14 @@ function render(){
 
 
 
-
                 <button
-                data-screen="alerts"
-                onclick="navigate('alerts')">
+                data-screen="history"
+                onclick="navigate('history')">
 
-                    🔔<br>
-                    Meldingen
+                    📈<br>
+                    Historie
 
                 </button>
-
 
 
 
@@ -111,6 +103,7 @@ function render(){
                     Instellingen
 
                 </button>
+
 
 
             </div>
@@ -142,6 +135,7 @@ function render(){
 
 
 
+
     if(title){
 
         title.textContent =
@@ -162,38 +156,26 @@ function render(){
 
 
         const screen =
-            button.getAttribute(
-                "data-screen"
-            );
+            button.dataset.screen;
 
 
-        const active =
+
+        button.classList.toggle(
+
+            "active",
 
             screen === appState.screen
 
             ||
 
             (
-                screen === "recipes"
+                screen==="recipes"
 
                 &&
 
-                (
-                    appState.screen === "recipes"
+                appState.screen==="recipeDetail"
+            )
 
-                    ||
-
-                    appState.screen === "recipeDetail"
-
-                )
-
-            );
-
-
-
-        button.classList.toggle(
-            "active",
-            active
         );
 
 
@@ -215,13 +197,10 @@ function render(){
 
         if(content.innerHTML !== html){
 
-
             content.innerHTML =
                 html;
 
-
         }
-
 
 
 
@@ -237,7 +216,6 @@ function render(){
 
             if(next){
 
-
                 next.scrollTop =
                     Math.min(
                         scrollTop,
@@ -248,7 +226,6 @@ function render(){
                         )
                     );
 
-
             }
 
 
@@ -258,8 +235,8 @@ function render(){
     }
 
 
-
 }
+
 
 
 
@@ -287,8 +264,8 @@ function getTitle(){
             "Recept",
 
 
-        alerts:
-            "Meldingen",
+        history:
+            "Geschiedenis",
 
 
         settings:
@@ -298,10 +275,9 @@ function getTitle(){
     };
 
 
-
     return titles[
         appState.screen
-    ];
+    ] || "Hermanos";
 
 }
 
@@ -344,7 +320,7 @@ function renderScreen(){
 
 
 
-        case "alerts":
+        case "history":
 
 
             return `
@@ -355,14 +331,25 @@ function renderScreen(){
 
                 <h2>
 
-                Meldingen
+                    Temperatuur historie
 
                 </h2>
 
 
                 <p>
 
-                Geen actieve waarschuwingen.
+                    Je cook sessies en temperatuurverloop
+                    verschijnen hier.
+
+                </p>
+
+
+                <br>
+
+
+                <p style="color:var(--muted)">
+
+                    Nog geen opgeslagen sessies.
 
                 </p>
 
@@ -380,8 +367,14 @@ function renderScreen(){
 
         case "settings":
 
-
             return settingsView();
+
+
+
+
+        default:
+
+            return dashboardView();
 
 
 
@@ -389,6 +382,8 @@ function renderScreen(){
 
 
 }
+
+
 
 
 
@@ -416,6 +411,8 @@ function navigate(screen){
 
 
 
+
+
 function rerenderPreservingScroll(){
 
 
@@ -423,6 +420,7 @@ function rerenderPreservingScroll(){
 
 
 }
+
 
 
 
@@ -473,6 +471,6 @@ if(
 
 
 
-// Initial start
+// start app
 
 render();
