@@ -644,7 +644,7 @@ body {
 
    left: 50%;
 
-   bottom: calc(env(safe-area-inset-bottom) + 14px);
+   bottom: calc(env(safe-area-inset-bottom) + 6px);
 
    transform: translateX(-50%);
 
@@ -694,9 +694,9 @@ body {
 
 .nav button {
 
-   width: 58px;
+   width: 54px;
 
-   height: 58px;
+   height: 54px;
 
 
    display: flex;
@@ -705,6 +705,7 @@ body {
 
    justify-content: center;
 
+   padding: 0;
 
    border: none;
 
@@ -766,25 +767,21 @@ body {
 
 .nav-icon {
 
+   width: 26px;
 
-   width: 28px;
+   height: 26px;
 
-   height: 28px;
-
+   display: block;
 
    fill: none;
 
-
    stroke: currentColor;
 
-
    stroke-width: 2;
-
 
    stroke-linecap: round;
 
    stroke-linejoin: round;
-
 
 }
 
