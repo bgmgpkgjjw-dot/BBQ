@@ -69,7 +69,8 @@ function updateLiveUi() {
     timer.textContent =
         formatElapsedTime();
 
-}
+    }
+  }
 
 function renderProbeCard(probe) {
   const target = getProbeTarget(probe);
@@ -307,4 +308,4 @@ setInterval(()=>{
 
     }
 
-},1000);
+    },1000);
