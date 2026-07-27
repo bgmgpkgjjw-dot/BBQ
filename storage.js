@@ -84,10 +84,11 @@ function startCookSession(){
         id:
             Date.now().toString(),
 
-        recipe:
-            appState.cook.name ||
+        name: appState.cook.name ||
+            "Nieuwe cook",
 
-            "Manual cook",
+        recipe: appState.cook.recipe ||
+            null,
 
         startedAt:
             new Date().toISOString(),

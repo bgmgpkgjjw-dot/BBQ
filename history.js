@@ -629,7 +629,14 @@ function historyDetailView(){
         <h2>
         🔥 ${session.recipe}
         </h2>
+        
+        <button
+        class="button secondary"
+        onclick="renameCook('${session.id}')">
 
+        ✏️ Naam wijzigen
+
+        </button>
 
         <p>
         Gestart:
@@ -723,6 +730,42 @@ function historyDetailView(){
 function closeHistoryDetail(){
 
     appState.selectedHistory = null;
+
+    render();
+
+}
+
+function renameCook(sessionId){
+
+    const session =
+        appState.sessions.find(
+            s => s.id === sessionId
+        );
+
+
+    if(!session){
+        return;
+    }
+
+
+    const newName =
+        prompt(
+            "Nieuwe naam voor deze cook:",
+            session.name || session.recipe
+        );
+
+
+    if(!newName){
+        return;
+    }
+
+
+    session.name =
+        newName;
+
+
+    saveSessions();
+
 
     render();
 
