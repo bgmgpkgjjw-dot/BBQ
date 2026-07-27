@@ -141,7 +141,22 @@ function getBluetoothServiceCandidates(){
         "6e400001-b5a3-f393-e0a9-e50e24dcca9e",
         "0000fff0-0000-1000-8000-00805f9b34fb",
         "0000ffe0-0000-1000-8000-00805f9b34fb",
-        "00001809-0000-1000-8000-00805f9b34fb"
+        "00001809-0000-1000-8000-00805f9b34fb",
+        "0000180f-0000-1000-8000-00805f9b34fb"
+    ].filter(Boolean);
+
+}
+
+
+function getBluetoothCharacteristicCandidates(){
+
+    return [
+        appState.bluetooth.characteristicUuid,
+        "6e400003-b5a3-f393-e0a9-e50e24dcca9e",
+        "6e400002-b5a3-f393-e0a9-e50e24dcca9e",
+        "0000fff4-0000-1000-8000-00805f9b34fb",
+        "0000fff1-0000-1000-8000-00805f9b34fb",
+        "0000ffe1-0000-1000-8000-00805f9b34fb"
     ].filter(Boolean);
 
 }
@@ -150,6 +165,7 @@ function getBluetoothServiceCandidates(){
 async function discoverBluetoothCharacteristic(server){
 
     const services = await server.getPrimaryServices();
+    const matches = [];
 
     for(const service of services){
 
@@ -157,17 +173,24 @@ async function discoverBluetoothCharacteristic(server){
 
         for(const characteristic of characteristics){
 
+            const uuid = characteristic.uuid.toLowerCase();
             const properties = characteristic.properties || {};
+            const isKnownTelemetryCharacteristic = getBluetoothCharacteristicCandidates()
+                .some(candidate => uuid.includes(candidate.toLowerCase()));
 
             if(properties.notify || properties.indicate || properties.read){
-                return { service, characteristic };
+                if(isKnownTelemetryCharacteristic){
+                    return { service, characteristic };
+                }
+
+                matches.push({ service, characteristic });
             }
 
         }
 
     }
 
-    return null;
+    return matches[0] || null;
 
 }
 
@@ -194,7 +217,7 @@ async function connectBluetoothDevice(){
                 { namePrefix: "Thermo" },
                 { namePrefix: "Probe" }
             ],
-            optionalServices: getBluetoothServiceCandidates().concat(["battery_service"])
+            optionalServices: []
         });
 
 
