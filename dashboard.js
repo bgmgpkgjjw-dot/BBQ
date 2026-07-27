@@ -46,13 +46,29 @@ function updateLiveUi() {
   }
 
   document.querySelectorAll("[data-probe-temperature]").forEach(el => {
+
     const id = Number(el.dataset.probeId);
+
     const probe = appState.probes.find(p => p.id === id);
 
     if (probe) {
-      el.textContent = formatTemperatureValue(probe.temperature);
+        el.textContent =
+            formatTemperatureValue(probe.temperature);
     }
-  });
+
+    });
+
+
+
+    const timer =
+    document.querySelector("[data-cook-time]");
+
+
+    if(timer){
+
+    timer.textContent =
+        formatElapsedTime();
+
 }
 
 function renderProbeCard(probe) {
@@ -153,7 +169,7 @@ function renderCookPanel() {
         </div>
         <div>
           <span>Tijd</span>
-          <strong>${formatElapsedTime()}</strong>
+          <strong data-cook-time>${formatElapsedTime()}</strong>
         </div>
         <div>
           <span>Dome</span>
@@ -286,7 +302,10 @@ setInterval(()=>{
         appState.cook &&
         appState.cook.active
     ){
+
         updateLiveUi();
+
     }
 
 },1000);
+}
