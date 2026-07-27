@@ -11,81 +11,115 @@ function render(){
 
     const app = document.getElementById("app");
 
-
-    app.innerHTML = `
-
-    <div class="phone">
+    if(!app) return;
 
 
-        <div class="notch"></div>
+    const content = app.querySelector(".content");
+    const title = app.querySelector(".topbar h1");
+    const scrollTop = content?.scrollTop || 0;
 
 
-        <div class="topbar">
+    if(!app.dataset.initialized){
 
-            <h1>
-                ${getTitle()}
-            </h1>
+        app.innerHTML = `
 
-        </div>
+        <div class="phone">
 
 
-
-        <div class="content">
-
-            ${renderScreen()}
-
-        </div>
+            <div class="notch"></div>
 
 
+            <div class="topbar">
 
-        <div class="nav">
+                <h1></h1>
 
-            <button 
-            class="${appState.screen==="dashboard"?"active":""}"
-            onclick="navigate('dashboard')">
-
-                🔥<br>
-                Grill
-
-            </button>
+            </div>
 
 
-            <button
-            class="${(appState.screen==="recipes"||appState.screen==="recipeDetail")?"active":""}"
-            onclick="navigate('recipes')">
 
-                🍖<br>
-                Recepten
-
-            </button>
+            <div class="content"></div>
 
 
-            <button
-            class="${appState.screen==="alerts"?"active":""}"
-            onclick="navigate('alerts')">
 
-                🔔<br>
-                Meldingen
+            <div class="nav">
 
-            </button>
+                <button data-screen="dashboard" onclick="navigate('dashboard')">
+
+                    🔥<br>
+                    Grill
+
+                </button>
 
 
-            <button
-            class="${appState.screen==="settings"?"active":""}"
-            onclick="navigate('settings')">
+                <button data-screen="recipes" onclick="navigate('recipes')">
 
-                ⚙️<br>
-                Instellingen
+                    🍖<br>
+                    Recepten
 
-            </button>
+                </button>
+
+
+                <button data-screen="alerts" onclick="navigate('alerts')">
+
+                    🔔<br>
+                    Meldingen
+
+                </button>
+
+
+                <button data-screen="settings" onclick="navigate('settings')">
+
+                    ⚙️<br>
+                    Instellingen
+
+                </button>
+
+
+            </div>
 
 
         </div>
 
+        `;
 
-    </div>
+        app.dataset.initialized = "true";
 
-    `;
+    }
+
+
+    if(title){
+        title.textContent = getTitle();
+    }
+
+
+    app.querySelectorAll(".nav button").forEach(button => {
+
+        const isRecipesNav = button.getAttribute("data-screen") === "recipes";
+        const isActive =
+            button.getAttribute("data-screen") === appState.screen
+            || (isRecipesNav && (appState.screen === "recipeDetail" || appState.screen === "recipes"));
+
+        button.classList.toggle("active", isActive);
+
+    });
+
+
+    if(content){
+
+        const nextHtml = renderScreen();
+
+        if(content.innerHTML !== nextHtml){
+            content.innerHTML = nextHtml;
+        }
+
+        requestAnimationFrame(() => {
+            const nextContent = app.querySelector(".content");
+            if(nextContent){
+                nextContent.scrollTop = Math.min(scrollTop, Math.max(0, nextContent.scrollHeight - nextContent.clientHeight));
+            }
+        });
+
+    }
 
 }
 
@@ -186,8 +220,20 @@ function navigate(screen){
 }
 
 
+function rerenderPreservingScroll(){
+    render();
+}
 
 
+
+
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .catch(err => console.error('Service worker registration failed:', err));
+    });
+}
 
 // eerste start
 

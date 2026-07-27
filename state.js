@@ -24,11 +24,17 @@ const appState = {
     // Verbinding thermometer
     bluetooth: {
 
-        connected: true,
+        connected: false,
 
-        device: "Hermanos Pro",
+        device: null,
 
-        battery: 86
+        deviceRef: null,
+
+        battery: null,
+
+        status: "Not connected",
+
+        error: ""
 
     },
 

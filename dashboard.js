@@ -6,6 +6,29 @@
    ========================================================== */
 
 
+function updateLiveUi(){
+
+    const statusEl = document.querySelector("[data-live-status]");
+
+    if(statusEl){
+        statusEl.textContent = `${appState.bluetooth.connected ? "🟢" : "🔴"} ${appState.bluetooth.device || "Geen apparaat"} · Batterij ${Math.round(appState.bluetooth.battery)}%`;
+    }
+
+
+    document.querySelectorAll("[data-probe-temperature]").forEach(el => {
+
+        const probeId = Number(el.getAttribute("data-probe-id"));
+        const probe = appState.probes.find(p => p.id === probeId);
+
+        if(probe){
+            el.textContent = `${Math.round(probe.temperature)}°`;
+        }
+
+    });
+
+}
+
+
 function dashboardView(){
 
 
@@ -23,7 +46,7 @@ function dashboardView(){
     return `
 
 
-    <div class="status">
+    <div class="status" data-live-status>
 
         ${appState.bluetooth.connected ? "🟢" : "🔴"}
 
@@ -50,7 +73,7 @@ function dashboardView(){
 
                 <div>
 
-                    <div class="temp">
+                    <div class="temp" data-probe-temperature data-probe-id="${p.id}">
 
                         ${Math.round(p.temperature)}°
 
@@ -111,7 +134,7 @@ function dashboardView(){
 
                         </h3>
 
-                        <div class="temp" style="font-size:36px">
+                        <div class="temp" style="font-size:36px" data-probe-temperature data-probe-id="${p.id}">
 
                             ${Math.round(p.temperature)}°
 

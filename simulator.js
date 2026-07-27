@@ -9,17 +9,36 @@
 
 function startSimulator(){
 
+    let isScrolling = false;
+    let scrollTimer = null;
+
+    const content = () => document.querySelector('.content');
+
+    const handleScroll = () => {
+        isScrolling = true;
+        if(scrollTimer){
+            clearTimeout(scrollTimer);
+        }
+
+        scrollTimer = setTimeout(() => {
+            isScrolling = false;
+        }, 150);
+    };
+
+    const contentEl = content();
+    if(contentEl){
+        contentEl.addEventListener('scroll', handleScroll, { passive: true });
+    }
 
     setInterval(()=>{
 
+        if(isScrolling) return;
 
         updateTemperatures();
 
-
         updateBattery();
 
-
-        render();
+        updateLiveUi();
 
 
     },2000);
