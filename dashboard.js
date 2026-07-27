@@ -178,21 +178,49 @@ function dashboardView() {
   `;
 }
 
-function startManualCook() {
+function startManualCook(){
+
     appState.cook.active = true;
+
     appState.cook.name = "Nieuwe cook";
+
     appState.cook.domeTarget = 110;
+
     appState.cook.meatTarget = null;
+
     appState.cook.duration = "";
+
     appState.cook.phase = 0;
+
     appState.cook.phases = [];
-    appState.cook.startedAt = new Date().toISOString();
-    appState.cook.lastPhaseChange = new Date().toISOString();
+
+    appState.cook.startedAt =
+        new Date().toISOString();
+
+    appState.cook.lastPhaseChange =
+        new Date().toISOString();
+
     appState.cook.completedPhases = [];
+
+
+    // START HISTORY SESSION
+    if(typeof startCookSession === "function"){
+
+        startCookSession();
+
+    } else {
+
+        console.warn(
+            "startCookSession() not available"
+        );
+
+    }
+
+
     appState.screen = "dashboard";
-    // NEW
-    startCookSession();
+
     render();
+
 }
 
 function completePhase() {
