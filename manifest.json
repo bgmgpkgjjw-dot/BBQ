@@ -4,6 +4,7 @@
   "description": "A companion app for grill planning and recipes",
   "start_url": "./index.html",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#0B0906",
   "theme_color": "#0B0906",
   "icons": [
