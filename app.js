@@ -8,6 +8,15 @@
 
 
 
+// Toggleable debug logger (set window.DEBUG = true to enable)
+window.DEBUG = window.DEBUG || false;
+window.debug = function(...args){
+    if(window.DEBUG){
+        console.log(...args);
+    }
+};
+
+
 function render(){
 
 
@@ -320,50 +329,10 @@ function renderScreen(){
 
 
 
-        case "history":
+    case "history":
 
-
-            return `
-
-
-            <div class="card">
-
-
-                <h2>
-
-                    Temperatuur historie
-
-                </h2>
-
-
-                <p>
-
-                    Je cook sessies en temperatuurverloop
-                    verschijnen hier.
-
-                </p>
-
-
-                <br>
-
-
-                <p style="color:var(--muted)">
-
-                    Nog geen opgeslagen sessies.
-
-                </p>
-
-
-            </div>
-
-
-            `;
-
-
-
-
-
-
+    return historyView();
+    
 
         case "settings":
 

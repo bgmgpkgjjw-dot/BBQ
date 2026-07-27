@@ -1,6 +1,7 @@
 /* ==========================================================
    Hermanos Grill Companion
    bluetooth.js
+
    BLE connection and notification handling
    ========================================================== */
 
@@ -29,7 +30,7 @@ const BLE = {
 
 function onBluetoothDisconnected(){
 
-    console.log("Bluetooth disconnected");
+    debug("Bluetooth disconnected");
 
 
     appState.bluetooth.connected = false;
@@ -71,57 +72,12 @@ function handleBluetoothNotification(event){
 
 
 
-    console.log("--------------------------------");
-    console.log("BLE length:", bytes.length);
-    console.log("HEX:", hex);
-    console.log("BYTES:", Array.from(bytes));
+    debug("--------------------------------");
+    debug("BLE length:", bytes.length);
+    debug("HEX:", hex);
+    debug("BYTES:", Array.from(bytes));
 
 
-
-
-
-    /*
-        BLE packet layout:
-
-        Byte 0:
-        55
-
-        Byte 1:
-        00
-
-
-        Physical probe sockets:
-
-        Probe 1:
-        bytes 2-3
-
-        Probe 2:
-        bytes 4-5
-
-        Probe 3:
-        bytes 6-7
-
-        Probe 4:
-        bytes 8-9
-
-        Probe 5:
-        bytes 10-11
-
-        Probe 6:
-        bytes 12-13
-
-
-        Temperature:
-
-        big endian 16-bit value
-
-        Celsius = value / 10
-
-
-        Disconnected:
-
-        FFFF
-    */
 
 
 
@@ -158,6 +114,7 @@ function handleBluetoothNotification(event){
         }
 
     ];
+
 
 
 
@@ -212,30 +169,12 @@ function handleBluetoothNotification(event){
 
 
 
-        console.log(
-            "Probe",
-            slot.id,
-            "raw:",
-            raw
-        );
-
-
-
-
-
 
 
         if(raw === 0xFFFF){
 
 
             probe.temperature = null;
-
-
-            console.log(
-                "Probe",
-                slot.id,
-                "disconnected"
-            );
 
 
             return;
@@ -247,9 +186,6 @@ function handleBluetoothNotification(event){
 
 
 
-        /*
-            Ignore empty values
-        */
 
 
         if(raw === 0){
@@ -264,9 +200,9 @@ function handleBluetoothNotification(event){
 
 
 
+
         const temperature =
             raw / 10;
-
 
 
 
@@ -279,10 +215,10 @@ function handleBluetoothNotification(event){
 
 
 
-        console.log(
+
+        debug(
             "Probe",
             slot.id,
-            "temperature:",
             temperature,
             "°C"
         );
@@ -291,6 +227,25 @@ function handleBluetoothNotification(event){
 
     });
 
+
+
+
+
+
+    /*
+        SAVE TEMPERATURE SAMPLE
+
+        Stores current probe values
+        for history graph.
+
+        history.js handles the storage.
+    */
+
+    if(typeof recordTemperatureHistory === "function"){
+
+        recordTemperatureHistory();
+
+    }
 
 
 
@@ -318,9 +273,10 @@ async function connectBluetooth(){
     try{
 
 
-        console.log(
+        debug(
             "Searching for thermometer..."
         );
+
 
 
 
@@ -369,16 +325,8 @@ async function connectBluetooth(){
 
 
 
-
         BLE.server =
             await BLE.device.gatt.connect();
-
-
-
-        console.log(
-            "Connected"
-        );
-
 
 
 
@@ -395,12 +343,10 @@ async function connectBluetooth(){
 
 
 
-
         BLE.writeCharacteristic =
             await BLE.service.getCharacteristic(
                 BLE.WRITE
             );
-
 
 
 
@@ -417,10 +363,8 @@ async function connectBluetooth(){
 
 
 
-
         await BLE.notifyCharacteristic
             .startNotifications();
-
 
 
 
@@ -438,11 +382,9 @@ async function connectBluetooth(){
 
 
 
-
-        console.log(
+        debug(
             "Notifications started"
         );
-
 
 
 
