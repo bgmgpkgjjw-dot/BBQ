@@ -279,3 +279,14 @@ function stopCook() {
     appState.currentSessionId = null;
     render();
 }
+
+setInterval(()=>{
+
+    if(
+        appState.cook &&
+        appState.cook.active
+    ){
+        updateLiveUi();
+    }
+
+},1000);
