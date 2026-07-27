@@ -402,3 +402,164 @@ beginAtZero:false
 
 
 }
+/* ==========================================================
+   Hermanos Grill Companion
+
+   history.js
+
+   Saved cook sessions
+   ========================================================== */
+
+
+function historyView(){
+
+
+    if(
+        !appState.sessions ||
+        appState.sessions.length === 0
+    ){
+
+        return `
+
+        <div class="card">
+
+            <h2>
+            📈 Geschiedenis
+            </h2>
+
+            <p style="color:var(--muted)">
+            Nog geen opgeslagen cooks.
+            </p>
+
+        </div>
+
+        `;
+
+    }
+
+
+
+    return `
+
+
+    <div class="card">
+
+        <h2>
+        📈 Cook geschiedenis
+        </h2>
+
+    </div>
+
+
+
+    ${
+        appState.sessions
+        .map(renderHistoryCard)
+        .join("")
+    }
+
+
+    `;
+
+
+}
+
+
+
+
+function renderHistoryCard(session){
+
+
+    const date =
+        new Date(
+            session.startedAt
+        )
+        .toLocaleDateString(
+            "nl-NL"
+        );
+
+
+
+    const samples =
+        session.temperatureHistory
+        ?
+        session.temperatureHistory.length
+        :
+        0;
+
+
+
+    return `
+
+
+    <div class="card history-card">
+
+
+        <h2>
+        🔥 ${session.recipe}
+        </h2>
+
+
+
+        <p>
+        📅 ${date}
+        </p>
+
+
+
+        <p>
+        ⏱ ${session.duration || "—"}
+        </p>
+
+
+
+        <p>
+        🌡 ${samples} temperatuurmetingen
+        </p>
+
+
+
+        <button
+        class="button secondary"
+        onclick="openHistorySession('${session.id}')">
+
+        Bekijk details
+
+        </button>
+
+
+
+    </div>
+
+
+    `;
+
+
+}
+
+
+
+
+
+function openHistorySession(id){
+
+
+    const session =
+        appState.sessions.find(
+            s => s.id === id
+        );
+
+
+    if(!session){
+        return;
+    }
+
+
+    appState.selectedHistory =
+        session;
+
+
+    render();
+
+
+}

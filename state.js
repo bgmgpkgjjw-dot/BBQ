@@ -57,7 +57,8 @@ const appState = {
 
     },
 
-
+    //History zien
+    selectedHistory:null,
 
     // ======================================================
     // ACTIEVE COOK
