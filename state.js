@@ -36,9 +36,9 @@ const appState = {
 
         error: "",
 
-        serviceUuid: "6e400001-b5a3-f393-e0a9-e50e24dcca9e",
+        serviceUuid: "0000ffb0-0000-1000-8000-00805f9b34fb",
 
-        characteristicUuid: "6e400003-b5a3-f393-e0a9-e50e24dcca9e",
+        characteristicUuid: "0000ffb2-0000-1000-8000-00805f9b34fb",
 
         lastPayload: "",
 

@@ -134,179 +134,24 @@ function applyTemperatureReading(rawValue){
 }
 
 
-function getBluetoothServiceCandidates(){
+function connectBluetoothDevice(){
 
-    return [
-        appState.bluetooth.serviceUuid,
-        "6e400001-b5a3-f393-e0a9-e50e24dcca9e",
-        "0000fff0-0000-1000-8000-00805f9b34fb",
-        "0000ffe0-0000-1000-8000-00805f9b34fb",
-        "00001809-0000-1000-8000-00805f9b34fb",
-        "0000180f-0000-1000-8000-00805f9b34fb"
-    ].filter(Boolean);
-
-}
-
-
-function getBluetoothCharacteristicCandidates(){
-
-    return [
-        appState.bluetooth.characteristicUuid,
-        "6e400003-b5a3-f393-e0a9-e50e24dcca9e",
-        "6e400002-b5a3-f393-e0a9-e50e24dcca9e",
-        "0000fff4-0000-1000-8000-00805f9b34fb",
-        "0000fff1-0000-1000-8000-00805f9b34fb",
-        "0000ffe1-0000-1000-8000-00805f9b34fb"
-    ].filter(Boolean);
-
-}
-
-
-async function discoverBluetoothCharacteristic(server){
-
-    const services = await server.getPrimaryServices();
-    const matches = [];
-
-    for(const service of services){
-
-        const characteristics = await service.getCharacteristics();
-
-        for(const characteristic of characteristics){
-
-            const uuid = characteristic.uuid.toLowerCase();
-            const properties = characteristic.properties || {};
-            const isKnownTelemetryCharacteristic = getBluetoothCharacteristicCandidates()
-                .some(candidate => uuid.includes(candidate.toLowerCase()));
-
-            if(properties.notify || properties.indicate || properties.read){
-                if(isKnownTelemetryCharacteristic){
-                    return { service, characteristic };
-                }
-
-                matches.push({ service, characteristic });
-            }
-
-        }
-
-    }
-
-    return matches[0] || null;
-
-}
-
-
-async function connectBluetoothDevice(){
+    setBluetoothStatus("Requesting device...");
 
     if(!navigator.bluetooth || !navigator.bluetooth.requestDevice){
-
         setBluetoothStatus("Not supported", "Web Bluetooth is not available in this browser.");
-
         return;
-
     }
 
-
-    try{
-
-        setBluetoothStatus("Requesting device...");
-
-        const device = await navigator.bluetooth.requestDevice({
-            filters: [
-                { namePrefix: "Grill" },
-                { namePrefix: "BT" },
-                { namePrefix: "Thermo" },
-                { namePrefix: "Probe" }
-            ],
-            optionalServices: []
-        });
-
-
-        appState.bluetooth.device = device.name || "Bluetooth device";
-        appState.bluetooth.deviceRef = device;
-        appState.bluetooth.battery = null;
-        appState.bluetooth.error = "";
-
-        setBluetoothStatus("Connecting...");
-
-        const server = await device.gatt.connect();
-
-        let characteristic = null;
-        let discoveryError = "";
-
-        try{
-
-            const discovered = await discoverBluetoothCharacteristic(server);
-            characteristic = discovered?.characteristic || null;
-
-        } catch(serviceError){
-            discoveryError = serviceError?.message || "Could not discover Bluetooth characteristics.";
-        }
-
-        if(characteristic){
-
-            const properties = characteristic.properties || {};
-
-            if(properties.notify || properties.indicate){
-                try{
-                    await characteristic.startNotifications();
-                } catch(notifyError){
-                    console.warn("Could not start notifications", notifyError);
-                }
-
-                characteristic.addEventListener("characteristicvaluechanged", event => {
-                    const value = event.target.value;
-                    const decoder = new TextDecoder();
-                    const rawValue = decoder.decode(value);
-                    applyTemperatureReading(rawValue);
-                });
-            }
-
-            if(properties.read){
-                try{
-                    const initialValue = await characteristic.readValue();
-                    const decoder = new TextDecoder();
-                    const rawValue = decoder.decode(initialValue);
-                    applyTemperatureReading(rawValue);
-                } catch(readError){
-                    console.warn("Could not read initial characteristic value", readError);
-                }
-            }
-
-            appState.bluetooth.connected = true;
-            appState.bluetooth.status = "Connected";
-            appState.bluetooth.error = "";
-            render();
-            return;
-
-        }
-
-        try{
-            const batteryService = await server.getPrimaryService("battery_service");
-            const batteryCharacteristic = await batteryService.getCharacteristic("battery_level");
-            const batteryValue = await batteryCharacteristic.readValue();
-            appState.bluetooth.battery = batteryValue.getUint8(0);
-        } catch(batteryError){
-            appState.bluetooth.battery = null;
-        }
-
-        appState.bluetooth.connected = true;
-        appState.bluetooth.status = "Connected";
-        appState.bluetooth.error = discoveryError || "Device connected, but no temperature characteristic was found.";
-
-        render();
-
-    } catch(err){
-
+    connectBluetooth().catch(err => {
         appState.bluetooth.connected = false;
         appState.bluetooth.device = null;
         appState.bluetooth.deviceRef = null;
         appState.bluetooth.battery = null;
         appState.bluetooth.error = err?.message || "Bluetooth connection failed.";
         appState.bluetooth.status = "Connection failed";
-
         render();
-
-    }
+    });
 
 }
 
