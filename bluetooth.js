@@ -30,7 +30,7 @@ const BLE = {
 
 function onBluetoothDisconnected(){
 
-    console.log("Bluetooth disconnected");
+    debug("Bluetooth disconnected");
 
 
     appState.bluetooth.connected = false;
@@ -72,10 +72,10 @@ function handleBluetoothNotification(event){
 
 
 
-    console.log("--------------------------------");
-    console.log("BLE length:", bytes.length);
-    console.log("HEX:", hex);
-    console.log("BYTES:", Array.from(bytes));
+    debug("--------------------------------");
+    debug("BLE length:", bytes.length);
+    debug("HEX:", hex);
+    debug("BYTES:", Array.from(bytes));
 
 
 
@@ -216,7 +216,7 @@ function handleBluetoothNotification(event){
 
 
 
-        console.log(
+        debug(
             "Probe",
             slot.id,
             temperature,
@@ -273,7 +273,7 @@ async function connectBluetooth(){
     try{
 
 
-        console.log(
+        debug(
             "Searching for thermometer..."
         );
 
@@ -382,7 +382,7 @@ async function connectBluetooth(){
 
 
 
-        console.log(
+        debug(
             "Notifications started"
         );
 

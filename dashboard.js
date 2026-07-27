@@ -179,19 +179,20 @@ function dashboardView() {
 }
 
 function startManualCook() {
-  appState.cook.active = true;
-  appState.cook.name = "Nieuwe cook";
-  appState.cook.domeTarget = 110;
-  appState.cook.meatTarget = null;
-  appState.cook.duration = "";
-  appState.cook.phase = 0;
-  appState.cook.phases = [];
-  appState.cook.startedAt = new Date().toISOString();
-  appState.cook.lastPhaseChange = new Date().toISOString();
-  appState.cook.completedPhases = [];
-  appState.screen = "dashboard";
-
-  render();
+    appState.cook.active = true;
+    appState.cook.name = "Nieuwe cook";
+    appState.cook.domeTarget = 110;
+    appState.cook.meatTarget = null;
+    appState.cook.duration = "";
+    appState.cook.phase = 0;
+    appState.cook.phases = [];
+    appState.cook.startedAt = new Date().toISOString();
+    appState.cook.lastPhaseChange = new Date().toISOString();
+    appState.cook.completedPhases = [];
+    appState.screen = "dashboard";
+    // NEW
+    startCookSession();
+    render();
 }
 
 function completePhase() {
@@ -209,14 +210,14 @@ function completePhase() {
 }
 
 function stopCook() {
-  finishCookHistory();
-
-  appState.cook.active = false;
-  appState.cook.name = "";
-  appState.cook.phases = [];
-  appState.cook.phase = 0;
-  appState.cook.startedAt = null;
-  appState.cook.completedPhases = [];
-
-  render();
+    // NEW
+    finishCookSession();
+    appState.cook.active = false;
+    appState.cook.name = "";
+    appState.cook.phases = [];
+    appState.cook.phase = 0;
+    appState.cook.startedAt = null;
+    appState.cook.completedPhases = [];
+    appState.currentSessionId = null;
+    render();
 }

@@ -193,37 +193,30 @@ function loadRecipeIntoCook(recipeId){
         r => r.id === recipeId
     );
 
-
     if(!recipe){
-
         console.error("Recipe not found:", recipeId);
         return;
-
     }
 
-
     appState.cook.active = true;
-
     appState.cook.name = recipe.name;
-
     appState.cook.domeTarget = recipe.dome;
-
     appState.cook.meatTarget = recipe.target;
-
     appState.cook.duration = recipe.duration;
 
     appState.cook.phase = 0;
-
     appState.cook.phases = recipe.phases || [];
+    appState.cook.completedPhases = [];
 
-    appState.cook.startedAt = new Date();
+    appState.cook.servings = scaledServings(recipe);
+    appState.cook.ingredients = scaledIngredients(recipe);
 
+    appState.cook.startedAt = new Date().toISOString();
+    appState.cook.lastPhaseChange = new Date().toISOString();
 
     appState.screen = "dashboard";
 
-
-    console.log("Cook started:", appState.cook);
-
+    startCookSession();
 
     render();
 
