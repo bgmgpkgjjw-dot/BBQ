@@ -50,6 +50,12 @@ function handleBluetoothNotification(event){
     console.log("HEX:", appState.bluetooth.lastRawHex);
 
     const candidateOffsets = [BLE.HEADER_LENGTH, 0, 1, 2, 4];
+    const channelMap = {
+        1: 6,
+        2: 2,
+        3: 3,
+        4: 4
+    };
 
     let decodedAny = false;
 
@@ -65,13 +71,16 @@ function handleBluetoothNotification(event){
             parsed.push(raw);
         }
 
-        if(parsed.some(value => value !== 0 && value !== 0xFFFF)){
+        if(parsed.some(value => value !== 0 && value !== 0xFFFF && value !== 6553)){
             decodedAny = true;
 
             parsed.forEach((raw, index) => {
-                const probe = appState.probes.find(p => p.id === index + 1);
+                const appProbeId = channelMap[index + 1];
+                const probe = appProbeId ? appState.probes.find(p => p.id === appProbeId) : null;
+
                 if(!probe) return;
-                if(raw === 0xFFFF || raw === 0) return;
+                if(raw === 0xFFFF || raw === 0 || raw === 6553) return;
+
                 probe.temperature = raw / 10;
             });
 
