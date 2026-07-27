@@ -9,20 +9,19 @@
 const appState = {
 
 
-    // Actief scherm
+    // Welk scherm is actief?
     screen: "dashboard",
 
 
-    // Recept selectie
+
+    // Recept dat momenteel bekeken wordt (id) + schaalfactor t.o.v. baseServings
     selectedRecipe: null,
 
     recipeScale: 1,
 
 
-    // ======================================================
-    // Bluetooth thermometer
-    // ======================================================
 
+    // Verbinding thermometer
     bluetooth: {
 
         connected: false,
@@ -37,14 +36,9 @@ const appState = {
 
         error: "",
 
+        serviceUuid: "0000ffb0-0000-1000-8000-00805f9b34fb",
 
-        serviceUuid:
-        "0000ffb0-0000-1000-8000-00805f9b34fb",
-
-
-        characteristicUuid:
-        "0000ffb2-0000-1000-8000-00805f9b34fb",
-
+        characteristicUuid: "0000ffb2-0000-1000-8000-00805f9b34fb",
 
         lastPayload: "",
 
@@ -54,10 +48,7 @@ const appState = {
 
 
 
-    // ======================================================
-    // Thema
-    // ======================================================
-
+    // Thema / merk
     theme: {
 
         brand: "Kamado Joe",
@@ -68,154 +59,152 @@ const appState = {
 
 
 
-    // ======================================================
     // Actieve cook
-    // ======================================================
-
     cook: {
+
 
         active: false,
 
+
         name: "",
+
 
         domeTarget: 110,
 
+
         meatTarget: 92,
+
 
         duration: "",
 
+
         phase: 0,
 
-        phases: [],
 
-        ingredients: [],
-
-        servings: null
+        phases: []
 
     },
 
 
 
-    // ======================================================
-    // Probes
-    // ======================================================
-
+    // Temperatuursensoren
     probes: [
 
         {
-            id:1,
 
-            name:"Dome",
+            id: 1,
 
-            type:"dome",
+            name: "Dome",
+            type: "dome",
+            temperature: null,
+            active: true
 
-            temperature:null,
-
-            active:true
         },
 
 
         {
-            id:2,
 
-            name:"Vlees",
+            id: 2,
 
-            type:"meat",
+            name: "Vlees",
+            type: "meat",
+            temperature: null,
+            active: true
 
-            temperature:null,
-
-            active:true
         },
 
 
         {
-            id:3,
 
-            name:"Probe 3",
+            id: 3,
 
-            type:"unused",
+            name: "Probe 3",
 
-            temperature:null,
+            type: "unused",
 
-            active:false
+            temperature: null,
+
+            active: false
+
         },
 
 
         {
-            id:4,
 
-            name:"Probe 4",
+            id: 4,
 
-            type:"unused",
+            name: "Probe 4",
 
-            temperature:null,
+            type: "unused",
 
-            active:false
+            temperature: null,
+
+            active: false
+
         },
 
 
         {
-            id:5,
 
-            name:"Probe 5",
+            id: 5,
 
-            type:"unused",
+            name: "Probe 5",
 
-            temperature:null,
+            type: "unused",
 
-            active:false
+            temperature: null,
+
+            active: false
+
         },
 
 
         {
-            id:6,
 
-            name:"Probe 6",
+            id: 6,
 
-            type:"unused",
+            name: "Probe 6",
 
-            temperature:null,
+            type: "unused",
 
-            active:false
+            temperature: null,
+
+            active: false
+
         }
 
     ],
 
 
 
-    // ======================================================
-    // Alerts + historie
-    // ======================================================
-
+    // Waarschuwingen
     alerts: {
 
-        enabled:true,
 
-        meatTemperature:65,
+        enabled: true,
 
-        domeDeviation:8,
 
-        history:[]
+        meatTemperature: 65,
+
+
+        domeDeviation: 8,
+
+
+        history: []
 
     },
 
 
 
-    // ======================================================
-    // Recipe database
-    //
-    // Wordt geladen vanuit recipes-data.js
-    // ======================================================
-
-    recipes: [],
+    // Recepten database
+    // NB: ingredients[].amount is de hoeveelheid bij baseServings.
+    // primaryIngredientId verwijst naar het ingredient dat de "hoofdmaat"
+    // is (bv. het vlees) — dat veld is ook direct instelbaar in de UI.
+   
 
 
-
-    // ======================================================
-    // Algemene instellingen
-    // ======================================================
-
-    settings: {
+    // App instellingen
+    settings:{
 
 
         notifications:true,
@@ -230,23 +219,18 @@ const appState = {
     }
 
 
-
 };
 
 
 
-
-
-// ==========================================================
-// State update helper
-// ==========================================================
-
+// Hulpfunctie om state aan te passen
 function updateState(callback){
 
 
     callback(appState);
 
 
+    // later koppelen we hier render()
     if(typeof render === "function"){
 
         render();
