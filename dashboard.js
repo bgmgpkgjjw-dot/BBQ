@@ -65,11 +65,11 @@ function dashboardView(){
 
         ${appState.bluetooth.connected ? "🟢" : "🔴"}
 
-        ${appState.bluetooth.device}
+        ${appState.bluetooth.device || "Geen apparaat"}
 
         ·
 
-        Batterij ${Math.round(appState.bluetooth.battery)}%
+        ${appState.bluetooth.connected ? (appState.bluetooth.battery === null || appState.bluetooth.battery === undefined ? "Batterij —%" : `Batterij ${Math.round(appState.bluetooth.battery)}%`) : "Wacht op Bluetooth-data"}
 
     </div>
 
