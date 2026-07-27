@@ -2,146 +2,16 @@
    Hermanos Grill Companion
    recipes.js
 
-   Receptenoverzicht + detail + schaalfunctie
-   ========================================================== */
+   Recipe overview + detail + scaling + cook loading
+   Recipe data loaded separately from recipes-data.js
+========================================================== */
 
 
 /* ==========================================================
-   NAVIGATIE
-========================================================== */
-/* ==========================================================
-   RECIPE DATABASE
+   NAVIGATION
 ========================================================== */
 
-appState.recipes = [
 
-    {
-        id:"pulled_pork",
-        name:"Pulled Pork",
-        category:"Varken",
-        meat:"Varkensschouder",
-        dome:110,
-        target:92,
-        duration:"10-12 uur",
-        baseServings:8,
-        primaryIngredientId:"i1",
-
-        ingredients:[
-
-            {
-                id:"i1",
-                name:"Varkensschouder",
-                amount:3,
-                unit:"kg"
-            },
-
-            {
-                id:"i2",
-                name:"Mosterd",
-                amount:2,
-                unit:"tbsp"
-            },
-
-            {
-                id:"i3",
-                name:"BBQ rub",
-                amount:4,
-                unit:"tbsp"
-            }
-
-        ],
-
-        setup:[
-
-            "Indirecte opstelling met deflectorplaten",
-            "Stabiliseer dome op 110°C",
-            "Voeg appelhout toe"
-
-        ],
-
-        phases:[
-
-            [
-                "Roken",
-                "110°C tot kern 65°C"
-            ],
-
-            [
-                "Wrap",
-                "Tot kern 92°C"
-            ],
-
-            [
-                "Rust",
-                "30 minuten"
-
-            ]
-
-        ]
-
-    },
-
-
-    {
-        id:"ribs",
-        name:"Spare Ribs 3-2-1",
-        category:"Varken",
-        meat:"Spare ribs",
-        dome:110,
-        target:90,
-        duration:"6 uur",
-        baseServings:4,
-        primaryIngredientId:"i1",
-
-        ingredients:[
-
-            {
-                id:"i1",
-                name:"Spare ribs",
-                amount:2,
-                unit:"kg"
-            },
-
-            {
-                id:"i2",
-                name:"BBQ rub",
-                amount:3,
-                unit:"tbsp"
-            }
-
-        ],
-
-        setup:[
-
-            "Indirect met deflectorplaten",
-            "3 uur roken",
-            "2 uur inpakken",
-            "1 uur afwerken"
-
-        ],
-
-        phases:[
-
-            [
-                "Roken",
-                "3 uur"
-            ],
-
-            [
-                "Wrap",
-                "2 uur"
-            ],
-
-            [
-                "Afwerken",
-                "1 uur"
-            ]
-
-        ]
-
-    }
-
-];
 function selectRecipe(recipeId){
 
     appState.selectedRecipe = recipeId;
@@ -151,6 +21,7 @@ function selectRecipe(recipeId){
     render();
 
 }
+
 
 
 function backToRecipes(){
@@ -163,8 +34,10 @@ function backToRecipes(){
 }
 
 
+
+
 /* ==========================================================
-   SCHALEN
+   SCALING
 ========================================================== */
 
 
@@ -177,11 +50,10 @@ function setServings(recipeId,value){
     if(!recipe) return;
 
 
-    const servings =
-        Math.max(
-            1,
-            Number(value) || recipe.baseServings
-        );
+    const servings = Math.max(
+        1,
+        Number(value) || recipe.baseServings
+    );
 
 
     appState.recipeScale =
@@ -191,6 +63,7 @@ function setServings(recipeId,value){
     render();
 
 }
+
 
 
 
@@ -204,24 +77,23 @@ function setPrimaryAmount(recipeId,value){
     if(!recipe) return;
 
 
-    const ingredient =
+    const primary =
         recipe.ingredients.find(
             i => i.id === recipe.primaryIngredientId
         );
 
 
-    if(!ingredient) return;
+    if(!primary) return;
 
 
-    const amount =
-        Math.max(
-            0.01,
-            Number(value) || ingredient.amount
-        );
+    const amount = Math.max(
+        0.01,
+        Number(value) || primary.amount
+    );
 
 
     appState.recipeScale =
-        amount / ingredient.amount;
+        amount / primary.amount;
 
 
     render();
@@ -264,22 +136,17 @@ function scaledServings(recipe){
 
 function roundAmount(value,unit){
 
-
     if(unit==="g" || unit==="ml"){
-
         return Math.round(value);
-
     }
 
 
     if(unit==="kg"){
-
-        return Math.round(value*100)/100;
-
+        return Math.round(value * 100) / 100;
     }
 
 
-    return Math.round(value*10)/10;
+    return Math.round(value * 10) / 10;
 
 }
 
@@ -288,13 +155,9 @@ function roundAmount(value,unit){
 
 function formatAmount(item){
 
-
     if(!item.unit){
-
         return `${item.amount}x`;
-
     }
-
 
     return `${item.amount} ${item.unit}`;
 
@@ -304,7 +167,7 @@ function formatAmount(item){
 
 
 /* ==========================================================
-   COOK LADEN
+   COOK CONTROL
 ========================================================== */
 
 
@@ -313,34 +176,40 @@ function loadRecipeIntoCook(recipeId){
 
     const recipe =
         appState.recipes.find(
-            r=>r.id===recipeId
+            r => r.id === recipeId
         );
 
 
-    if(!recipe) return;
+    if(!recipe){
+        console.error("Recipe not found:", recipeId);
+        return;
+    }
 
 
 
-    appState.cook = {
+    // Keep existing state structure
+    Object.assign(
+        appState.cook,
+        {
 
-        active:true,
+            active:true,
 
-        name:recipe.name,
+            name:recipe.name,
 
-        domeTarget:recipe.dome,
+            domeTarget:recipe.dome,
 
-        meatTarget:recipe.target,
+            meatTarget:recipe.target,
 
-        duration:recipe.duration,
+            duration:recipe.duration,
 
-        phase:0,
+            phase:0,
 
-        phases:recipe.phases,
+            phases:recipe.phases,
 
-        servings:
-            scaledServings(recipe)
+            servings:scaledServings(recipe)
 
-    };
+        }
+    );
 
 
 
@@ -354,16 +223,57 @@ function loadRecipeIntoCook(recipeId){
 
 
 
+
+
+function startManualCook(){
+
+    Object.assign(
+        appState.cook,
+        {
+
+            active:true,
+
+            name:"Handmatige cook",
+
+            domeTarget:110,
+
+            meatTarget:null,
+
+            duration:"",
+
+            phase:0,
+
+            phases:[],
+
+            servings:null
+
+        }
+    );
+
+
+    appState.screen="dashboard";
+
+    render();
+
+}
+
+
+
+
+
+
 /* ==========================================================
-   RECEPTEN LIJST
+   RECIPE LIST
 ========================================================== */
 
 
 function recipeListView(){
 
 
-    if(!appState.recipes ||
-       !appState.recipes.length){
+    if(
+        !appState.recipes ||
+        !appState.recipes.length
+    ){
 
         return `
 
@@ -384,16 +294,26 @@ function recipeListView(){
     return `
 
 
+    <button
+    class="button"
+    onclick="startManualCook()">
+
+    🔥 Start handmatige cook
+
+    </button>
+
+
+    <br><br>
+
+
     <div class="recipe-list">
 
 
     ${
-
         appState.recipes.map(recipe=>`
 
-
         <div class="recipe"
-             onclick="selectRecipe('${recipe.id}')">
+        onclick="selectRecipe('${recipe.id}')">
 
 
             <h2>
@@ -402,21 +322,17 @@ function recipeListView(){
 
 
             <p>
-
             ${recipe.meat}
             ·
             ${recipe.dome}°C
             ·
             ${recipe.duration}
-
             </p>
 
 
         </div>
 
-
         `).join("")
-
     }
 
 
@@ -425,7 +341,6 @@ function recipeListView(){
 
     `;
 
-
 }
 
 
@@ -433,7 +348,7 @@ function recipeListView(){
 
 
 /* ==========================================================
-   DETAIL
+   DETAIL VIEW
 ========================================================== */
 
 
@@ -442,7 +357,7 @@ function recipeDetailView(){
 
     const recipe =
         appState.recipes.find(
-            r=>r.id===appState.selectedRecipe
+            r => r.id === appState.selectedRecipe
         );
 
 
@@ -472,298 +387,219 @@ function recipeDetailView(){
 
     const primary =
         ingredients.find(
-            i=>i.id===recipe.primaryIngredientId
+            i => i.id === recipe.primaryIngredientId
         );
 
 
 
-    return `
 
+return `
 
 
-    <button
-    class="button secondary"
-    onclick="backToRecipes()">
 
-    ← Terug
+<button
+class="button secondary"
+onclick="backToRecipes()">
 
-    </button>
+← Terug
 
+</button>
 
 
 
-    <div class="card">
+<div class="card">
 
+<h2>${recipe.name}</h2>
 
-        <h2>
-        ${recipe.name}
-        </h2>
+<p style="color:var(--muted)">
+${recipe.category}
+</p>
 
+</div>
 
-        <p style="color:var(--muted)">
 
-        ${recipe.category}
 
-        </p>
 
+<div class="card">
 
-    </div>
+<h3>Instellingen</h3>
 
 
+<p>
+Dome:
+<strong>${recipe.dome}°C</strong>
+</p>
 
 
+${
+recipe.target
+?
+`
+<p>
+Kern:
+<strong>${recipe.target}°C</strong>
+</p>
+`
+:""
+}
 
-    <div class="card">
 
+<p>
+Tijd:
+<strong>${recipe.duration}</strong>
+</p>
 
-        <h3>
-        Instellingen
-        </h3>
 
+</div>
 
-        <p>
-        Dome:
-        <strong>${recipe.dome}°C</strong>
-        </p>
 
 
-        ${
-        recipe.target
-        ?
-        `
-        <p>
-        Kern:
-        <strong>${recipe.target}°C</strong>
-        </p>
-        `
-        :
-        ""
-        }
 
+<div class="card">
 
-        <p>
-        Tijd:
-        <strong>${recipe.duration}</strong>
-        </p>
+<h3>Hoeveelheid</h3>
 
 
-    </div>
+<div class="scale-row">
 
+<label>
+Porties
+</label>
 
 
+<input
+type="number"
+min="1"
+value="${scaledServings(recipe)}"
+onchange="setServings('${recipe.id}',this.value)"
+>
 
+</div>
 
-    <div class="card">
 
 
-    <h3>
-    Hoeveelheid
-    </h3>
+${
+primary
+?
+`
 
+<div class="scale-row">
 
+<label>
+${primary.name}
+</label>
 
-    <div class="scale-row">
 
+<input
+type="number"
+step="0.1"
+value="${primary.amount}"
+onchange="setPrimaryAmount('${recipe.id}',this.value)"
+>
 
-        <label>
-        Porties
-        </label>
+</div>
 
+`
+:""
+}
 
-        <input
 
-        type="number"
 
-        value="${scaledServings(recipe)}"
+</div>
 
-        min="1"
 
-        onchange="
-        setServings(
-        '${recipe.id}',
-        this.value
-        )"
 
-        >
 
 
-    </div>
+<div class="card">
 
+<h3>Ingrediënten</h3>
 
 
+${
+ingredients.map(i=>`
 
+<div class="ingredient-row">
 
-    ${
-    primary
-    ?
-    `
+<span>${i.name}</span>
 
-    <div class="scale-row">
+<strong>${formatAmount(i)}</strong>
 
+</div>
 
-        <label>
-        ${primary.name}
-        </label>
+`).join("")
+}
 
 
-        <input
+</div>
 
-        type="number"
 
-        step="0.1"
 
-        value="${primary.amount}"
 
-        onchange="
-        setPrimaryAmount(
-        '${recipe.id}',
-        this.value
-        )"
 
-        >
 
+<div class="card">
 
-    </div>
+<h3>Kamado setup</h3>
 
-    `
-    :
-    ""
-    }
 
+<ol class="setup-list">
 
+${
+recipe.setup.map(
+s=>`<li>${s}</li>`
+).join("")
+}
 
-    </div>
+</ol>
 
 
+</div>
 
 
 
 
 
-    <div class="card">
 
+<div class="card">
 
-    <h3>
-    Ingrediënten
-    </h3>
+<h3>Fases</h3>
 
 
-    ${
-    ingredients.map(i=>`
+${
+recipe.phases.map(
+p=>`
 
-        <div class="ingredient-row">
+<div class="ingredient-row">
 
-            <span>
-            ${i.name}
-            </span>
+<span>${p[0]}</span>
 
-            <strong>
-            ${formatAmount(i)}
-            </strong>
+<strong>${p[1]}</strong>
 
-        </div>
+</div>
 
+`
+).join("")
+}
 
-    `).join("")
-    }
 
+</div>
 
-    </div>
 
 
 
 
 
+<button
+class="button"
+onclick="loadRecipeIntoCook('${recipe.id}')">
 
+🔥 Start cook
 
+</button>
 
-    <div class="card">
 
 
-    <h3>
-    Kamado setup
-    </h3>
-
-
-    <ol class="setup-list">
-
-
-    ${
-    recipe.setup
-    .map(
-    s=>`<li>${s}</li>`
-    )
-    .join("")
-    }
-
-
-    </ol>
-
-
-    </div>
-
-
-
-
-
-
-
-    <div class="card">
-
-
-    <h3>
-    Fases
-    </h3>
-
-
-
-    ${
-    recipe.phases
-    .map(
-    p=>`
-
-    <div class="ingredient-row">
-
-        <span>
-        ${p[0]}
-        </span>
-
-
-        <strong>
-        ${p[1]}
-        </strong>
-
-    </div>
-
-    `
-    )
-    .join("")
-    }
-
-
-    </div>
-
-
-
-
-
-
-
-    <button
-
-    class="button"
-
-    onclick="
-    loadRecipeIntoCook('${recipe.id}')
-    ">
-
-    🔥 Start cook
-
-    </button>
-
-
-
-    `;
-
+`;
 
 }
