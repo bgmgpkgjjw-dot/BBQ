@@ -9,7 +9,139 @@
 /* ==========================================================
    NAVIGATIE
 ========================================================== */
+/* ==========================================================
+   RECIPE DATABASE
+========================================================== */
 
+appState.recipes = [
+
+    {
+        id:"pulled_pork",
+        name:"Pulled Pork",
+        category:"Varken",
+        meat:"Varkensschouder",
+        dome:110,
+        target:92,
+        duration:"10-12 uur",
+        baseServings:8,
+        primaryIngredientId:"i1",
+
+        ingredients:[
+
+            {
+                id:"i1",
+                name:"Varkensschouder",
+                amount:3,
+                unit:"kg"
+            },
+
+            {
+                id:"i2",
+                name:"Mosterd",
+                amount:2,
+                unit:"tbsp"
+            },
+
+            {
+                id:"i3",
+                name:"BBQ rub",
+                amount:4,
+                unit:"tbsp"
+            }
+
+        ],
+
+        setup:[
+
+            "Indirecte opstelling met deflectorplaten",
+            "Stabiliseer dome op 110°C",
+            "Voeg appelhout toe"
+
+        ],
+
+        phases:[
+
+            [
+                "Roken",
+                "110°C tot kern 65°C"
+            ],
+
+            [
+                "Wrap",
+                "Tot kern 92°C"
+            ],
+
+            [
+                "Rust",
+                "30 minuten"
+
+            ]
+
+        ]
+
+    },
+
+
+    {
+        id:"ribs",
+        name:"Spare Ribs 3-2-1",
+        category:"Varken",
+        meat:"Spare ribs",
+        dome:110,
+        target:90,
+        duration:"6 uur",
+        baseServings:4,
+        primaryIngredientId:"i1",
+
+        ingredients:[
+
+            {
+                id:"i1",
+                name:"Spare ribs",
+                amount:2,
+                unit:"kg"
+            },
+
+            {
+                id:"i2",
+                name:"BBQ rub",
+                amount:3,
+                unit:"tbsp"
+            }
+
+        ],
+
+        setup:[
+
+            "Indirect met deflectorplaten",
+            "3 uur roken",
+            "2 uur inpakken",
+            "1 uur afwerken"
+
+        ],
+
+        phases:[
+
+            [
+                "Roken",
+                "3 uur"
+            ],
+
+            [
+                "Wrap",
+                "2 uur"
+            ],
+
+            [
+                "Afwerken",
+                "1 uur"
+            ]
+
+        ]
+
+    }
+
+];
 function selectRecipe(recipeId){
 
     appState.selectedRecipe = recipeId;
