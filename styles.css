@@ -635,43 +635,119 @@ body {
 }
 
 /* ==========================================================
-   BOTTOM NAVIGATION
-   ========================================================== */
+   FLOATING NAVIGATION
+========================================================== */
 
 .nav {
 
-   height: 72px;
+   position: fixed;
 
-   flex-shrink: 0;
+   left: 50%;
+
+   bottom: calc(env(safe-area-inset-bottom) + 16px);
+
+   transform: translateX(-50%);
+
+   width: calc(100% - 36px);
+
+   max-width: 420px;
+
+   height: 72px;
 
    display: flex;
 
-   justify-content: space-around;
+   justify-content: space-evenly;
 
    align-items: center;
 
-   background: #181410;
+   border-radius: 28px;
 
-   border-top:
+   background: rgba(28, 24, 20, .82);
 
-      1px solid var(--border);
+   backdrop-filter: blur(18px);
+
+   -webkit-backdrop-filter: blur(18px);
+
+   border: 1px solid rgba(255, 255, 255, .06);
+
+   box-shadow:
+      0 12px 35px rgba(0, 0, 0, .45);
+
+   z-index: 1000;
 
 }
 
 .nav button {
-   background: none;
+
+   width: 54px;
+
+   height: 54px;
+
    border: none;
-   color: var(--muted);
-   font-size: 11px;
+
+   border-radius: 50%;
+
+   background: transparent;
+
    display: flex;
-   flex-direction: column;
-   gap: 3px;
+
+   justify-content: center;
+
    align-items: center;
+
+   transition:
+      background .22s,
+      transform .18s;
+
+   cursor: pointer;
+
+}
+
+.nav button:hover {
+
+   transform: translateY(-2px);
+
 }
 
 .nav button.active {
-   color: var(--accent);
-   font-weight: 700;
+
+   background: var(--accent);
+
+   box-shadow:
+      0 6px 18px rgba(0, 0, 0, .35);
+
+}
+
+.nav-icon {
+
+   width: 24px;
+
+   height: 24px;
+
+   fill: none;
+
+   stroke: rgba(255, 255, 255, .55);
+
+   stroke-width: 2;
+
+   stroke-linecap: round;
+
+   stroke-linejoin: round;
+
+   transition: .22s;
+
+}
+
+.nav button.active .nav-icon {
+
+   stroke: #fff;
+
+}
+
+.nav button:active {
+
+   transform: scale(.94);
+
 }
 
 /* ==========================================================
@@ -1111,11 +1187,11 @@ COMPACT PREMIUM PROBE CARDS
 
 /* overall probe cards */
 
-.premium-probe{
+.premium-probe {
 
-    min-height:170px;
+   min-height: 170px;
 
-    padding:14px;
+   padding: 14px;
 
 }
 
@@ -1125,45 +1201,45 @@ COMPACT DOME GAUGE
 ========================================================== */
 
 
-.dome-gauge{
+.dome-gauge {
 
-    margin:10px 0;
-
-}
-
-
-
-.gauge-circle{
-
-    width:120px;
-
-    height:120px;
+   margin: 10px 0;
 
 }
 
 
 
-.gauge-circle::before{
+.gauge-circle {
 
-    width:94px;
+   width: 120px;
 
-    height:94px;
-
-}
-
-
-
-.gauge-value{
-
-    font-size:34px;
+   height: 120px;
 
 }
 
 
 
-.gauge-label{
+.gauge-circle::before {
 
-    font-size:10px;
+   width: 94px;
+
+   height: 94px;
+
+}
+
+
+
+.gauge-value {
+
+   font-size: 34px;
+
+}
+
+
+
+.gauge-label {
+
+   font-size: 10px;
 
 }
 
@@ -1176,51 +1252,51 @@ COMPACT MEAT THERMOMETER
 ========================================================== */
 
 
-.thermometer-box{
+.thermometer-box {
 
-    margin:10px 0;
+   margin: 10px 0;
 
-    gap:12px;
-
-}
-
-
-
-.thermometer-icon{
-
-    width:32px;
-
-    height:70px;
+   gap: 12px;
 
 }
 
 
 
-.thermometer-icon::after{
+.thermometer-icon {
 
-    width:22px;
+   width: 32px;
 
-    height:22px;
-
-}
-
-
-
-.thermometer-icon::before{
-
-    width:8px;
-
-    height:42px;
-
-    bottom:20px;
+   height: 70px;
 
 }
 
 
 
-.thermometer-value{
+.thermometer-icon::after {
 
-    font-size:36px;
+   width: 22px;
+
+   height: 22px;
+
+}
+
+
+
+.thermometer-icon::before {
+
+   width: 8px;
+
+   height: 42px;
+
+   bottom: 20px;
+
+}
+
+
+
+.thermometer-value {
+
+   font-size: 36px;
 
 }
 
@@ -1228,9 +1304,9 @@ COMPACT MEAT THERMOMETER
 
 /* target text */
 
-.premium-probe .probe-info{
+.premium-probe .probe-info {
 
-    font-size:12px;
+   font-size: 12px;
 
 }
 
@@ -1238,10 +1314,10 @@ COMPACT MEAT THERMOMETER
 
 /* progress bar */
 
-.premium-probe .progress-bar{
+.premium-probe .progress-bar {
 
-    margin-top:12px;
+   margin-top: 12px;
 
-    height:6px;
+   height: 6px;
 
 }
