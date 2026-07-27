@@ -644,7 +644,7 @@ body {
 
    left: 50%;
 
-   bottom: calc(env(safe-area-inset-bottom) + 6px);
+   bottom: calc(env(safe-area-inset-bottom) + 2px);
 
    transform: translateX(-50%);
 
