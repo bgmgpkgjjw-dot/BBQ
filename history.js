@@ -3,8 +3,12 @@
 
    history.js
 
-   Temperature history and cook sessions
+   Temperature history + graphs
    ========================================================== */
+
+
+let temperatureChart = null;
+
 
 
 
@@ -14,7 +18,6 @@ function recordTemperatureHistory(){
     if(!appState.cook.active){
         return;
     }
-
 
 
     if(!appState.history){
@@ -34,25 +37,47 @@ function recordTemperatureHistory(){
 
 
 
+
     const sample = {
 
 
-        time:
-            new Date().toISOString(),
+        timestamp:
+            Date.now(),
 
 
-        probes:
+        elapsed:
+
+            Math.floor(
+                (
+                    Date.now()
+                    -
+                    new Date(
+                        appState.history.activeSession.startedAt
+                    ).getTime()
+
+                ) / 60000
+            ),
+
+
+
+        dome:
+
             appState.probes
-            .filter(p=>p.active)
-            .map(p=>({
+            .find(
+                p=>p.type==="dome"
+            )
+            ?.temperature || null,
 
-                id:p.id,
 
-                name:p.name,
 
-                temperature:p.temperature
+        meat:
 
-            }))
+            appState.probes
+            .find(
+                p=>p.type==="meat"
+            )
+            ?.temperature || null
+
 
     };
 
@@ -63,10 +88,9 @@ function recordTemperatureHistory(){
 
 
 
-
-    // limit memory usage
+    // max 6 hours of samples
     if(
-        appState.history.activeSession.samples.length > 5000
+        appState.history.activeSession.samples.length > 720
     ){
 
         appState.history.activeSession.samples.shift();
@@ -81,15 +105,19 @@ function recordTemperatureHistory(){
 
 
 
+
 function finishCookHistory(){
 
 
+    const session =
+        appState.history.activeSession;
+
+
+
     if(
-        !appState.history.activeSession.samples.length
+        !session.samples.length
     ){
-
         return;
-
     }
 
 
@@ -97,8 +125,16 @@ function finishCookHistory(){
 
     appState.history.sessions.push({
 
+        id:
+            Date.now(),
+
+
+        name:
+            appState.cook.name,
+
+
         startedAt:
-            appState.history.activeSession.startedAt,
+            session.startedAt,
 
 
         finishedAt:
@@ -106,7 +142,7 @@ function finishCookHistory(){
 
 
         samples:
-            appState.history.activeSession.samples
+            session.samples
 
 
     });
@@ -131,84 +167,238 @@ function finishCookHistory(){
 
 
 
+
 function historyView(){
 
 
-    const session =
-        appState.history.activeSession;
+return `
 
 
-
-    return `
-
-
-    <div class="card">
+<div class="card">
 
 
-        <h2>
-        Temperatuur historie
-        </h2>
+<h2>
+📈 Temperatuur verloop
+</h2>
 
 
-        <p>
-        Live temperatuurmetingen tijdens cooks.
-        </p>
+<div class="chart-container">
+
+<canvas id="temperatureChart"></canvas>
+
+</div>
 
 
-    </div>
+</div>
 
 
 
 
-    <div class="card">
+<div class="card">
 
 
-        <h3>
-        Huidige cook
-        </h3>
+<h3>
+Cook historie
+</h3>
 
 
 
-        ${
-            session.samples.length
+${
+appState.history.sessions.length
 
-            ?
+?
 
-            `
+appState.history.sessions
+.map(
+s=>`
 
-            <p>
-            Metingen:
-            <strong>
-            ${session.samples.length}
-            </strong>
-            </p>
+<div class="recipe">
 
+<h2>
+${s.name}
+</h2>
 
-            <div class="history-placeholder">
-
-                📈 Grafiek komt hier
-
-            </div>
-
-
-            `
-
-            :
-
-            `
-
-            <p style="color:var(--muted)">
-            Nog geen temperatuurdata.
-            </p>
-
-            `
-
-        }
+<p>
+${new Date(s.finishedAt)
+.toLocaleString()}
+</p>
 
 
-    </div>
+</div>
 
 
-    `;
+`
+)
+.join("")
+
+:
+
+`
+<p style="color:var(--muted)">
+Nog geen afgeronde cooks.
+</p>
+`
+
+}
+
+
+</div>
+
+
+`;
+
+}
+
+
+
+
+
+
+
+
+
+function renderTemperatureChart(){
+
+
+const canvas =
+document.getElementById(
+"temperatureChart"
+);
+
+
+
+if(!canvas){
+    return;
+}
+
+
+
+const samples =
+appState.history.activeSession.samples;
+
+
+
+if(!samples.length){
+    return;
+}
+
+
+
+
+
+
+if(temperatureChart){
+
+    temperatureChart.destroy();
+
+}
+
+
+
+
+
+
+temperatureChart =
+new Chart(
+canvas,
+{
+
+
+type:"line",
+
+
+
+data:{
+
+
+labels:
+
+samples.map(
+s=>`${s.elapsed} min`
+),
+
+
+
+datasets:[
+
+{
+
+
+label:"🔥 Dome",
+
+data:
+
+samples.map(
+s=>s.dome
+),
+
+
+
+tension:.3
+
+},
+
+
+
+{
+
+
+label:"🥩 Vlees",
+
+data:
+
+samples.map(
+s=>s.meat
+),
+
+
+
+tension:.3
+
+}
+
+
+]
+
+
+},
+
+
+
+options:{
+
+
+responsive:true,
+
+
+interaction:{
+
+mode:"index",
+
+intersect:false
+
+},
+
+
+scales:{
+
+
+y:{
+
+beginAtZero:false
+
+}
+
+
+}
+
+
+}
+
+
+}
+
+);
+
 
 }

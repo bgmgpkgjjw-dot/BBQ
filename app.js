@@ -317,12 +317,14 @@ function renderScreen(){
             return recipeDetailView();
 
 
+         case "history":
 
+            setTimeout(
+                renderTemperatureChart,
+                50
+            );
 
-
-    case "history":
-
-    return historyView();
+            return historyView();
     
 
         case "settings":
