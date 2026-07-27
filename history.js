@@ -343,7 +343,7 @@ tension:.3
 {
 
 
-label:"🥩 Vlees",
+label:"🥩 Kern temperatuur",
 
 data:
 
@@ -668,7 +668,7 @@ function historyDetailView(){
 
 
         <p>
-        🥩 Max vlees:
+        🥩 Max kern temperatuur:
         ${maxMeat}°C
         </p>
 

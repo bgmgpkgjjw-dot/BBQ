@@ -1103,3 +1103,145 @@ BETTER MOBILE TOUCH SIZE
    margin-top: 18px;
 
 }
+
+/* ==========================================================
+COMPACT PREMIUM PROBE CARDS
+========================================================== */
+
+
+/* overall probe cards */
+
+.premium-probe{
+
+    min-height:170px;
+
+    padding:14px;
+
+}
+
+
+/* ==========================================================
+COMPACT DOME GAUGE
+========================================================== */
+
+
+.dome-gauge{
+
+    margin:10px 0;
+
+}
+
+
+
+.gauge-circle{
+
+    width:120px;
+
+    height:120px;
+
+}
+
+
+
+.gauge-circle::before{
+
+    width:94px;
+
+    height:94px;
+
+}
+
+
+
+.gauge-value{
+
+    font-size:34px;
+
+}
+
+
+
+.gauge-label{
+
+    font-size:10px;
+
+}
+
+
+
+
+
+/* ==========================================================
+COMPACT MEAT THERMOMETER
+========================================================== */
+
+
+.thermometer-box{
+
+    margin:10px 0;
+
+    gap:12px;
+
+}
+
+
+
+.thermometer-icon{
+
+    width:32px;
+
+    height:70px;
+
+}
+
+
+
+.thermometer-icon::after{
+
+    width:22px;
+
+    height:22px;
+
+}
+
+
+
+.thermometer-icon::before{
+
+    width:8px;
+
+    height:42px;
+
+    bottom:20px;
+
+}
+
+
+
+.thermometer-value{
+
+    font-size:36px;
+
+}
+
+
+
+/* target text */
+
+.premium-probe .probe-info{
+
+    font-size:12px;
+
+}
+
+
+
+/* progress bar */
+
+.premium-probe .progress-bar{
+
+    margin-top:12px;
+
+    height:6px;
+
+}
