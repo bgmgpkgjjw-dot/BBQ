@@ -496,7 +496,7 @@ function renderHistoryCard(session){
 
 
         <h2>
-        🔥 ${session.recipe}
+        ${session.name || session.recipe}
         </h2>
 
 
@@ -627,7 +627,7 @@ function historyDetailView(){
 
 
         <h2>
-        🔥 ${session.recipe}
+        ${session.name || session.recipe}
         </h2>
         
         <button
@@ -744,24 +744,36 @@ function renameCook(sessionId){
 
 
     if(!session){
+        console.error("Session not found", sessionId);
         return;
     }
+
+
+    const currentName =
+        session.name ||
+        session.recipe ||
+        "Nieuwe cook";
 
 
     const newName =
         prompt(
             "Nieuwe naam voor deze cook:",
-            session.name || session.recipe
+            currentName
         );
 
 
-    if(!newName){
+    if(!newName || !newName.trim()){
         return;
     }
 
 
     session.name =
-        newName;
+        newName.trim();
+
+
+    // keep backwards compatibility
+    session.recipe =
+        session.recipe || session.name;
 
 
     saveSessions();
