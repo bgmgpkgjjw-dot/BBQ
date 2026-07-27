@@ -4,79 +4,79 @@
    ========================================================== */
 
 function formatTemperatureValue(value) {
-  if (value === null || value === undefined || Number.isNaN(Number(value))) {
-    return "—";
-  }
-  return `${Math.round(Number(value))}°`;
+    if (value === null || value === undefined || Number.isNaN(Number(value))) {
+        return "—";
+    }
+    return `${Math.round(Number(value))}°`;
 }
 
 function getProbeTarget(probe) {
-  if (!appState.cook) return null;
-  if (probe.type === "dome") return appState.cook.domeTarget || null;
-  if (probe.type === "meat") return appState.cook.meatTarget || null;
-  return null;
+    if (!appState.cook) return null;
+    if (probe.type === "dome") return appState.cook.domeTarget || null;
+    if (probe.type === "meat") return appState.cook.meatTarget || null;
+    return null;
 }
 
 function getProgress(probe) {
-  const target = getProbeTarget(probe);
-  const temp = Number(probe.temperature);
+    const target = getProbeTarget(probe);
+    const temp = Number(probe.temperature);
 
-  if (!target || Number.isNaN(temp)) return 0;
+    if (!target || Number.isNaN(temp)) return 0;
 
-  return Math.min(100, Math.round((temp / target) * 100));
+    return Math.min(100, Math.round((temp / target) * 100));
 }
 
 function getProbeStatus(probe) {
-  const target = getProbeTarget(probe);
-  const temp = Number(probe.temperature);
+    const target = getProbeTarget(probe);
+    const temp = Number(probe.temperature);
 
-  if (Number.isNaN(temp)) return "";
-  if (target && temp >= target) return "ready";
-  if (temp >= 70) return "hot";
-  return "warming";
+    if (Number.isNaN(temp)) return "";
+    if (target && temp >= target) return "ready";
+    if (temp >= 70) return "hot";
+    return "warming";
 }
 
 function updateLiveUi() {
-  const status = document.querySelector("[data-live-status]");
+    const status = document.querySelector("[data-live-status]");
 
-  if (status) {
-    status.textContent = appState.bluetooth.connected
-      ? `🟢 ${appState.bluetooth.device || "Bluetooth"}`
-      : "🔴 Niet verbonden";
-  }
-
-  document.querySelectorAll("[data-probe-temperature]").forEach(el => {
-
-    const id = Number(el.dataset.probeId);
-
-    const probe = appState.probes.find(p => p.id === id);
-
-    if (probe) {
-        el.textContent =
-            formatTemperatureValue(probe.temperature);
+    if (status) {
+        status.textContent = appState.bluetooth.connected
+            ? `🟢 ${appState.bluetooth.device || "Bluetooth"}`
+            : "🔴 Niet verbonden";
     }
+
+    document.querySelectorAll("[data-probe-temperature]").forEach(el => {
+
+        const id = Number(el.dataset.probeId);
+
+        const probe = appState.probes.find(p => p.id === id);
+
+        if (probe) {
+            el.textContent =
+                formatTemperatureValue(probe.temperature);
+        }
 
     });
 
 
 
     const timer =
-    document.querySelector("[data-cook-time]");
+        document.querySelector("[data-cook-time]");
 
 
-    if(timer){
+    if (timer) {
 
-    timer.textContent =
-        formatElapsedTime();
+        timer.textContent =
+            formatElapsedTime();
 
     }
-  }
+}
 
 function renderProbeCard(probe) {
-  const target = getProbeTarget(probe);
-  const progress = getProgress(probe);
+    const target = getProbeTarget(probe);
+    const progress = getProgress(probe);
 
-  return `
+    return `
     <div class="probe-card ${getProbeStatus(probe)}">
       <div class="probe-title">
         <span>${probe.type === "meat" ? "🥩" : "🔥"} ${probe.name}</span>
@@ -100,7 +100,7 @@ function renderProbeCard(probe) {
 
 function formatElapsedTime() {
 
-    if(!appState.cook.startedAt){
+    if (!appState.cook.startedAt) {
         return "00:00:00";
     }
 
@@ -130,33 +130,33 @@ function formatElapsedTime() {
 
 
     return (
-        String(hours).padStart(2,"0")
+        String(hours).padStart(2, "0")
         + ":" +
-        String(minutes).padStart(2,"0")
+        String(minutes).padStart(2, "0")
         + ":" +
-        String(seconds).padStart(2,"0")
+        String(seconds).padStart(2, "0")
     );
 
 }
 
 function renderCookPanel() {
-  if (!appState.cook.active) {
-    return `
+    if (!appState.cook.active) {
+        return `
       <div class="card cook-card">
         <h3>🔥 Actieve cook</h3>
         <p style="color:var(--muted)">Geen actieve cook</p>
         <button class="button secondary" onclick="startManualCook()">Start nieuwe cook</button>
       </div>
     `;
-  }
+    }
 
-  const phases = appState.cook.phases || [];
-  const currentPhase = phases[appState.cook.phase] || ["Voorbereiden", ""];
-  const phaseProgress = phases.length
-    ? Math.round(((appState.cook.phase + 1) / phases.length) * 100)
-    : 0;
+    const phases = appState.cook.phases || [];
+    const currentPhase = phases[appState.cook.phase] || ["Voorbereiden", ""];
+    const phaseProgress = phases.length
+        ? Math.round(((appState.cook.phase + 1) / phases.length) * 100)
+        : 0;
 
-  return `
+    return `
     <div class="card cook-card">
       <h3>🔥 Actieve cook</h3>
       <h2>${appState.cook.name}</h2>
@@ -198,9 +198,9 @@ function renderCookPanel() {
 }
 
 function dashboardView() {
-  const probes = appState.probes.filter(p => p.active && p.type !== "unused");
+    const probes = appState.probes.filter(p => p.active && p.type !== "unused");
 
-  return `
+    return `
     <div class="status" data-live-status>
       ${appState.bluetooth.connected ? "🟢 Verbonden" : "🔴 Niet verbonden"}
     </div>
@@ -211,11 +211,10 @@ function dashboardView() {
     </div>
 
     <div class="probe-container">
-      ${
-        probes.length
-          ? probes.map(renderProbeCard).join("")
-          : `<div class="card">Geen actieve probes</div>`
-      }
+      ${probes.length
+            ? probes.map(renderProbeCard).join("")
+            : `<div class="card">Geen actieve probes</div>`
+        }
     </div>
 
     ${renderCookPanel()}
@@ -225,7 +224,7 @@ function dashboardView() {
   `;
 }
 
-function startManualCook(){
+function startManualCook() {
 
     appState.cook.active = true;
 
@@ -251,7 +250,7 @@ function startManualCook(){
 
 
     // START HISTORY SESSION
-    if(typeof startCookSession === "function"){
+    if (typeof startCookSession === "function") {
 
         startCookSession();
 
@@ -271,17 +270,17 @@ function startManualCook(){
 }
 
 function completePhase() {
-  if (!appState.cook.active) return;
+    if (!appState.cook.active) return;
 
-  appState.cook.completedPhases.push(appState.cook.phase);
+    appState.cook.completedPhases.push(appState.cook.phase);
 
-  if (appState.cook.phase < appState.cook.phases.length - 1) {
-    appState.cook.phase++;
-  }
+    if (appState.cook.phase < appState.cook.phases.length - 1) {
+        appState.cook.phase++;
+    }
 
-  appState.cook.lastPhaseChange = new Date();
+    appState.cook.lastPhaseChange = new Date();
 
-  render();
+    render();
 }
 
 function stopCook() {
@@ -297,15 +296,15 @@ function stopCook() {
     render();
 }
 
-setInterval(()=>{
+setInterval(() => {
 
-    if(
+    if (
         appState.cook &&
         appState.cook.active
-    ){
+    ) {
 
         updateLiveUi();
 
     }
 
-    },1000);
+}, 1000);
