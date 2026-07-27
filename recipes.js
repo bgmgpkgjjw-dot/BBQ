@@ -3,7 +3,10 @@
    recipes.js
 
    Recipe overview + detail + scaling + cook loading
-   Recipe data loaded separately from recipes-data.js
+
+   Recipe data is loaded separately:
+   recipes-data.js
+
 ========================================================== */
 
 
@@ -15,7 +18,9 @@
 function selectRecipe(recipeId){
 
     appState.selectedRecipe = recipeId;
+
     appState.recipeScale = 1;
+
     appState.screen = "recipeDetail";
 
     render();
@@ -27,12 +32,12 @@ function selectRecipe(recipeId){
 function backToRecipes(){
 
     appState.selectedRecipe = null;
+
     appState.screen = "recipes";
 
     render();
 
 }
-
 
 
 
@@ -63,6 +68,7 @@ function setServings(recipeId,value){
     render();
 
 }
+
 
 
 
@@ -103,21 +109,23 @@ function setPrimaryAmount(recipeId,value){
 
 
 
+
 function scaledIngredients(recipe){
 
-    return recipe.ingredients.map(i => ({
+    return recipe.ingredients.map(item => ({
 
-        ...i,
+        ...item,
 
         amount:
             roundAmount(
-                i.amount * appState.recipeScale,
-                i.unit
+                item.amount * appState.recipeScale,
+                item.unit
             )
 
     }));
 
 }
+
 
 
 
@@ -134,15 +142,20 @@ function scaledServings(recipe){
 
 
 
+
 function roundAmount(value,unit){
 
-    if(unit==="g" || unit==="ml"){
+    if(unit === "g" || unit === "ml"){
+
         return Math.round(value);
+
     }
 
 
-    if(unit==="kg"){
+    if(unit === "kg"){
+
         return Math.round(value * 100) / 100;
+
     }
 
 
@@ -153,16 +166,19 @@ function roundAmount(value,unit){
 
 
 
+
 function formatAmount(item){
 
     if(!item.unit){
+
         return `${item.amount}x`;
+
     }
+
 
     return `${item.amount} ${item.unit}`;
 
 }
-
 
 
 
@@ -174,6 +190,12 @@ function formatAmount(item){
 function loadRecipeIntoCook(recipeId){
 
 
+    console.log(
+        "Starting cook:",
+        recipeId
+    );
+
+
     const recipe =
         appState.recipes.find(
             r => r.id === recipeId
@@ -181,13 +203,18 @@ function loadRecipeIntoCook(recipeId){
 
 
     if(!recipe){
-        console.error("Recipe not found:", recipeId);
+
+        console.error(
+            "Recipe not found",
+            recipeId
+        );
+
         return;
+
     }
 
 
 
-    // Keep existing state structure
     Object.assign(
         appState.cook,
         {
@@ -204,16 +231,21 @@ function loadRecipeIntoCook(recipeId){
 
             phase:0,
 
-            phases:recipe.phases,
+            phases:recipe.phases || [],
 
-            servings:scaledServings(recipe)
+            servings:
+                scaledServings(recipe),
+
+            startedAt:
+                new Date().toISOString()
 
         }
+
     );
 
 
 
-    appState.screen="dashboard";
+    appState.screen = "dashboard";
 
 
     render();
@@ -226,6 +258,7 @@ function loadRecipeIntoCook(recipeId){
 
 
 function startManualCook(){
+
 
     Object.assign(
         appState.cook,
@@ -245,19 +278,23 @@ function startManualCook(){
 
             phases:[],
 
-            servings:null
+            servings:null,
+
+            startedAt:
+                new Date().toISOString()
 
         }
+
     );
 
 
     appState.screen="dashboard";
 
+
     render();
 
+
 }
-
-
 
 
 
@@ -272,7 +309,7 @@ function recipeListView(){
 
     if(
         !appState.recipes ||
-        !appState.recipes.length
+        appState.recipes.length === 0
     ){
 
         return `
@@ -306,13 +343,16 @@ function recipeListView(){
     <br><br>
 
 
+
     <div class="recipe-list">
 
 
     ${
-        appState.recipes.map(recipe=>`
+        appState.recipes.map(recipe => `
 
-        <div class="recipe"
+
+        <div
+        class="recipe"
         onclick="selectRecipe('${recipe.id}')">
 
 
@@ -322,15 +362,22 @@ function recipeListView(){
 
 
             <p>
+
             ${recipe.meat}
+
             ·
+
             ${recipe.dome}°C
+
             ·
+
             ${recipe.duration}
+
             </p>
 
 
         </div>
+
 
         `).join("")
     }
@@ -341,14 +388,13 @@ function recipeListView(){
 
     `;
 
+
 }
 
 
 
-
-
 /* ==========================================================
-   DETAIL VIEW
+   RECIPE DETAIL
 ========================================================== */
 
 
@@ -392,9 +438,7 @@ function recipeDetailView(){
 
 
 
-
 return `
-
 
 
 <button
@@ -409,7 +453,9 @@ onclick="backToRecipes()">
 
 <div class="card">
 
-<h2>${recipe.name}</h2>
+<h2>
+${recipe.name}
+</h2>
 
 <p style="color:var(--muted)">
 ${recipe.category}
@@ -451,6 +497,7 @@ Tijd:
 
 
 </div>
+
 
 
 
@@ -504,7 +551,6 @@ onchange="setPrimaryAmount('${recipe.id}',this.value)"
 }
 
 
-
 </div>
 
 
@@ -517,13 +563,18 @@ onchange="setPrimaryAmount('${recipe.id}',this.value)"
 
 
 ${
-ingredients.map(i=>`
+ingredients.map(item => `
 
 <div class="ingredient-row">
 
-<span>${i.name}</span>
+<span>
+${item.name}
+</span>
 
-<strong>${formatAmount(i)}</strong>
+
+<strong>
+${formatAmount(item)}
+</strong>
 
 </div>
 
@@ -547,7 +598,7 @@ ingredients.map(i=>`
 
 ${
 recipe.setup.map(
-s=>`<li>${s}</li>`
+step => `<li>${step}</li>`
 ).join("")
 }
 
@@ -568,13 +619,18 @@ s=>`<li>${s}</li>`
 
 ${
 recipe.phases.map(
-p=>`
+phase => `
 
 <div class="ingredient-row">
 
-<span>${p[0]}</span>
+<span>
+${phase[0]}
+</span>
 
-<strong>${p[1]}</strong>
+
+<strong>
+${phase[1]}
+</strong>
 
 </div>
 
@@ -589,9 +645,10 @@ p=>`
 
 
 
-
 <button
+
 class="button"
+
 onclick="loadRecipeIntoCook('${recipe.id}')">
 
 🔥 Start cook
@@ -603,3 +660,23 @@ onclick="loadRecipeIntoCook('${recipe.id}')">
 `;
 
 }
+
+
+
+
+
+/* ==========================================================
+   GLOBAL EXPORTS
+========================================================== */
+
+window.selectRecipe = selectRecipe;
+
+window.backToRecipes = backToRecipes;
+
+window.setServings = setServings;
+
+window.setPrimaryAmount = setPrimaryAmount;
+
+window.loadRecipeIntoCook = loadRecipeIntoCook;
+
+window.startManualCook = startManualCook;
