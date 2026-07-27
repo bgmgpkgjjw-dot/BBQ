@@ -2,13 +2,17 @@
    Hermanos Grill Companion
    dashboard.js
 
-   Dashboard scherm
+   Premium BBQ dashboard
    ========================================================== */
 
 
 function formatTemperatureValue(value){
 
-    if(value === null || value === undefined || Number.isNaN(Number(value))){
+    if(
+        value === null ||
+        value === undefined ||
+        Number.isNaN(Number(value))
+    ){
         return "—";
     }
 
@@ -17,26 +21,86 @@ function formatTemperatureValue(value){
 }
 
 
+
+function temperatureProgress(current,target){
+
+    if(!current || !target){
+        return 0;
+    }
+
+    return Math.min(
+        100,
+        Math.round((current / target) * 100)
+    );
+
+}
+
+
+
+function temperatureClass(temp,target){
+
+    if(!temp){
+        return "cold";
+    }
+
+    if(target && temp >= target){
+        return "ready";
+    }
+
+    if(temp > 70){
+        return "hot";
+    }
+
+    return "warming";
+
+}
+
+
+
 function updateLiveUi(){
 
-    const statusEl = document.querySelector("[data-live-status]");
+
+    const statusEl =
+        document.querySelector("[data-live-status]");
+
 
     if(statusEl){
-        const batteryText = appState.bluetooth.battery === null || appState.bluetooth.battery === undefined
-            ? "Batterij —%"
-            : `Batterij ${Math.round(appState.bluetooth.battery)}%`;
 
-        statusEl.textContent = `${appState.bluetooth.connected ? "🟢" : "🔴"} ${appState.bluetooth.device || "Geen apparaat"} · ${appState.bluetooth.connected ? batteryText : "Wacht op Bluetooth-data"}`;
+        statusEl.innerHTML = `
+
+        ${appState.bluetooth.connected ? "🟢" : "🔴"}
+
+        ${appState.bluetooth.device || "Geen apparaat"}
+
+        ${appState.bluetooth.connected ? "· verbonden" : ""}
+
+        `;
+
     }
 
 
-    document.querySelectorAll("[data-probe-temperature]").forEach(el => {
 
-        const probeId = Number(el.getAttribute("data-probe-id"));
-        const probe = appState.probes.find(p => p.id === probeId);
+    document
+    .querySelectorAll("[data-probe-temperature]")
+    .forEach(el=>{
+
+        const id =
+            Number(el.dataset.probeId);
+
+
+        const probe =
+            appState.probes.find(
+                p=>p.id===id
+            );
+
 
         if(probe){
-            el.textContent = formatTemperatureValue(probe.temperature);
+
+            el.textContent =
+                formatTemperatureValue(
+                    probe.temperature
+                );
+
         }
 
     });
@@ -44,240 +108,182 @@ function updateLiveUi(){
 }
 
 
-function dashboardView(){
 
 
-    // Alleen sondes die aan staan én een rol toegewezen hebben
-    const activeProbes = appState.probes.filter(
-        p => p.active && p.type !== "unused"
-    );
+function renderProbeCard(probe){
 
 
-    const domeProbes = activeProbes.filter(p => p.type === "dome");
+    const target =
+        probe.type==="meat"
+        ? appState.cook.meatTarget
+        : appState.cook.domeTarget;
 
-    const otherProbes = activeProbes.filter(p => p.type !== "dome");
+
+    const progress =
+        temperatureProgress(
+            probe.temperature,
+            target
+        );
 
 
     return `
 
-
-    <div class="status" data-live-status>
-
-        ${appState.bluetooth.connected ? "🟢" : "🔴"}
-
-        ${appState.bluetooth.device || "Geen apparaat"}
-
-        ·
-
-        ${appState.bluetooth.connected ? (appState.bluetooth.battery === null || appState.bluetooth.battery === undefined ? "Batterij —%" : `Batterij ${Math.round(appState.bluetooth.battery)}%`) : "Wacht op Bluetooth-data"}
-
-    </div>
+    <div class="
+        probe-card
+        ${temperatureClass(
+            probe.temperature,
+            target
+        )}
+    ">
 
 
+        <div class="probe-header">
+
+            <span>
+                ${probe.type==="meat" ? "🥩":"🔥"}
+                ${probe.name}
+            </span>
+
+        </div>
 
 
-    ${
 
-        domeProbes.length
+        <div class="big-temperature"
+             data-probe-temperature
+             data-probe-id="${probe.id}">
 
-        ?
+            ${formatTemperatureValue(probe.temperature)}
 
-        domeProbes.map(p => `
+        </div>
 
-            <div class="gauge">
 
-                <div>
 
-                    <div class="temp" data-probe-temperature data-probe-id="${p.id}">
+        <div class="target">
 
-                        ${formatTemperatureValue(p.temperature)}
+            Target ${target || "—"}°
 
-                    </div>
+        </div>
 
-                    <div class="label">
 
-                        ${p.name}
 
-                    </div>
+        <div class="progress">
 
-                </div>
-
+            <div
+            style="
+            width:${progress}%
+            ">
             </div>
 
-        `).join("")
-
-        :
-
-        `
-
-        <div class="card">
-
-            <p style="text-align:center; color:var(--muted)">
-
-                Geen dome-sonde actief. Zet er één aan bij Instellingen.
-
-            </p>
-
         </div>
-
-        `
-
-    }
-
-
-
-
-    ${
-
-        otherProbes.length
-
-        ?
-
-        `
-
-        <div class="probe-grid">
-
-            ${
-
-                otherProbes.map(p => `
-
-                    <div class="card probe-card">
-
-                        <h3>
-
-                            ${p.name}
-
-                        </h3>
-
-                        <div class="temp" style="font-size:36px" data-probe-temperature data-probe-id="${p.id}">
-
-                            ${formatTemperatureValue(p.temperature)}
-
-                        </div>
-
-                        ${
-
-                            p.type === "meat"
-
-                            ?
-
-                            `
-
-                            <p style="color:var(--muted); text-align:center">
-
-                                Target: ${appState.cook.meatTarget || "—"}°C
-
-                            </p>
-
-                            `
-
-                            :
-
-                            ""
-
-                        }
-
-                    </div>
-
-                `).join("")
-
-            }
-
-        </div>
-
-        `
-
-        :
-
-        ""
-
-    }
-
-
-
-
-    <div class="card">
-
-
-        <h3>
-
-            Actieve cook
-
-        </h3>
-
-
-        ${
-            appState.cook.active
-
-            ?
-
-            `
-
-            <h2>
-
-                ${appState.cook.name}
-
-            </h2>
-
-
-            <p>
-
-                Dome:
-
-                ${appState.cook.domeTarget}°C
-
-            </p>
-
-
-            <p>
-
-                Kern:
-
-                ${appState.cook.meatTarget || "—"}°C
-
-            </p>
-
-
-            `
-
-
-            :
-
-
-            `
-
-            <p>
-
-                Geen actieve cook
-
-            </p>
-
-
-            `
-
-        }
 
 
     </div>
-
-
-
-
-    <button
-
-        class="button"
-
-        onclick="navigate('recipes')"
-
-    >
-
-        🍖 Kies een recept
-
-
-    </button>
-
 
     `;
 
+}
+
+
+
+
+
+function dashboardView(){
+
+
+const activeProbes =
+appState.probes.filter(
+p=>p.active && p.type!=="unused"
+);
+
+
+
+return `
+
+
+<div class="status"
+data-live-status>
+
+${appState.bluetooth.connected ? "🟢":"🔴"}
+
+${appState.bluetooth.device || "Geen apparaat"}
+
+</div>
+
+
+
+<div class="cook-header">
+
+
+<h2>
+
+🔥 ${appState.cook.active
+? appState.cook.name
+:"Nieuwe cook"}
+
+</h2>
+
+
+<p>
+
+${appState.cook.active
+?"Actieve sessie"
+:"Geen actieve cook"}
+
+</p>
+
+
+</div>
+
+
+
+
+<div class="probe-container">
+
+
+${
+activeProbes.length
+
+?
+
+activeProbes
+.map(renderProbeCard)
+.join("")
+
+:
+
+`
+
+<div class="card">
+
+Geen actieve probes
+
+</div>
+
+`
+
+}
+
+
+</div>
+
+
+
+
+
+<button
+
+class="button"
+
+onclick="navigate('recipes')"
+
+>
+
+🍖 Kies recept
+
+</button>
+
+
+
+`;
 
 }
