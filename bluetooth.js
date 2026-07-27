@@ -29,7 +29,7 @@ const BLE = {
 
 function onBluetoothDisconnected(){
 
-    console.log("Bluetooth verbroken");
+    console.log("Bluetooth disconnected");
 
 
     appState.bluetooth.connected = false;
@@ -81,7 +81,7 @@ function handleBluetoothNotification(event){
 
 
     /*
-        Packet format:
+        BLE packet layout:
 
         Byte 0:
         55
@@ -90,7 +90,7 @@ function handleBluetoothNotification(event){
         00
 
 
-        Probe slots:
+        Physical probe sockets:
 
         Probe 1:
         bytes 2-3
@@ -112,11 +112,15 @@ function handleBluetoothNotification(event){
 
 
         Temperature:
-        16-bit big endian
-        value / 10
+
+        big endian 16-bit value
+
+        Celsius = value / 10
 
 
-        FFFF = disconnected
+        Disconnected:
+
+        FFFF
     */
 
 
@@ -124,33 +128,33 @@ function handleBluetoothNotification(event){
     const probeSlots = [
 
         {
-            offset: 2,
-            probeId: 1
+            id: 1,
+            offset: 2
         },
 
         {
-            offset: 4,
-            probeId: 2
+            id: 2,
+            offset: 4
         },
 
         {
-            offset: 6,
-            probeId: 3
+            id: 3,
+            offset: 6
         },
 
         {
-            offset: 8,
-            probeId: 4
+            id: 4,
+            offset: 8
         },
 
         {
-            offset: 10,
-            probeId: 5
+            id: 5,
+            offset: 10
         },
 
         {
-            offset: 12,
-            probeId: 6
+            id: 6,
+            offset: 12
         }
 
     ];
@@ -160,25 +164,24 @@ function handleBluetoothNotification(event){
 
 
 
+
     probeSlots.forEach(slot => {
 
 
-        const offset = slot.offset;
+
+        const high =
+            bytes[slot.offset];
+
+        const low =
+            bytes[slot.offset + 1];
 
 
 
-        if(offset + 1 >= bytes.length){
+        if(high === undefined || low === undefined){
 
             return;
 
         }
-
-
-
-
-        const high = bytes[offset];
-
-        const low = bytes[offset + 1];
 
 
 
@@ -192,10 +195,9 @@ function handleBluetoothNotification(event){
 
 
 
-
         const probe =
             appState.probes.find(
-                p => p.id === slot.probeId
+                p => p.id === slot.id
             );
 
 
@@ -210,10 +212,9 @@ function handleBluetoothNotification(event){
 
 
 
-
         console.log(
             "Probe",
-            slot.probeId,
+            slot.id,
             "raw:",
             raw
         );
@@ -223,17 +224,18 @@ function handleBluetoothNotification(event){
 
 
 
+
         if(raw === 0xFFFF){
+
+
+            probe.temperature = null;
 
 
             console.log(
                 "Probe",
-                slot.probeId,
+                slot.id,
                 "disconnected"
             );
-
-
-            probe.temperature = null;
 
 
             return;
@@ -243,6 +245,11 @@ function handleBluetoothNotification(event){
 
 
 
+
+
+        /*
+            Ignore empty values
+        */
 
 
         if(raw === 0){
@@ -264,20 +271,21 @@ function handleBluetoothNotification(event){
 
 
 
+
+        probe.temperature =
+            temperature;
+
+
+
+
+
         console.log(
             "Probe",
-            slot.probeId,
+            slot.id,
             "temperature:",
             temperature,
             "°C"
         );
-
-
-
-
-
-
-        probe.temperature = temperature;
 
 
 
@@ -311,7 +319,7 @@ async function connectBluetooth(){
 
 
         console.log(
-            "Zoeken naar thermometer..."
+            "Searching for thermometer..."
         );
 
 
@@ -321,13 +329,11 @@ async function connectBluetooth(){
         BLE.device =
             await navigator.bluetooth.requestDevice({
 
-
                 filters: [
                     {
                         namePrefix: "Grill"
                     }
                 ],
-
 
 
                 optionalServices: [
@@ -369,11 +375,10 @@ async function connectBluetooth(){
 
 
 
-
-
         console.log(
-            "Verbonden"
+            "Connected"
         );
+
 
 
 
@@ -390,10 +395,12 @@ async function connectBluetooth(){
 
 
 
+
         BLE.writeCharacteristic =
             await BLE.service.getCharacteristic(
                 BLE.WRITE
             );
+
 
 
 
@@ -431,8 +438,9 @@ async function connectBluetooth(){
 
 
 
+
         console.log(
-            "Notifications gestart"
+            "Notifications started"
         );
 
 
@@ -472,9 +480,9 @@ async function connectBluetooth(){
 
 
 
-
     }
     catch(error){
+
 
 
         console.error(error);
@@ -531,7 +539,6 @@ async function sendCommand(bytes){
         return;
 
     }
-
 
 
 
