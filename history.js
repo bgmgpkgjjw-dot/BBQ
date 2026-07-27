@@ -12,22 +12,22 @@ let temperatureChart = null;
 
 
 
-function recordTemperatureHistory(){
+function recordTemperatureHistory() {
 
 
-    if(!appState.cook.active){
+    if (!appState.cook.active) {
         return;
     }
 
 
-    if(!appState.history){
+    if (!appState.history) {
         return;
     }
 
 
 
 
-    if(!appState.history.activeSession.startedAt){
+    if (!appState.history.activeSession.startedAt) {
 
         appState.history.activeSession.startedAt =
             new Date().toISOString();
@@ -63,20 +63,20 @@ function recordTemperatureHistory(){
         dome:
 
             appState.probes
-            .find(
-                p=>p.type==="dome"
-            )
-            ?.temperature || null,
+                .find(
+                    p => p.type === "dome"
+                )
+                ?.temperature || null,
 
 
 
         meat:
 
             appState.probes
-            .find(
-                p=>p.type==="meat"
-            )
-            ?.temperature || null
+                .find(
+                    p => p.type === "meat"
+                )
+                ?.temperature || null
 
 
     };
@@ -89,9 +89,9 @@ function recordTemperatureHistory(){
 
 
     // max 6 hours of samples
-    if(
+    if (
         appState.history.activeSession.samples.length > 720
-    ){
+    ) {
 
         appState.history.activeSession.samples.shift();
 
@@ -106,7 +106,7 @@ function recordTemperatureHistory(){
 
 
 
-function finishCookHistory(){
+function finishCookHistory() {
 
 
     const session =
@@ -114,9 +114,9 @@ function finishCookHistory(){
 
 
 
-    if(
+    if (
         !session.samples.length
-    ){
+    ) {
         return;
     }
 
@@ -152,9 +152,9 @@ function finishCookHistory(){
 
     appState.history.activeSession = {
 
-        startedAt:null,
+        startedAt: null,
 
-        samples:[]
+        samples: []
 
     };
 
@@ -168,10 +168,10 @@ function finishCookHistory(){
 
 
 
-function historyView(){
+function historyView() {
 
 
-return `
+    return `
 
 
 <div class="card">
@@ -203,14 +203,13 @@ Cook historie
 
 
 
-${
-appState.history.sessions.length
+${appState.history.sessions.length
 
-?
+            ?
 
-appState.history.sessions
-.map(
-s=>`
+            appState.history.sessions
+                .map(
+                    s => `
 
 <div class="recipe">
 
@@ -220,7 +219,7 @@ ${s.name}
 
 <p>
 ${new Date(s.finishedAt)
-.toLocaleString()}
+                            .toLocaleString()}
 </p>
 
 
@@ -228,18 +227,18 @@ ${new Date(s.finishedAt)
 
 
 `
-)
-.join("")
+                )
+                .join("")
 
-:
+            :
 
-`
+            `
 <p style="color:var(--muted)">
 Nog geen afgeronde cooks.
 </p>
 `
 
-}
+        }
 
 
 </div>
@@ -257,148 +256,148 @@ Nog geen afgeronde cooks.
 
 
 
-function renderTemperatureChart(){
+function renderTemperatureChart() {
 
 
-const canvas =
-document.getElementById(
-"temperatureChart"
-);
+    const canvas =
+        document.getElementById(
+            "temperatureChart"
+        );
 
 
 
-if(!canvas){
-    return;
-}
+    if (!canvas) {
+        return;
+    }
 
 
 
-const samples =
-appState.history.activeSession.samples;
+    const samples =
+        appState.history.activeSession.samples;
 
 
 
-if(!samples.length){
-    return;
-}
+    if (!samples.length) {
+        return;
+    }
 
 
 
 
 
 
-if(temperatureChart){
+    if (temperatureChart) {
 
-    temperatureChart.destroy();
+        temperatureChart.destroy();
 
-}
+    }
 
 
 
 
 
 
-temperatureChart =
-new Chart(
-canvas,
-{
+    temperatureChart =
+        new Chart(
+            canvas,
+            {
 
 
-type:"line",
+                type: "line",
 
 
 
-data:{
+                data: {
 
 
-labels:
+                    labels:
 
-samples.map(
-s=>`${s.elapsed} min`
-),
+                        samples.map(
+                            s => `${s.elapsed} min`
+                        ),
 
 
 
-datasets:[
+                    datasets: [
 
-{
+                        {
 
 
-label:"🔥 Dome",
+                            label: "🔥 Dome",
 
-data:
+                            data:
 
-samples.map(
-s=>s.dome
-),
+                                samples.map(
+                                    s => s.dome
+                                ),
 
 
 
-tension:.3
+                            tension: .3
 
-},
+                        },
 
 
 
-{
+                        {
 
 
-label:"🥩 Kern temperatuur",
+                            label: "🥩 Kern temperatuur",
 
-data:
+                            data:
 
-samples.map(
-s=>s.meat
-),
+                                samples.map(
+                                    s => s.meat
+                                ),
 
 
 
-tension:.3
+                            tension: .3
 
-}
+                        }
 
 
-]
+                    ]
 
 
-},
+                },
 
 
 
-options:{
+                options: {
 
 
-responsive:true,
+                    responsive: true,
 
 
-interaction:{
+                    interaction: {
 
-mode:"index",
+                        mode: "index",
 
-intersect:false
+                        intersect: false
 
-},
+                    },
 
 
-scales:{
+                    scales: {
 
 
-y:{
+                        y: {
 
-beginAtZero:false
+                            beginAtZero: false
 
-}
+                        }
 
 
-}
+                    }
 
 
-}
+                }
 
 
-}
+            }
 
-);
+        );
 
 
 }
@@ -411,13 +410,13 @@ beginAtZero:false
    ========================================================== */
 
 
-function historyView(){
+function historyView() {
 
 
-    if(
+    if (
         !appState.sessions ||
         appState.sessions.length === 0
-    ){
+    ) {
 
         return `
 
@@ -452,11 +451,10 @@ function historyView(){
 
 
 
-    ${
-        appState.sessions
-        .map(renderHistoryCard)
-        .join("")
-    }
+    ${appState.sessions
+            .map(renderHistoryCard)
+            .join("")
+        }
 
 
     `;
@@ -467,25 +465,25 @@ function historyView(){
 
 
 
-function renderHistoryCard(session){
+function renderHistoryCard(session) {
 
 
     const date =
         new Date(
             session.startedAt
         )
-        .toLocaleDateString(
-            "nl-NL"
-        );
+            .toLocaleDateString(
+                "nl-NL"
+            );
 
 
 
     const samples =
         session.temperatureHistory
-        ?
-        session.temperatureHistory.length
-        :
-        0;
+            ?
+            session.temperatureHistory.length
+            :
+            0;
 
 
 
@@ -541,7 +539,7 @@ function renderHistoryCard(session){
 
 
 
-function openHistorySession(id){
+function openHistorySession(id) {
 
 
     const session =
@@ -550,7 +548,7 @@ function openHistorySession(id){
         );
 
 
-    if(!session){
+    if (!session) {
         return;
     }
 
@@ -564,14 +562,14 @@ function openHistorySession(id){
 
 }
 
-function historyDetailView(){
+function historyDetailView() {
 
 
     const session =
         appState.selectedHistory;
 
 
-    if(!session){
+    if (!session) {
 
         return historyView();
 
@@ -586,27 +584,27 @@ function historyDetailView(){
 
     const maxDome =
         samples.length
-        ?
-        Math.max(
-            ...samples.map(
-                x => x.dome || 0
+            ?
+            Math.max(
+                ...samples.map(
+                    x => x.dome || 0
+                )
             )
-        )
-        :
-        "—";
+            :
+            "—";
 
 
 
     const maxMeat =
         samples.length
-        ?
-        Math.max(
-            ...samples.map(
-                x => x.meat || 0
+            ?
+            Math.max(
+                ...samples.map(
+                    x => x.meat || 0
+                )
             )
-        )
-        :
-        "—";
+            :
+            "—";
 
 
 
@@ -635,6 +633,16 @@ function historyDetailView(){
         onclick="renameCook('${session.id}')">
 
         ✏️ Naam wijzigen
+
+        </button>
+
+        <br><br>
+
+        <button
+        class="button danger"
+        onclick="deleteCook('${session.id}')">
+
+        🗑 Verwijder cook
 
         </button>
 
@@ -692,15 +700,14 @@ function historyDetailView(){
         </h3>
 
 
-        ${
-            samples.slice(-10).map(
-                s => `
+        ${samples.slice(-10).map(
+        s => `
 
                 <div class="ingredient-row">
 
                     <span>
                     ${new Date(s.timestamp)
-                    .toLocaleTimeString("nl-NL")}
+                .toLocaleTimeString("nl-NL")}
                     </span>
 
                     <strong>
@@ -711,7 +718,7 @@ function historyDetailView(){
                 </div>
 
                 `
-            ).join("")
+    ).join("")
         }
 
 
@@ -727,7 +734,7 @@ function historyDetailView(){
 
 
 
-function closeHistoryDetail(){
+function closeHistoryDetail() {
 
     appState.selectedHistory = null;
 
@@ -735,7 +742,7 @@ function closeHistoryDetail(){
 
 }
 
-function renameCook(sessionId){
+function renameCook(sessionId) {
 
     const session =
         appState.sessions.find(
@@ -743,7 +750,7 @@ function renameCook(sessionId){
         );
 
 
-    if(!session){
+    if (!session) {
         console.error("Session not found", sessionId);
         return;
     }
@@ -762,7 +769,7 @@ function renameCook(sessionId){
         );
 
 
-    if(!newName || !newName.trim()){
+    if (!newName || !newName.trim()) {
         return;
     }
 
@@ -778,6 +785,39 @@ function renameCook(sessionId){
 
     saveSessions();
 
+
+    render();
+
+}
+
+function deleteCook(sessionId){
+
+    const session =
+        appState.sessions.find(
+            s => s.id === sessionId
+        );
+
+    if(!session){
+        return;
+    }
+
+    const confirmed =
+        confirm(
+            `Cook "${session.name || session.recipe}" verwijderen?\n\nDeze actie kan niet ongedaan worden gemaakt.`
+        );
+
+    if(!confirmed){
+        return;
+    }
+
+    appState.sessions =
+        appState.sessions.filter(
+            s => s.id !== sessionId
+        );
+
+    saveSessions();
+
+    appState.screen = "history";
 
     render();
 
