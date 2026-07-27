@@ -8,15 +8,6 @@
 
 
 
-// Toggleable debug logger (set window.DEBUG = true to enable)
-window.DEBUG = window.DEBUG || false;
-window.debug = function(...args){
-    if(window.DEBUG){
-        console.log(...args);
-    }
-};
-
-
 function render(){
 
 

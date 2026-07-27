@@ -742,6 +742,7 @@ render();
 
 function stopCook(){
 
+finishCookHistory();    
 
 appState.cook.active = false;
 

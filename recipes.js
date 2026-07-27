@@ -222,7 +222,7 @@ function loadRecipeIntoCook(recipeId){
     appState.screen = "dashboard";
 
 
-    debug("Cook started:", appState.cook);
+    console.log("Cook started:", appState.cook);
 
 
     render();

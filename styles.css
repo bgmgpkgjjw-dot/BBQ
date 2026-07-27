@@ -1,1486 +1,417 @@
 /* ==========================================================
    Hermanos Grill Companion
-
-   styles.css
-
-   Premium BBQ UI
-   Optimized mobile layout
+   styles.css — Premium BBQ UI, optimized mobile layout
    ========================================================== */
 
-
-:root{
-
---bg:#0B0906;
---surface:#15120F;
---card:#211C16;
-
---text:#F2EBDD;
---muted:#918678;
-
---accent:#C1272D;
---accent-light:#FF6B1A;
-
---green:#4CAF50;
---yellow:#FFC107;
---danger:#E53935;
-
---border:rgba(255,255,255,.08);
-
---radius:18px;
-
---shadow:
-0 15px 35px rgba(0,0,0,.45);
-
-}
-
-
-
-/* ==========================================================
-RESET
-========================================================== */
-
-
-*{
-
-margin:0;
-padding:0;
-box-sizing:border-box;
-
-}
-
-
-
-html,
-body{
-
-height:100%;
-
-background:var(--bg);
-
-font-family:
-Inter,
-system-ui,
--apple-system,
-BlinkMacSystemFont,
-"Segoe UI",
-sans-serif;
-
-color:var(--text);
-
-overflow:hidden;
-
-}
-
-
-
-/* ==========================================================
-APP CONTAINER
-========================================================== */
-
-
-#app{
-
-height:100vh;
-
-width:100%;
-
-display:flex;
-
-justify-content:center;
-
-}
-
-
-
-.phone{
-
-height:100%;
-
-width:100%;
-
-max-width:480px;
-
-background:var(--surface);
-
-display:flex;
-
-flex-direction:column;
-
-position:relative;
-
-overflow:hidden;
-
-}
-
-
-
-
-
-/* ==========================================================
-TOP BAR
-========================================================== */
-
-
-.topbar{
-
-height:62px;
-
-padding:0 18px;
-
-display:flex;
-
-align-items:center;
-
-border-bottom:
-
-1px solid var(--border);
-
-flex-shrink:0;
-
-}
-
-
-
-.topbar h1{
-
-font-size:17px;
-
-font-weight:800;
-
-letter-spacing:.08em;
-
-text-transform:uppercase;
-
-}
-
-
-
-
-
-/* ==========================================================
-CONTENT
-========================================================== */
-
-
-.content{
-
-flex:1;
-
-overflow-y:auto;
-
-padding:16px;
-
-padding-bottom:90px;
-
-}
-
-
-
-.content::-webkit-scrollbar{
-
-display:none;
-
-}
-
-
-
-
-
-/* ==========================================================
-CARDS
-========================================================== */
-
-
-.card{
-
-background:var(--card);
-
-border-radius:var(--radius);
-
-padding:15px;
-
-margin-bottom:12px;
-
-border:
-
-1px solid var(--border);
-
-box-shadow:
-
-0 8px 20px rgba(0,0,0,.18);
-
-}
-
-
-
-.card h2{
-
-font-size:19px;
-
-font-weight:800;
-
-margin-bottom:6px;
-
-}
-
-
-
-.card h3{
-
-font-size:12px;
-
-font-weight:700;
-
-color:var(--muted);
-
-text-transform:uppercase;
-
-letter-spacing:.12em;
-
-margin-bottom:12px;
-
-}
-
-
-
-.card p{
-
-font-size:14px;
-
-}
-
-
-
-
-
-/* ==========================================================
-STATUS
-========================================================== */
-
-
-.status{
-
-font-size:12px;
-
-color:var(--muted);
-
-margin-bottom:12px;
-
-}
-
-
-
-
-
-/* ==========================================================
-COOK HEADER
-========================================================== */
-
-
-.cook-header{
-
-margin-bottom:14px;
-
-}
-
-
-
-.cook-header h2{
-
-font-size:24px;
-
-font-weight:850;
-
-letter-spacing:-.03em;
-
-}
-
-
-
-.cook-header p{
-
-margin-top:4px;
-
-font-size:13px;
-
-color:var(--muted);
-
-}
-
-
-
-
-
-/* ==========================================================
-PROBES
-========================================================== */
-
-
-.probe-container{
-
-display:flex;
-
-flex-direction:column;
-
-gap:10px;
-
-}
-
-
-
-
-
-.probe-card{
-
-background:
-
-linear-gradient(
-145deg,
-#262019,
-#1B1713
-);
-
-border-radius:16px;
-
-padding:12px 14px;
-
-border:
-
-1px solid var(--border);
-
-min-height:150px;
-
-}
-
-
-
-
-
-.probe-card.ready{
-
-border-color:
-
-rgba(76,175,80,.55);
-
-}
-
-
-
-.probe-card.hot{
-
-border-color:
-
-rgba(255,107,26,.55);
-
-}
-
-
-
-
-
-.probe-title{
-
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-font-size:14px;
-
-font-weight:700;
-
-}
-
-
-
-.probe-id{
-
-font-size:11px;
-
-color:var(--muted);
-
-}
-
-
-
-
-
-.probe-temperature{
-
-font-size:44px;
-
-font-weight:850;
-
-letter-spacing:-.06em;
-
-text-align:center;
-
-line-height:1;
-
-margin:10px 0 5px;
-
-font-variant-numeric:
-
-tabular-nums;
-
-}
-
-
-
-
-
-.probe-info{
-
-text-align:center;
-
-font-size:12px;
-
-color:var(--muted);
-
-}
-
-
-
-
-
-/* ==========================================================
-TEMPERATURE BAR
-========================================================== */
-
-
-.progress-bar{
-
-height:6px;
-
-margin-top:10px;
-
-background:#352D24;
-
-border-radius:20px;
-
-overflow:hidden;
-
-}
-
-
-
-.progress-value{
-
-height:100%;
-
-background:
-
-linear-gradient(
-90deg,
-var(--accent),
-var(--accent-light)
-);
-
-transition:
-
-width .3s ease;
-
-}
-
-
-
-.ready .progress-value{
-
-background:var(--green);
-
-}
-
-
-
-/* ==========================================================
-ACTIVE COOK PANEL
-========================================================== */
-
-
-.cook-card{
-
-background:
-
-linear-gradient(
-160deg,
-#281E15,
-#18130F
-);
-
-}
-
-
-
-.cook-card h2{
-
-font-size:22px;
-
-margin-bottom:12px;
-
-}
-
-
-
-.cook-info{
-
-display:grid;
-
-grid-template-columns:
-
-1fr 1fr;
-
-gap:10px;
-
-}
-
-
-
-.cook-info p{
-
-background:#17130F;
-
-border-radius:12px;
-
-padding:10px;
-
-font-size:13px;
-
-}
-
-
-
-.cook-info strong{
-
-display:block;
-
-font-size:17px;
-
-margin-top:3px;
-
-}
-
-
-
-
-
-.cook-phase{
-
-margin-top:14px;
-
-padding:12px;
-
-background:#17130F;
-
-border-radius:14px;
-
-}
-
-
-
-.cook-phase strong{
-
-font-size:16px;
-
-}
-
-
-
-.cook-timer{
-
-font-size:28px;
-
-font-weight:800;
-
-margin-top:8px;
-
-}
-
-.cook-status{
-
-color:#8fd18f;
-
-font-size:13px;
-
-margin-bottom:14px;
-
-}
-
-
-.cook-grid{
-
-display:grid;
-
-grid-template-columns:1fr 1fr;
-
-gap:10px;
-
-margin-bottom:14px;
-
-}
-
-
-.cook-grid div{
-
-background:#17130F;
-
-padding:12px;
-
-border-radius:12px;
-
-}
-
-
-.cook-grid span{
-
-display:block;
-
-font-size:12px;
-
-color:var(--muted);
-
-}
-
-
-.cook-grid strong{
-
-display:block;
-
-font-size:18px;
-
-margin-top:4px;
-
-}
-
-
-
-.phase-box{
-
-background:#17130F;
-
-padding:14px;
-
-border-radius:14px;
-
-margin-bottom:12px;
-
-}
-
-
-
-.phase-box h3{
-
-margin-bottom:6px;
-
-}
-
-
-
-.cook-progress{
-
-height:8px;
-
-background:#342B22;
-
-border-radius:20px;
-
-overflow:hidden;
-
-margin-bottom:14px;
-
-}
-
-.cook-progress div{
-
-height:100%;
-
-background:
-
-linear-gradient(
-90deg,
-var(--accent),
-var(--accent-light)
-);
-
+:root {
+  --bg: #0B0906;
+  --surface: #15120F;
+  --card: #211C16;
+
+  --text: #F2EBDD;
+  --muted: #918678;
+
+  --accent: #C1272D;
+  --accent-light: #FF6B1A;
+
+  --green: #4CAF50;
+  --yellow: #FFC107;
+  --danger: #E53935;
+
+  --border: rgba(255, 255, 255, .08);
+  --radius: 18px;
+  --shadow: 0 15px 35px rgba(0, 0, 0, .45);
+
+  /* consolidated repeated gradients */
+  --gradient-progress: linear-gradient(90deg, var(--accent), var(--accent-light));
+  --gradient-card-surface: linear-gradient(145deg, #262019, #1B1713);
+  --gradient-cook: linear-gradient(160deg, #281E15, #18130F);
+  --gradient-button: linear-gradient(135deg, var(--accent), #9E1B20);
 }
 
 /* ==========================================================
-BUTTONS
-========================================================== */
+   RESET
+   ========================================================== */
 
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-.button{
-
-height:48px;
-
-width:100%;
-
-border:none;
-
-border-radius:999px;
-
-background:
-
-linear-gradient(
-135deg,
-var(--accent),
-#9E1B20
-);
-
-color:white;
-
-font-size:15px;
-
-font-weight:750;
-
-margin-top:10px;
-
-cursor:pointer;
-
-transition:
-
-transform .15s ease,
-opacity .15s ease;
-
+html, body {
+  height: 100%;
+  background: var(--bg);
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--text);
+  overflow: hidden;
 }
-
-
-
-.button:active{
-
-transform:scale(.98);
-
-opacity:.85;
-
-}
-
-
-
-.button.secondary{
-
-background:transparent;
-
-border:
-
-1px solid var(--border);
-
-color:var(--text);
-
-}
-
-
-
-
 
 /* ==========================================================
-COOK CONTROLS
-========================================================== */
+   APP CONTAINER
+   ========================================================== */
 
+#app { height: 100vh; width: 100%; display: flex; justify-content: center; }
 
-.phase-button{
-
-background:var(--green);
-
-color:white;
-
+.phone {
+  height: 100%;
+  width: 100%;
+  max-width: 480px;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
 }
-
-
-
-.stop-button{
-
-background:transparent;
-
-border:
-
-1px solid rgba(229,57,53,.5);
-
-color:#ff8a80;
-
-}
-
-
-
-
 
 /* ==========================================================
-PROGRESS RING SUPPORT
-========================================================== */
+   TOP BAR
+   ========================================================== */
 
-
-.progress-ring{
-
-width:110px;
-
-height:110px;
-
-border-radius:50%;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-background:
-
-conic-gradient(
-var(--accent) 0deg,
-#332A22 0deg
-);
-
-margin:15px auto;
-
+.topbar {
+  height: 62px;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
-
-
-.progress-ring-inner{
-
-width:88px;
-
-height:88px;
-
-border-radius:50%;
-
-background:var(--card);
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
-
-font-size:22px;
-
-font-weight:800;
-
-}
-
-
-
-
+.topbar h1 { font-size: 17px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 
 /* ==========================================================
-RECIPES
-========================================================== */
+   CONTENT
+   ========================================================== */
 
-
-.recipe-list{
-
-display:flex;
-
-flex-direction:column;
-
-gap:10px;
-
-}
-
-
-
-.recipe{
-
-background:
-
-linear-gradient(
-145deg,
-#262019,
-#1B1713
-);
-
-border-radius:16px;
-
-padding:15px;
-
-border:
-
-1px solid var(--border);
-
-cursor:pointer;
-
-}
-
-
-
-.recipe:active{
-
-transform:scale(.98);
-
-}
-
-
-
-.recipe h2{
-
-font-size:17px;
-
-font-weight:750;
-
-margin-bottom:5px;
-
-}
-
-
-
-.recipe p{
-
-font-size:13px;
-
-color:var(--muted);
-
-}
-
-
-
-
+.content { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 90px; }
+.content::-webkit-scrollbar { display: none; }
 
 /* ==========================================================
-INGREDIENTS
-========================================================== */
+   CARDS
+   ========================================================== */
 
-
-.ingredient-row{
-
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-padding:10px 0;
-
-border-bottom:
-
-1px solid var(--border);
-
-font-size:14px;
-
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 15px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .18);
 }
 
-
-
-.ingredient-row:last-child{
-
-border-bottom:none;
-
-}
-
-
-
-.ingredient-row strong{
-
-font-weight:700;
-
-}
-
-
-
-
-
-.setup-list{
-
-padding-left:18px;
-
-}
-
-
-
-.setup-list li{
-
-margin-bottom:8px;
-
-font-size:14px;
-
-color:var(--text);
-
-}
-
-
-
-
-
-.scale-row{
-
-display:flex;
-
-align-items:center;
-
-justify-content:space-between;
-
-gap:12px;
-
-margin-bottom:12px;
-
-}
-
-
-
-.scale-row label{
-
-font-size:14px;
-
-color:var(--muted);
-
-flex:1;
-
-}
-
-
-
-.scale-row input{
-
-width:100px;
-
-}
-
-
-
-
+.card h2 { font-size: 19px; font-weight: 800; margin-bottom: 6px; }
+.card h3 { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; margin-bottom: 12px; }
+.card p { font-size: 14px; }
 
 /* ==========================================================
-SETTINGS
-========================================================== */
+   STATUS
+   ========================================================== */
 
-
-.probe-settings-row{
-
-display:flex;
-
-align-items:center;
-
-gap:8px;
-
-margin-bottom:10px;
-
-}
-
-
-
-.probe-name-input{
-
-flex:1;
-
-height:40px;
-
-background:#0F0D0B;
-
-border:
-
-1px solid var(--border);
-
-border-radius:12px;
-
-color:var(--text);
-
-padding:0 12px;
-
-font-size:14px;
-
-}
-
-
-
-.probe-type-select{
-
-height:40px;
-
-background:#0F0D0B;
-
-border:
-
-1px solid var(--border);
-
-border-radius:12px;
-
-color:var(--text);
-
-padding:0 8px;
-
-font-size:13px;
-
-}
-
-
-
-
+.status { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
 
 /* ==========================================================
-TOGGLE SWITCH
-========================================================== */
+   COOK HEADER
+   ========================================================== */
 
-
-.probe-toggle{
-
-width:52px;
-
-height:28px;
-
-border-radius:20px;
-
-background:#3A332B;
-
-border:none;
-
-position:relative;
-
-flex-shrink:0;
-
-}
-
-
-
-.probe-toggle::after{
-
-content:"";
-
-position:absolute;
-
-width:22px;
-
-height:22px;
-
-top:3px;
-
-left:3px;
-
-border-radius:50%;
-
-background:#fff;
-
-transition:.2s ease;
-
-}
-
-
-
-.probe-toggle.on{
-
-background:var(--accent);
-
-}
-
-
-
-.probe-toggle.on::after{
-
-transform:
-
-translateX(24px);
-
-}
-
-
-
-
+.cook-header { margin-bottom: 14px; }
+.cook-header h2 { font-size: 24px; font-weight: 850; letter-spacing: -.03em; }
+.cook-header p { margin-top: 4px; font-size: 13px; color: var(--muted); }
 
 /* ==========================================================
-BLUETOOTH
-========================================================== */
+   PROBES
+   ========================================================== */
 
+.probe-container { display: flex; flex-direction: column; gap: 10px; }
 
-.bluetooth-status{
-
-font-size:14px;
-
-color:#8fd18f;
-
+.probe-card {
+  background: var(--gradient-card-surface);
+  border-radius: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  min-height: 150px;
 }
 
+.probe-card.ready { border-color: rgba(76, 175, 80, .55); }
+.probe-card.hot { border-color: rgba(255, 107, 26, .55); }
 
+.probe-title { display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 700; }
+.probe-id { font-size: 11px; color: var(--muted); }
 
-.bluetooth-meta{
-
-font-size:12px;
-
-color:var(--muted);
-
-margin-top:5px;
-
+.probe-temperature {
+  font-size: 44px;
+  font-weight: 850;
+  letter-spacing: -.06em;
+  text-align: center;
+  line-height: 1;
+  margin: 10px 0 5px;
+  font-variant-numeric: tabular-nums;
 }
 
-
-
-.bluetooth-error{
-
-color:#ff8f8f;
-
-font-size:13px;
-
-}
-
-
-
-
+.probe-info { text-align: center; font-size: 12px; color: var(--muted); }
 
 /* ==========================================================
-ALERTS / HISTORY
-========================================================== */
+   TEMPERATURE BAR
+   ========================================================== */
 
-
-.alert-item{
-
-padding:10px;
-
-border-radius:12px;
-
-background:#17130F;
-
-margin-bottom:8px;
-
-font-size:13px;
-
-}
-
-
-
-.alert-item strong{
-
-display:block;
-
-margin-bottom:3px;
-
-}
-
-
-
-
+.progress-bar { height: 6px; margin-top: 10px; background: #352D24; border-radius: 20px; overflow: hidden; }
+.progress-value { height: 100%; background: var(--gradient-progress); transition: width .3s ease; }
+.ready .progress-value { background: var(--green); }
 
 /* ==========================================================
-BOTTOM NAVIGATION
-========================================================== */
+   ACTIVE COOK PANEL
+   ========================================================== */
 
-
-.nav{
-
-height:68px;
-
-flex-shrink:0;
-
-display:flex;
-
-justify-content:space-around;
-
-align-items:center;
-
-background:#181410;
-
-border-top:
-
-1px solid var(--border);
-
+/* NOTE: margin-bottom added here so this panel always keeps its own
+   spacing from whatever comes after it (e.g. Probe 2), the same way
+   every other .card already does — regardless of whether this element
+   also carries the .card class in markup. This fixes the "active cook
+   and probe touching" issue. */
+.cook-card {
+  background: var(--gradient-cook);
+  margin-bottom: 12px;
 }
 
+.cook-card h2 { font-size: 22px; margin-bottom: 12px; }
 
+.cook-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cook-info p { background: #17130F; border-radius: 12px; padding: 10px; font-size: 13px; }
+.cook-info strong { display: block; font-size: 17px; margin-top: 3px; }
 
-.nav button{
+.cook-phase { margin-top: 14px; padding: 12px; background: #17130F; border-radius: 14px; }
+.cook-phase strong { font-size: 16px; }
+.cook-timer { font-size: 28px; font-weight: 800; margin-top: 8px; }
+.cook-status { color: #8fd18f; font-size: 13px; margin-bottom: 14px; }
 
-background:none;
+.cook-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.cook-grid div { background: #17130F; padding: 12px; border-radius: 12px; }
+.cook-grid span { display: block; font-size: 12px; color: var(--muted); }
+.cook-grid strong { display: block; font-size: 18px; margin-top: 4px; }
 
-border:none;
+.phase-box { background: #17130F; padding: 14px; border-radius: 14px; margin-bottom: 12px; }
+.phase-box h3 { margin-bottom: 6px; }
 
-color:var(--muted);
-
-font-size:11px;
-
-display:flex;
-
-flex-direction:column;
-
-gap:3px;
-
-align-items:center;
-
-}
-
-
-
-.nav button.active{
-
-color:var(--accent);
-
-font-weight:700;
-
-}
-
-
-
-
+.cook-progress { height: 8px; background: #342B22; border-radius: 20px; overflow: hidden; margin-bottom: 14px; }
+.cook-progress div { height: 100%; background: var(--gradient-progress); }
 
 /* ==========================================================
-INPUTS
-========================================================== */
+   BUTTONS
+   ========================================================== */
 
-
-input,
-select{
-
-font-family:inherit;
-
+.button {
+  height: 48px;
+  width: 100%;
+  border: none;
+  border-radius: 999px;
+  background: var(--gradient-button);
+  color: white;
+  font-size: 15px;
+  font-weight: 750;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: transform .15s ease, opacity .15s ease;
 }
 
-
-
-input{
-
-background:#0F0D0B;
-
-border:
-
-1px solid var(--border);
-
-border-radius:12px;
-
-height:40px;
-
-padding:0 10px;
-
-color:var(--text);
-
-font-size:14px;
-
-}
-
-
-
-input:focus,
-select:focus{
-
-outline:none;
-
-border-color:var(--accent);
-
-}
-
-
-
-
+.button:active { transform: scale(.98); opacity: .85; }
+.button.secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
 
 /* ==========================================================
-LOADING SCREEN
-========================================================== */
+   COOK CONTROLS
+   ========================================================== */
 
-
-.loading{
-
-height:100%;
-
-display:flex;
-
-justify-content:center;
-
-align-items:center;
-
-flex-direction:column;
-
-gap:15px;
-
-}
-
-
-
-.logo{
-
-font-size:58px;
-
-}
-
-
-
-.loading h1{
-
-font-size:26px;
-
-letter-spacing:.1em;
-
-}
-
-
-
-.loading p{
-
-color:var(--muted);
-
-}
-
-
-
-
+.phase-button { background: var(--green); color: white; }
+.stop-button { background: transparent; border: 1px solid rgba(229, 57, 53, .5); color: #ff8a80; }
 
 /* ==========================================================
-MOBILE OPTIMIZATION
-========================================================== */
+   PROGRESS RING SUPPORT
+   ========================================================== */
 
-
-@media(max-height:700px){
-
-.content{
-
-padding-top:12px;
-
+.progress-ring {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: conic-gradient(var(--accent) 0deg, #332A22 0deg);
+  margin: 15px auto;
 }
 
-
-
-.probe-card{
-
-min-height:130px;
-
-padding:10px;
-
+.progress-ring-inner {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: var(--card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 800;
 }
-
-
-
-.probe-temperature{
-
-font-size:38px;
-
-}
-
-
-
-.button{
-
-height:44px;
-
-}
-
-
-
-.cook-header h2{
-
-font-size:21px;
-
-}
-
-}
-
-
 
 /* ==========================================================
-SMOOTH ANIMATIONS
-========================================================== */
+   RECIPES
+   ========================================================== */
 
+.recipe-list { display: flex; flex-direction: column; gap: 10px; }
 
-.card,
-.probe-card,
-.recipe{
-
-transition:
-
-transform .15s ease,
-border-color .2s ease;
-
+.recipe {
+  background: var(--gradient-card-surface);
+  border-radius: 16px;
+  padding: 15px;
+  border: 1px solid var(--border);
+  cursor: pointer;
 }
 
+.recipe:active { transform: scale(.98); }
+.recipe h2 { font-size: 17px; font-weight: 750; margin-bottom: 5px; }
+.recipe p { font-size: 13px; color: var(--muted); }
 
+/* ==========================================================
+   INGREDIENTS
+   ========================================================== */
 
-.card:hover,
-.probe-card:hover,
-.recipe:hover{
+.ingredient-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
 
-border-color:
+.ingredient-row:last-child { border-bottom: none; }
+.ingredient-row strong { font-weight: 700; }
 
-rgba(255,255,255,.15);
+.setup-list { padding-left: 18px; }
+.setup-list li { margin-bottom: 8px; font-size: 14px; color: var(--text); }
 
+.scale-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.scale-row label { font-size: 14px; color: var(--muted); flex: 1; }
+.scale-row input { width: 100px; }
+
+/* ==========================================================
+   SETTINGS
+   ========================================================== */
+
+.probe-settings-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+
+.probe-name-input {
+  flex: 1;
+  height: 40px;
+  background: #0F0D0B;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  padding: 0 12px;
+  font-size: 14px;
+}
+
+.probe-type-select {
+  height: 40px;
+  background: #0F0D0B;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  padding: 0 8px;
+  font-size: 13px;
+}
+
+/* ==========================================================
+   TOGGLE SWITCH
+   ========================================================== */
+
+.probe-toggle { width: 52px; height: 28px; border-radius: 20px; background: #3A332B; border: none; position: relative; flex-shrink: 0; }
+
+.probe-toggle::after {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  top: 3px;
+  left: 3px;
+  border-radius: 50%;
+  background: #fff;
+  transition: .2s ease;
+}
+
+.probe-toggle.on { background: var(--accent); }
+.probe-toggle.on::after { transform: translateX(24px); }
+
+/* ==========================================================
+   BLUETOOTH
+   ========================================================== */
+
+.bluetooth-status { font-size: 14px; color: #8fd18f; }
+.bluetooth-meta { font-size: 12px; color: var(--muted); margin-top: 5px; }
+.bluetooth-error { color: #ff8f8f; font-size: 13px; }
+
+/* ==========================================================
+   ALERTS / HISTORY
+   ========================================================== */
+
+.alert-item { padding: 10px; border-radius: 12px; background: #17130F; margin-bottom: 8px; font-size: 13px; }
+.alert-item strong { display: block; margin-bottom: 3px; }
+
+/* ==========================================================
+   BOTTOM NAVIGATION
+   ========================================================== */
+
+.nav {
+  height: 68px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: #181410;
+  border-top: 1px solid var(--border);
+}
+
+.nav button { background: none; border: none; color: var(--muted); font-size: 11px; display: flex; flex-direction: column; gap: 3px; align-items: center; }
+.nav button.active { color: var(--accent); font-weight: 700; }
+
+/* ==========================================================
+   INPUTS
+   ========================================================== */
+
+input, select { font-family: inherit; }
+
+input {
+  background: #0F0D0B;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  height: 40px;
+  padding: 0 10px;
+  color: var(--text);
+  font-size: 14px;
+}
+
+input:focus, select:focus { outline: none; border-color: var(--accent); }
+
+/* ==========================================================
+   LOADING SCREEN
+   ========================================================== */
+
+.loading { height: 100%; display: flex; justify-content: center; align-items: center; flex-direction: column; gap: 15px; }
+.logo { font-size: 58px; }
+.loading h1 { font-size: 26px; letter-spacing: .1em; }
+.loading p { color: var(--muted); }
+
+/* ==========================================================
+   MOBILE OPTIMIZATION
+   ========================================================== */
+
+@media (max-height: 700px) {
+  .content { padding-top: 12px; }
+  .probe-card { min-height: 130px; padding: 10px; }
+  .probe-temperature { font-size: 38px; }
+  .button { height: 44px; }
+  .cook-header h2 { font-size: 21px; }
+}
+
+/* ==========================================================
+   SMOOTH ANIMATIONS
+   ========================================================== */
+
+.card, .probe-card, .recipe {
+  transition: transform .15s ease, border-color .2s ease;
+}
+
+.card:hover, .probe-card:hover, .recipe:hover {
+  border-color: rgba(255, 255, 255, .15);
 }
