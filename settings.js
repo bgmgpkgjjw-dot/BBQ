@@ -224,7 +224,7 @@ function settingsView(){
                         class="probe-toggle ${p.active ? "on" : ""}"
                         onclick="toggleProbeActive(${p.id})"
                     >
-                        ${p.active ? "Aan" : "Uit"}
+                        ${p.active ? "" : ""}
                     </button>
 
                 </div>
