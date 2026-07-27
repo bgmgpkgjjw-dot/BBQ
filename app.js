@@ -56,40 +56,41 @@ function render() {
 
 
 
-            <div class="nav">
+    <div class="nav">
 
-    <button data-screen="dashboard" onclick="navigate('dashboard')" aria-label="Cook">
+    <button
+        data-screen="dashboard"
+        onclick="navigate('dashboard')"
+        aria-label="Cook">
 
-        <svg viewBox="0 0 24 24" class="nav-icon">
-            <path d="M12 2C10 5 7 8 7 12a5 5 0 0 0 10 0c0-2.6-1.5-4.6-3-6.7-.8-1.1-1.5-2.2-2-3.3z"/>
-        </svg>
-
-    </button>
-
-    <button data-screen="recipes" onclick="navigate('recipes')" aria-label="Recipes">
-
-        <svg viewBox="0 0 24 24" class="nav-icon">
-            <path d="M5 3h11a3 3 0 0 1 3 3v15H8a3 3 0 0 0-3-3V3z"/>
-            <path d="M8 3v15"/>
-        </svg>
+        ${Icons.cook}
 
     </button>
 
-    <button data-screen="history" onclick="navigate('history')" aria-label="History">
+    <button
+        data-screen="recipes"
+        onclick="navigate('recipes')"
+        aria-label="Recipes">
 
-        <svg viewBox="0 0 24 24" class="nav-icon">
-            <polyline points="4,16 9,11 13,14 20,7"/>
-            <line x1="4" y1="20" x2="20" y2="20"/>
-        </svg>
+        ${Icons.recipes}
 
     </button>
 
-    <button data-screen="settings" onclick="navigate('settings')" aria-label="Settings">
+    <button
+        data-screen="history"
+        onclick="navigate('history')"
+        aria-label="History">
 
-        <svg viewBox="0 0 24 24" class="nav-icon">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5h.1a1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1z"/>
-        </svg>
+        ${Icons.history}
+
+    </button>
+
+    <button
+        data-screen="settings"
+        onclick="navigate('settings')"
+        aria-label="Settings">
+
+        ${Icons.settings}
 
     </button>
 
