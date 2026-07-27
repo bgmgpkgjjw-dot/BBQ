@@ -648,11 +648,11 @@ body {
 
    transform: translateX(-50%);
 
-   width: calc(100% - 36px);
+   width: calc(100% - 16px);
 
-   max-width: 420px;
+   max-width: 470px;
 
-   height: 72px;
+   height: 78px;
 
    display: flex;
 
@@ -679,9 +679,9 @@ body {
 
 .nav button {
 
-   width: 54px;
+   width: 58px;
 
-   height: 54px;
+   height: 58px;
 
    border: none;
 
@@ -720,33 +720,27 @@ body {
 
 .nav-icon {
 
-   width: 24px;
+   width: 28px;
 
-   height: 24px;
+   height: 28px;
 
-   fill: none;
+   color: rgba(255, 255, 255, .55);
 
-   stroke: rgba(255, 255, 255, .55);
-
-   stroke-width: 2;
-
-   stroke-linecap: round;
-
-   stroke-linejoin: round;
-
-   transition: .22s;
+   transition:
+      color .25s,
+      transform .25s;
 
 }
 
 .nav button.active .nav-icon {
 
-   stroke: #fff;
+   color: #fff;
 
 }
 
-.nav button:active {
+.nav button:hover .nav-icon {
 
-   transform: scale(.94);
+   transform: scale(1.08);
 
 }
 
