@@ -2,19 +2,18 @@
    Hermanos Grill Companion
    recipes.js
 
-   Receptenoverzicht, receptdetail met schaalfunctie,
-   en het laden van een recept in de actieve cook
+   Receptenoverzicht + detail + schaalfunctie
    ========================================================== */
 
 
-// ---------- Navigatie ----------
+/* ==========================================================
+   NAVIGATIE
+========================================================== */
 
 function selectRecipe(recipeId){
 
     appState.selectedRecipe = recipeId;
-
     appState.recipeScale = 1;
-
     appState.screen = "recipeDetail";
 
     render();
@@ -25,7 +24,6 @@ function selectRecipe(recipeId){
 function backToRecipes(){
 
     appState.selectedRecipe = null;
-
     appState.screen = "recipes";
 
     render();
@@ -33,310 +31,607 @@ function backToRecipes(){
 }
 
 
-// ---------- Schaalfunctie ----------
+/* ==========================================================
+   SCHALEN
+========================================================== */
 
-// Herbereken de schaalfactor op basis van een nieuw aantal porties
-function setServings(recipeId, value){
 
-    const recipe = appState.recipes.find(r => r.id === recipeId);
+function setServings(recipeId,value){
+
+    const recipe = appState.recipes.find(
+        r => r.id === recipeId
+    );
 
     if(!recipe) return;
 
-    const servings = Math.max(1, Number(value) || recipe.baseServings);
 
-    appState.recipeScale = servings / recipe.baseServings;
+    const servings =
+        Math.max(
+            1,
+            Number(value) || recipe.baseServings
+        );
+
+
+    appState.recipeScale =
+        servings / recipe.baseServings;
+
 
     render();
 
 }
 
 
-// Herbereken de schaalfactor op basis van een nieuwe hoeveelheid
-// van het hoofdingrediënt (bv. 3kg schouder -> 2.5kg)
-function setPrimaryAmount(recipeId, value){
 
-    const recipe = appState.recipes.find(r => r.id === recipeId);
+function setPrimaryAmount(recipeId,value){
+
+    const recipe = appState.recipes.find(
+        r => r.id === recipeId
+    );
+
 
     if(!recipe) return;
 
-    const primary = recipe.ingredients.find(i => i.id === recipe.primaryIngredientId);
 
-    if(!primary) return;
+    const ingredient =
+        recipe.ingredients.find(
+            i => i.id === recipe.primaryIngredientId
+        );
 
-    const amount = Math.max(0.01, Number(value) || primary.amount);
 
-    appState.recipeScale = amount / primary.amount;
+    if(!ingredient) return;
+
+
+    const amount =
+        Math.max(
+            0.01,
+            Number(value) || ingredient.amount
+        );
+
+
+    appState.recipeScale =
+        amount / ingredient.amount;
+
 
     render();
 
 }
 
 
-// Geeft de ingrediëntenlijst terug, geschaald met de huidige factor
+
+
 function scaledIngredients(recipe){
 
-    return recipe.ingredients.map(ing => ({
+    return recipe.ingredients.map(i => ({
 
-        ...ing,
+        ...i,
 
-        amount: roundAmount(ing.amount * appState.recipeScale, ing.unit)
+        amount:
+            roundAmount(
+                i.amount * appState.recipeScale,
+                i.unit
+            )
 
     }));
 
 }
 
 
+
+
 function scaledServings(recipe){
 
-    return Math.round(recipe.baseServings * appState.recipeScale);
+    return Math.round(
+        recipe.baseServings *
+        appState.recipeScale
+    );
 
 }
 
 
-// Nette afronding: grammen/ml heel, kg/tbsp/tsp op 1 of 2 decimalen
-function roundAmount(value, unit){
 
-    if(unit === "g" || unit === "ml"){
+
+function roundAmount(value,unit){
+
+
+    if(unit==="g" || unit==="ml"){
 
         return Math.round(value);
 
     }
 
-    if(unit === "kg"){
 
-        return Math.round(value * 100) / 100;
+    if(unit==="kg"){
+
+        return Math.round(value*100)/100;
 
     }
 
-    return Math.round(value * 10) / 10;
+
+    return Math.round(value*10)/10;
 
 }
 
 
-function formatAmount(ing){
 
-    if(!ing.unit){
 
-        return `${ing.amount}x`;
+function formatAmount(item){
+
+
+    if(!item.unit){
+
+        return `${item.amount}x`;
 
     }
 
-    return `${ing.amount} ${ing.unit}`;
+
+    return `${item.amount} ${item.unit}`;
 
 }
 
 
-// ---------- Cook laden ----------
+
+
+/* ==========================================================
+   COOK LADEN
+========================================================== */
+
 
 function loadRecipeIntoCook(recipeId){
 
-    const recipe = appState.recipes.find(r => r.id === recipeId);
+
+    const recipe =
+        appState.recipes.find(
+            r=>r.id===recipeId
+        );
+
 
     if(!recipe) return;
 
-    const scale = appState.recipeScale;
+
 
     appState.cook = {
 
-        active: true,
+        active:true,
 
-        name: recipe.name,
+        name:recipe.name,
 
-        domeTarget: recipe.dome,
+        domeTarget:recipe.dome,
 
-        meatTarget: recipe.target,
+        meatTarget:recipe.target,
 
-        duration: recipe.duration,
+        duration:recipe.duration,
 
-        phase: 0,
+        phase:0,
 
-        phases: recipe.phases,
+        phases:recipe.phases,
 
-        servings: scaledServings(recipe),
-
-        ingredients: scaledIngredients(recipe)
+        servings:
+            scaledServings(recipe)
 
     };
 
-    appState.screen = "dashboard";
+
+
+    appState.screen="dashboard";
+
 
     render();
 
+
 }
 
 
-// ---------- Views ----------
+
+/* ==========================================================
+   RECEPTEN LIJST
+========================================================== */
+
 
 function recipeListView(){
 
+
+    if(!appState.recipes ||
+       !appState.recipes.length){
+
+        return `
+
+        <div class="card">
+
+            <p>
+            Geen recepten beschikbaar.
+            </p>
+
+        </div>
+
+        `;
+
+    }
+
+
+
     return `
+
 
     <div class="recipe-list">
 
-        ${
 
-            appState.recipes.map(r => `
+    ${
 
-                <div class="recipe" onclick="selectRecipe('${r.id}')">
+        appState.recipes.map(recipe=>`
 
-                    <h2>${r.name}</h2>
 
-                    <p>${r.meat} · ${r.dome}°C · ${r.duration}</p>
+        <div class="recipe"
+             onclick="selectRecipe('${recipe.id}')">
 
-                </div>
 
-            `).join("")
+            <h2>
+            ${recipe.name}
+            </h2>
 
-        }
+
+            <p>
+
+            ${recipe.meat}
+            ·
+            ${recipe.dome}°C
+            ·
+            ${recipe.duration}
+
+            </p>
+
+
+        </div>
+
+
+        `).join("")
+
+    }
+
 
     </div>
 
+
     `;
 
+
 }
+
+
+
+
+
+/* ==========================================================
+   DETAIL
+========================================================== */
 
 
 function recipeDetailView(){
 
-    const recipe = appState.recipes.find(r => r.id === appState.selectedRecipe);
+
+    const recipe =
+        appState.recipes.find(
+            r=>r.id===appState.selectedRecipe
+        );
+
+
 
     if(!recipe){
 
-        return `<div class="card"><p>Recept niet gevonden.</p></div>`;
+        return `
+
+        <div class="card">
+
+        <p>
+        Recept niet gevonden.
+        </p>
+
+        </div>
+
+        `;
 
     }
 
-    const ingredients = scaledIngredients(recipe);
 
-    const primary = ingredients.find(i => i.id === recipe.primaryIngredientId);
 
-    const servings = scaledServings(recipe);
+    const ingredients =
+        scaledIngredients(recipe);
+
+
+
+    const primary =
+        ingredients.find(
+            i=>i.id===recipe.primaryIngredientId
+        );
+
+
 
     return `
 
-    <button class="button secondary" style="margin-bottom:16px" onclick="backToRecipes()">
-        ← Terug naar recepten
+
+
+    <button
+    class="button secondary"
+    onclick="backToRecipes()">
+
+    ← Terug
+
     </button>
 
+
+
+
     <div class="card">
 
-        <h2>${recipe.name}</h2>
 
-        <p style="color:var(--muted)">${recipe.meat} · ${recipe.category}</p>
+        <h2>
+        ${recipe.name}
+        </h2>
+
+
+        <p style="color:var(--muted)">
+
+        ${recipe.category}
+
+        </p>
+
 
     </div>
 
+
+
+
+
     <div class="card">
 
-        <h3>Temperatuur &amp; tijd</h3>
 
-        <p>Dome: <strong>${recipe.dome}°C</strong></p>
+        <h3>
+        Instellingen
+        </h3>
 
-        ${recipe.target ? `<p>Kerntemperatuur: <strong>${recipe.target}°C</strong></p>` : ""}
 
-        <p>Duur: <strong>${recipe.duration}</strong></p>
+        <p>
+        Dome:
+        <strong>${recipe.dome}°C</strong>
+        </p>
+
+
+        ${
+        recipe.target
+        ?
+        `
+        <p>
+        Kern:
+        <strong>${recipe.target}°C</strong>
+        </p>
+        `
+        :
+        ""
+        }
+
+
+        <p>
+        Tijd:
+        <strong>${recipe.duration}</strong>
+        </p>
+
 
     </div>
 
+
+
+
+
     <div class="card">
 
-        <h3>Hoeveelheid aanpassen</h3>
 
-        <div class="scale-row">
+    <h3>
+    Hoeveelheid
+    </h3>
 
-            <label>Porties</label>
 
-            <input
-                type="number"
-                min="1"
-                value="${servings}"
-                oninput="setServings('${recipe.id}', this.value)"
-            >
+
+    <div class="scale-row">
+
+
+        <label>
+        Porties
+        </label>
+
+
+        <input
+
+        type="number"
+
+        value="${scaledServings(recipe)}"
+
+        min="1"
+
+        onchange="
+        setServings(
+        '${recipe.id}',
+        this.value
+        )"
+
+        >
+
+
+    </div>
+
+
+
+
+
+    ${
+    primary
+    ?
+    `
+
+    <div class="scale-row">
+
+
+        <label>
+        ${primary.name}
+        </label>
+
+
+        <input
+
+        type="number"
+
+        step="0.1"
+
+        value="${primary.amount}"
+
+        onchange="
+        setPrimaryAmount(
+        '${recipe.id}',
+        this.value
+        )"
+
+        >
+
+
+    </div>
+
+    `
+    :
+    ""
+    }
+
+
+
+    </div>
+
+
+
+
+
+
+
+    <div class="card">
+
+
+    <h3>
+    Ingrediënten
+    </h3>
+
+
+    ${
+    ingredients.map(i=>`
+
+        <div class="ingredient-row">
+
+            <span>
+            ${i.name}
+            </span>
+
+            <strong>
+            ${formatAmount(i)}
+            </strong>
 
         </div>
 
-        ${ primary ? `
 
-        <div class="scale-row">
+    `).join("")
+    }
 
-            <label>${primary.name} (${primary.unit || "st"})</label>
-
-            <input
-                type="number"
-                min="0.01"
-                step="0.1"
-                value="${primary.amount}"
-                oninput="setPrimaryAmount('${recipe.id}', this.value)"
-            >
-
-        </div>
-
-        ` : "" }
 
     </div>
+
+
+
+
+
+
+
 
     <div class="card">
 
-        <h3>Ingrediënten</h3>
 
-        ${
+    <h3>
+    Kamado setup
+    </h3>
 
-            ingredients.map(ing => `
 
-                <div class="ingredient-row">
+    <ol class="setup-list">
 
-                    <span>${ing.name}</span>
 
-                    <strong>${formatAmount(ing)}</strong>
+    ${
+    recipe.setup
+    .map(
+    s=>`<li>${s}</li>`
+    )
+    .join("")
+    }
 
-                </div>
 
-            `).join("")
+    </ol>
 
-        }
 
     </div>
+
+
+
+
+
+
 
     <div class="card">
 
-        <h3>Kamado setup</h3>
 
-        <ol class="setup-list">
+    <h3>
+    Fases
+    </h3>
 
-            ${ recipe.setup.map(step => `<li>${step}</li>`).join("") }
 
-        </ol>
 
-    </div>
+    ${
+    recipe.phases
+    .map(
+    p=>`
 
-    <div class="card">
+    <div class="ingredient-row">
 
-        <h3>Fases</h3>
+        <span>
+        ${p[0]}
+        </span>
 
-        ${
 
-            recipe.phases.map(p => `
-
-                <div class="ingredient-row">
-
-                    <span>${p[0]}</span>
-
-                    <strong>${p[1]}</strong>
-
-                </div>
-
-            `).join("")
-
-        }
+        <strong>
+        ${p[1]}
+        </strong>
 
     </div>
 
-    <button class="button" onclick="loadRecipeIntoCook('${recipe.id}')">
+    `
+    )
+    .join("")
+    }
 
-        🔥 Laad in actieve cook
+
+    </div>
+
+
+
+
+
+
+
+    <button
+
+    class="button"
+
+    onclick="
+    loadRecipeIntoCook('${recipe.id}')
+    ">
+
+    🔥 Start cook
 
     </button>
+
+
 
     `;
+
 
 }
