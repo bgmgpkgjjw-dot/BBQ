@@ -1,723 +1,207 @@
-/* ==========================================================
-   Hermanos Grill Companion
-
-   state.js
-
-   Central application state
-
-   Premium cooking model
-   ========================================================== */
-
-
-
 const appState = {
 
+    screen:"dashboard",
 
+    selectedRecipe:null,
 
-    /*
-    ----------------------------------------------------------
-    APP
-    ----------------------------------------------------------
-    */
-
-
-    screen:
-        "dashboard",
-
-
-
-    version:
-        "2.0",
-
-
-
-
-
-    /*
-    ----------------------------------------------------------
-    BLUETOOTH
-    ----------------------------------------------------------
-    */
+    recipeScale:1,
 
 
     bluetooth:{
 
+        connected:false,
 
-        connected:
-            false,
+        device:null,
 
+        deviceRef:null,
 
-        device:
-            null,
+        battery:null,
 
+        status:"Not connected",
 
-        deviceRef:
-            null,
+        error:"",
 
+        serviceUuid:"0000ffb0-0000-1000-8000-00805f9b34fb",
 
-        status:
-            "Disconnected",
+        characteristicUuid:"0000ffb2-0000-1000-8000-00805f9b34fb",
 
+        lastPayload:"",
 
-        error:
-            "",
-
-
-        battery:
-            null,
-
-
-        lastRawHex:
-            "",
-
-
-        lastPayload:
-            "",
-
-
-        lastUpdatedAt:
-            null,
-
-
-        /*
-        Future BLE settings
-        */
-
-        writeSupported:
-            false,
-
-
-        lastCommand:
-            null
-
+        lastUpdatedAt:null
 
     },
 
 
+    theme:{
 
+        brand:"Hermanos",
 
+        accent:"#C1272D"
 
-
-
-
-    /*
-    ----------------------------------------------------------
-    PROBES
-    ----------------------------------------------------------
-
-    id:
-    internal app id
-
-    bleId:
-    hardware identifier discovered
-    */
-
-
-    probes:[
-
-
-        {
-
-            id:1,
-
-            bleId:null,
-
-            name:
-                "Probe 1",
-
-            type:
-                "unused",
-
-            active:
-                false,
-
-            temperature:
-                null,
-
-
-            history:[],
-
-            connected:
-                false,
-
-
-            alarm:
-                {
-
-                    enabled:false,
-
-                    target:null
-
-                }
-
-
-        },
-
-
-
-        {
-
-            id:2,
-
-            bleId:null,
-
-            name:
-                "Probe 2",
-
-            type:
-                "unused",
-
-            active:
-                false,
-
-            temperature:
-                null,
-
-
-            history:[],
-
-            connected:
-                false,
-
-
-            alarm:
-                {
-
-                    enabled:false,
-
-                    target:null
-
-                }
-
-
-        },
-
-
-
-        {
-
-            id:3,
-
-            bleId:null,
-
-            name:
-                "Probe 3",
-
-            type:
-                "unused",
-
-            active:
-                false,
-
-            temperature:
-                null,
-
-
-            history:[],
-
-            connected:
-                false,
-
-
-            alarm:
-                {
-
-                    enabled:false,
-
-                    target:null
-
-                }
-
-
-        },
-
-
-
-        {
-
-            id:4,
-
-            bleId:null,
-
-            name:
-                "Probe 4",
-
-            type:
-                "unused",
-
-            active:
-                false,
-
-            temperature:
-                null,
-
-
-            history:[],
-
-            connected:
-                false,
-
-
-            alarm:
-                {
-
-                    enabled:false,
-
-                    target:null
-
-                }
-
-
-        },
-
-
-
-        {
-
-            id:5,
-
-            bleId:null,
-
-            name:
-                "Probe 5",
-
-            type:
-                "unused",
-
-            active:
-                false,
-
-            temperature:
-                null,
-
-
-            history:[],
-
-            connected:
-                false,
-
-
-            alarm:
-                {
-
-                    enabled:false,
-
-                    target:null
-
-                }
-
-
-        },
-
-
-
-        {
-
-            id:6,
-
-            bleId:null,
-
-            name:
-                "Probe 6",
-
-            type:
-                "unused",
-
-            active:
-                false,
-
-            temperature:
-                null,
-
-
-            history:[],
-
-            connected:
-                false,
-
-
-            alarm:
-                {
-
-                    enabled:false,
-
-                    target:null
-
-                }
-
-
-        }
-
-
-    ],
-
-
-
-
-
-
-
-
-
-    /*
-    ----------------------------------------------------------
-    COOK SESSION
-    ----------------------------------------------------------
-    */
+    },
 
 
     cook:{
 
+        active:false,
 
-        active:
-            false,
+        name:"",
 
+        startedAt:null,
 
-        name:
-            "",
+        domeTarget:110,
 
+        meatTarget:92,
 
-        recipeId:
-            null,
+        duration:"",
 
+        phase:0,
 
-        startedAt:
-            null,
-
-
-        finishedAt:
-            null,
-
-
-
-        domeTarget:
-            120,
-
-
-        meatTarget:
-            null,
-
-
-
-        status:
-            "idle",
-
-
-        /*
-        possible values:
-
-        idle
-        heating
-        cooking
-        resting
-        finished
-
-        */
-
-
-        notes:
-            "",
-
-
-        durationSeconds:
-            0
-
-
+        phases:[]
 
     },
 
 
+    probes:[
 
+        {
+            id:1,
+            name:"Dome",
+            type:"dome",
+            temperature:null,
+            previousTemperature:null,
+            calibration:0,
+            active:true,
+            icon:"🔥",
+            lastUpdate:null
+        },
 
+        {
+            id:2,
+            name:"Vlees",
+            type:"meat",
+            temperature:null,
+            previousTemperature:null,
+            calibration:0,
+            active:true,
+            icon:"🥩",
+            lastUpdate:null
+        },
 
+        {
+            id:3,
+            name:"Probe 3",
+            type:"unused",
+            temperature:null,
+            previousTemperature:null,
+            calibration:0,
+            active:false,
+            icon:"🌡️",
+            lastUpdate:null
+        },
 
+        {
+            id:4,
+            name:"Probe 4",
+            type:"unused",
+            temperature:null,
+            previousTemperature:null,
+            calibration:0,
+            active:false,
+            icon:"🌡️",
+            lastUpdate:null
+        },
 
+        {
+            id:5,
+            name:"Probe 5",
+            type:"unused",
+            temperature:null,
+            previousTemperature:null,
+            calibration:0,
+            active:false,
+            icon:"🌡️",
+            lastUpdate:null
+        },
 
+        {
+            id:6,
+            name:"Probe 6",
+            type:"unused",
+            temperature:null,
+            previousTemperature:null,
+            calibration:0,
+            active:false,
+            icon:"🌡️",
+            lastUpdate:null
+        }
 
-    /*
-    ----------------------------------------------------------
-    COOK HISTORY
-    ----------------------------------------------------------
-    */
+    ],
 
 
     history:{
 
+        enabled:true,
 
-        sessions:[]
+        maxPoints:120,
 
+        data:{
 
+            1:[],
+            2:[],
+            3:[],
+            4:[],
+            5:[],
+            6:[]
+
+        }
 
     },
 
 
+    alerts:{
 
+        enabled:true,
 
+        meatTemperature:65,
 
+        domeDeviation:8,
 
+        history:[]
 
-
-    /*
-    ----------------------------------------------------------
-    RECIPES
-    ----------------------------------------------------------
-    */
-
-
-    selectedRecipe:
-        null,
-
-
-
-
-
-
-
-
-
-    /*
-    ----------------------------------------------------------
-    SETTINGS
-    ----------------------------------------------------------
-    */
+    },
 
 
     settings:{
 
+        notifications:true,
 
-        temperatureUnit:
-            "C",
+        temperatureUnit:"C",
 
+        firstRun:false,
 
-        notifications:
-            true,
+        compactProbeCards:true,
 
+        showHistory:true,
 
-        sound:
-            true,
-
-
-        keepScreenAwake:
-            true
-
-
+        animations:true
 
     }
-
-
 
 };
 
 
 
 
+function updateState(callback){
+
+    callback(appState);
 
 
+    if(typeof render==="function"){
 
-
-
-/*
-==============================================================
-HELPER FUNCTIONS
-==============================================================
-*/
-
-
-
-
-
-function updateProbeTemperature(
-    probeId,
-    temperature
-){
-
-
-    const probe =
-        appState.probes.find(
-            p=>p.id===probeId
-        );
-
-
-    if(!probe){
-        return;
-    }
-
-
-
-    probe.temperature =
-        temperature;
-
-
-    probe.connected =
-        true;
-
-
-
-    /*
-    Save temperature history
-
-    Maximum:
-    one point every update
-    later we can throttle this
-    */
-
-
-    probe.history.push({
-
-        time:
-            Date.now(),
-
-        temperature
-
-    });
-
-
-
-    /*
-    Keep last 500 points
-    */
-
-
-    if(
-        probe.history.length > 500
-    ){
-
-        probe.history.shift();
+        render();
 
     }
-
-
-
-}
-
-
-
-
-
-
-
-
-
-function resetProbe(
-    probeId
-){
-
-
-    const probe =
-        appState.probes.find(
-            p=>p.id===probeId
-        );
-
-
-    if(!probe){
-        return;
-    }
-
-
-
-    probe.temperature =
-        null;
-
-
-    probe.connected =
-        false;
-
-
-}
-
-
-
-
-
-
-
-
-
-function startCook(
-    name,
-    recipeId=null
-){
-
-
-    appState.cook.active =
-        true;
-
-
-    appState.cook.name =
-        name;
-
-
-    appState.cook.recipeId =
-        recipeId;
-
-
-    appState.cook.startedAt =
-        Date.now();
-
-
-    appState.cook.status =
-        "heating";
-
-
-}
-
-
-
-
-
-
-
-
-
-function finishCook(){
-
-
-    appState.cook.finishedAt =
-        Date.now();
-
-
-    appState.cook.active =
-        false;
-
-
-    appState.cook.status =
-        "finished";
-
-
-}
-
-
-
-
-
-
-
-
-
-function getCookDuration(){
-
-
-    if(
-        !appState.cook.startedAt
-    ){
-
-        return 0;
-
-    }
-
-
-
-    return Math.floor(
-
-        (
-            Date.now()
-            -
-            appState.cook.startedAt
-        )
-        /
-        1000
-
-    );
-
 
 }
