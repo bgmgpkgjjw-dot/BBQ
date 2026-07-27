@@ -13,13 +13,20 @@ const BLE = {
 
     NOTIFY: "0000ffb2-0000-1000-8000-00805f9b34fb",
 
+
     device: null,
     server: null,
     service: null,
 
     writeCharacteristic: null,
-    notifyCharacteristic: null
+    notifyCharacteristic: null,
+
+
+    // Used later when we decode probe identity
+    lastActiveProbe: null
 };
+
+
 
 
 
@@ -27,21 +34,31 @@ function onBluetoothDisconnected(){
 
     console.log("Bluetooth verbroken");
 
+
     appState.bluetooth.connected = false;
     appState.bluetooth.status = "Disconnected";
-    appState.bluetooth.error = "Bluetooth connection lost.";
+    appState.bluetooth.error =
+        "Bluetooth connection lost.";
+
 
     render();
+
 }
+
+
+
+
 
 
 
 
 function handleBluetoothNotification(event){
 
+
     const value = event.target.value;
 
     const bytes = new Uint8Array(value.buffer);
+
 
 
     const hex = Array.from(bytes)
@@ -49,9 +66,13 @@ function handleBluetoothNotification(event){
         .join(" ");
 
 
+
+
     appState.bluetooth.lastRawHex = hex;
     appState.bluetooth.lastPayload = hex;
-    appState.bluetooth.lastUpdatedAt = new Date().toISOString();
+    appState.bluetooth.lastUpdatedAt =
+        new Date().toISOString();
+
 
 
     console.log("--------------------------------");
@@ -62,122 +83,207 @@ function handleBluetoothNotification(event){
 
 
     /*
-        Expected packet:
+        Packet format discovered:
 
-        55 00 xx FD 01 xx
-        TT TT TT TT TT TT
-        TT = temperature * 10
+        Header:
 
-        Probe data starts at byte 6
+        byte 0:
+        55
+
+        byte 1:
+        00
+
+
+        Status packets:
+
+        55 00 xx xx xx xx FF FF FF FF FF FF FF FF 00
+
+
+        Temperature packets:
+
+        55 00 FF FF FF FF TT TT FF FF FF FF FF FF 00
+
+
+        Temperature:
+
+        TT TT = BIG ENDIAN
+
+        Example:
+
+        01 16
+
+        = 278
+
+        = 27.8°C
     */
 
 
-    const probeStart = 6;
 
 
-    let decodedAny = false;
+
+    /*
+        Ignore status packets
+
+        These contain probe/channel information
+        but no temperature.
+    */
 
 
-    for(let i = 0; i < 6; i++){
-
-
-        const offset = probeStart + (i * 2);
-
-
-        if(offset + 1 >= bytes.length){
-            continue;
-        }
-
-
-        const raw =
-            bytes[offset] |
-            (bytes[offset + 1] << 8);
-
+    if(bytes[2] !== 0xFF){
 
 
         console.log(
-            "BLE Channel",
-            i + 1,
-            "raw:",
-            raw
+            "Status packet:",
+            bytes[2],
+            bytes[3],
+            bytes[4],
+            bytes[5]
         );
 
 
-
-        // disconnected probe
-        if(raw === 0xFFFF){
-
-            console.log(
-                "Channel",
-                i + 1,
-                "not connected"
-            );
-
-            continue;
-        }
-
-
-
-        if(raw === 0){
-
-            continue;
-        }
-
-
-
-        const temperature = raw / 10;
-
+        BLE.lastActiveProbe =
+            bytes[3];
 
 
         console.log(
-            "Channel",
-            i + 1,
-            "temperature:",
-            temperature,
-            "°C"
+            "Stored probe identifier:",
+            BLE.lastActiveProbe
         );
 
 
-
-        /*
-            Temporary mapping:
-            BLE channel 1 -> App probe 1
-            BLE channel 2 -> App probe 2
-            ...
-            BLE channel 6 -> App probe 6
-
-            We can adjust after testing.
-        */
-
-
-        const probe = appState.probes[i];
-
-
-        if(probe){
-
-            probe.temperature = temperature;
-
-            decodedAny = true;
-        }
+        return;
 
     }
 
 
 
-    if(!decodedAny){
 
-        console.warn(
-            "No valid temperatures decoded"
+
+
+    /*
+        Temperature starts at byte 6
+    */
+
+
+    const raw =
+        (bytes[6] << 8) |
+        bytes[7];
+
+
+
+    console.log(
+        "Temperature raw:",
+        raw
+    );
+
+
+
+
+    /*
+        No probe connected
+    */
+
+
+    if(raw === 0xFFFF || raw === 0){
+
+
+        console.log(
+            "No valid temperature"
+        );
+
+
+        return;
+
+    }
+
+
+
+
+
+    const temperature =
+        raw / 10;
+
+
+
+    console.log(
+        "Temperature:",
+        temperature,
+        "°C"
+    );
+
+
+
+
+
+
+    /*
+        Temporary mapping
+
+        Until we identify the real probe ID,
+        put temperature on first free probe.
+
+        This avoids wrong 6000°C values.
+    */
+
+
+    let targetProbe = null;
+
+
+
+    if(BLE.lastActiveProbe){
+
+
+        console.log(
+            "Possible probe ID:",
+            BLE.lastActiveProbe
         );
 
     }
+
+
+
+
+
+    targetProbe =
+        appState.probes.find(
+            p =>
+                p.temperature === null ||
+                p.temperature === undefined
+        );
+
+
+
+    if(!targetProbe){
+
+        targetProbe =
+            appState.probes[0];
+
+    }
+
+
+
+
+    if(targetProbe){
+
+
+        targetProbe.temperature =
+            temperature;
+
+
+    }
+
+
+
 
 
     updateLiveUi();
 
     render();
 
+
 }
+
+
 
 
 
@@ -206,6 +312,7 @@ async function connectBluetooth(){
                     }
                 ],
 
+
                 optionalServices: [
 
                     BLE.SERVICE,
@@ -226,10 +333,15 @@ async function connectBluetooth(){
 
 
 
+
+
         BLE.device.addEventListener(
             "gattserverdisconnected",
             onBluetoothDisconnected
         );
+
+
+
 
 
 
@@ -244,10 +356,17 @@ async function connectBluetooth(){
 
 
 
+
+
+
         BLE.service =
             await BLE.server.getPrimaryService(
                 BLE.SERVICE
             );
+
+
+
+
 
 
 
@@ -258,6 +377,9 @@ async function connectBluetooth(){
 
 
 
+
+
+
         BLE.notifyCharacteristic =
             await BLE.service.getCharacteristic(
                 BLE.NOTIFY
@@ -265,14 +387,25 @@ async function connectBluetooth(){
 
 
 
-        await BLE.notifyCharacteristic.startNotifications();
 
 
 
-        BLE.notifyCharacteristic.addEventListener(
-            "characteristicvaluechanged",
-            handleBluetoothNotification
-        );
+        await BLE.notifyCharacteristic
+            .startNotifications();
+
+
+
+
+
+
+        BLE.notifyCharacteristic
+            .addEventListener(
+                "characteristicvaluechanged",
+                handleBluetoothNotification
+            );
+
+
+
 
 
 
@@ -282,19 +415,29 @@ async function connectBluetooth(){
 
 
 
+
+
+
+
         appState.bluetooth.device =
-            BLE.device.name || "Bluetooth device";
+            BLE.device.name ||
+            "Bluetooth device";
+
 
 
         appState.bluetooth.deviceRef =
             BLE.device;
 
 
-        appState.bluetooth.connected = true;
+
+        appState.bluetooth.connected =
+            true;
+
 
 
         appState.bluetooth.status =
             "Connected";
+
 
 
         appState.bluetooth.error =
@@ -306,21 +449,34 @@ async function connectBluetooth(){
 
 
 
+
     }
     catch(error){
+
 
 
         console.error(error);
 
 
-        appState.bluetooth.connected = false;
 
-        appState.bluetooth.device = null;
+        appState.bluetooth.connected =
+            false;
 
-        appState.bluetooth.deviceRef = null;
+
+
+        appState.bluetooth.device =
+            null;
+
+
+
+        appState.bluetooth.deviceRef =
+            null;
+
+
 
         appState.bluetooth.status =
             "Connection failed";
+
 
 
         appState.bluetooth.error =
@@ -328,11 +484,15 @@ async function connectBluetooth(){
             "Bluetooth connection failed.";
 
 
+
         render();
+
 
     }
 
 }
+
+
 
 
 
@@ -350,8 +510,10 @@ async function sendCommand(bytes){
     }
 
 
-    await BLE.writeCharacteristic.writeValue(
-        new Uint8Array(bytes)
-    );
+
+    await BLE.writeCharacteristic
+        .writeValue(
+            new Uint8Array(bytes)
+        );
 
 }
