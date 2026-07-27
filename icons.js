@@ -13,15 +13,23 @@ const Icons = {
 <svg class="nav-icon"
 viewBox="0 0 24 24">
 
-<path d="M4 12h16"/>
+<!-- Kamado dome -->
+<path d="M3 13a9 9 0 0 1 18 0"/>
 
-<path d="M5 12v5a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-5"/>
+<!-- base -->
+<path d="M5 13h14"/>
 
-<path d="M7 12a5 5 0 0 1 10 0"/>
+<path d="M6 13v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4"/>
 
-<path d="M9 7h6"/>
+<!-- thermometer / heat indicator -->
+<path d="M12 5v3"/>
 
-<path d="M12 4v3"/>
+<circle cx="12" cy="4" r="1"/>
+
+<!-- small heat lines -->
+<path d="M8 9c0-1 1-2 2-3"/>
+
+<path d="M16 9c0-1-1-2-2-3"/>
 
 </svg>
 
@@ -55,13 +63,18 @@ viewBox="0 0 24 24">
 <svg class="nav-icon"
 viewBox="0 0 24 24">
 
-<path d="M4 18V6"/>
+<!-- journal -->
+<path d="M6 3h11a2 2 0 0 1 2 2v16H8a2 2 0 0 0-2-2V3z"/>
 
-<path d="M4 18h16"/>
+<path d="M8 3v16"/>
 
-<polyline points="7 15 11 11 14 13 19 7"/>
+<!-- temperature trace -->
+<path d="M11 15l2-3 2 2 2-4"/>
 
-<circle cx="19" cy="7" r="1"/>
+<!-- small thermometer -->
+<path d="M12 8v3"/>
+
+<circle cx="12" cy="12" r="1"/>
 
 </svg>
 
