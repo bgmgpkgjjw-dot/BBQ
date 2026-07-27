@@ -117,7 +117,10 @@ html, body {
    PROBES
    ========================================================== */
 
-.probe-container { display: flex; flex-direction: column; gap: 10px; }
+/* margin-bottom added so this always spaces itself from whatever
+   sibling follows (e.g. the active cook panel), matching the same
+   12px rhythm every .card already uses */
+.probe-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
 
 .probe-card {
   background: var(--gradient-card-surface);
