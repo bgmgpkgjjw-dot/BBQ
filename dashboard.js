@@ -141,11 +141,17 @@ function formatElapsedTime() {
 
 function renderCookPanel() {
     if (!appState.cook.active) {
-        return `
+    return `
       <div class="card cook-card">
-        <h3>🔥 Actieve cook</h3>
-        <p style="color:var(--muted)">Geen actieve cook</p>
-        <button class="button secondary" onclick="startManualCook()">Start nieuwe cook</button>
+
+        <h3>
+        🔥 Actieve cook
+        </h3>
+
+        <p style="color:var(--muted)">
+        Geen actieve cook
+        </p>
+
       </div>
     `;
     }
@@ -219,8 +225,8 @@ function dashboardView() {
 
     ${renderCookPanel()}
 
-    <button class="button secondary" onclick="navigate('recipes')">🍖 Kies een recept</button>
-    <button class="button" onclick="startManualCook()">🔥 Start nieuwe cook</button>
+    <button class="button" onclick="navigate('recipes')">  Kies een recept</button>
+    <button class="button" onclick="startManualCook()"> Start nieuwe cook</button>
   `;
 }
 
