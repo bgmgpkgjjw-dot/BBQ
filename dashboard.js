@@ -357,13 +357,60 @@ Geen actieve probes
 
 <button
 class="button"
+onclick="startManualCook()">
+
+🔥 Start nieuwe cook
+
+</button>
+
+
+<br>
+
+
+<button
+class="button secondary"
 onclick="navigate('recipes')">
 
-🍖 Kies recept
+🍖 Kies een recept
 
 </button>
 
 
 `;
+
+}
+
+function startManualCook(){
+
+
+    appState.cook.active = true;
+
+
+    appState.cook.name =
+        "Nieuwe cook";
+
+
+    appState.cook.domeTarget =
+        110;
+
+
+    appState.cook.meatTarget =
+        null;
+
+
+    appState.cook.duration =
+        "";
+
+
+    appState.cook.phase = 0;
+
+
+    appState.cook.phases = [];
+
+
+    appState.screen="dashboard";
+
+
+    render();
 
 }
