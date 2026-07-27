@@ -95,11 +95,8 @@ const appState = {
             id: 1,
 
             name: "Dome",
-
             type: "dome",
-
-            temperature: 112,
-
+            temperature: null,
             active: true
 
         },
@@ -110,11 +107,8 @@ const appState = {
             id: 2,
 
             name: "Vlees",
-
             type: "meat",
-
-            temperature: 67,
-
+            temperature: null,
             active: true
 
         },
