@@ -351,7 +351,89 @@ Geen actieve probes
 
 </div>
 
+<div class="card cook-card">
 
+
+<h3>
+🔥 Actieve cook
+</h3>
+
+
+${
+appState.cook.active
+
+?
+
+`
+
+<h2>
+${appState.cook.name}
+</h2>
+
+
+<div class="cook-info">
+
+<p>
+🌡 Dome:
+<strong>
+${appState.cook.domeTarget}°C
+</strong>
+</p>
+
+
+<p>
+🥩 Kern:
+<strong>
+${appState.cook.meatTarget || "—"}°C
+</strong>
+</p>
+
+
+<p>
+⏱ Duur:
+<strong>
+${appState.cook.duration || "—"}
+</strong>
+</p>
+
+
+</div>
+
+
+<button 
+class="button secondary"
+onclick="stopCook()">
+
+Stop cook
+
+</button>
+
+
+`
+
+:
+
+`
+
+<p style="color:var(--muted)">
+Geen actieve cook
+</p>
+
+
+<button 
+class="button secondary"
+onclick="navigate('recipes')">
+
+Kies recept
+
+</button>
+
+`
+
+}
+
+
+</div>
 
 
 
@@ -410,6 +492,18 @@ function startManualCook(){
 
     appState.screen="dashboard";
 
+
+    render();
+
+}
+
+function stopCook(){
+
+    appState.cook.active = false;
+
+    appState.cook.name = "";
+
+    appState.cook.phases = [];
 
     render();
 

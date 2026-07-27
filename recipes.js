@@ -189,67 +189,43 @@ function formatAmount(item){
 
 function loadRecipeIntoCook(recipeId){
 
-
-    console.log(
-        "Starting cook:",
-        recipeId
+    const recipe = appState.recipes.find(
+        r => r.id === recipeId
     );
-
-
-    const recipe =
-        appState.recipes.find(
-            r => r.id === recipeId
-        );
 
 
     if(!recipe){
 
-        console.error(
-            "Recipe not found",
-            recipeId
-        );
-
+        console.error("Recipe not found:", recipeId);
         return;
 
     }
 
 
+    appState.cook.active = true;
 
-    Object.assign(
-        appState.cook,
-        {
+    appState.cook.name = recipe.name;
 
-            active:true,
+    appState.cook.domeTarget = recipe.dome;
 
-            name:recipe.name,
+    appState.cook.meatTarget = recipe.target;
 
-            domeTarget:recipe.dome,
+    appState.cook.duration = recipe.duration;
 
-            meatTarget:recipe.target,
+    appState.cook.phase = 0;
 
-            duration:recipe.duration,
+    appState.cook.phases = recipe.phases || [];
 
-            phase:0,
-
-            phases:recipe.phases || [],
-
-            servings:
-                scaledServings(recipe),
-
-            startedAt:
-                new Date().toISOString()
-
-        }
-
-    );
-
+    appState.cook.startedAt = new Date();
 
 
     appState.screen = "dashboard";
 
 
-    render();
+    console.log("Cook started:", appState.cook);
 
+
+    render();
 
 }
 
