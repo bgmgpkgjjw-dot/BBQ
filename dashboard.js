@@ -6,12 +6,27 @@
    ========================================================== */
 
 
+function formatTemperatureValue(value){
+
+    if(value === null || value === undefined || Number.isNaN(Number(value))){
+        return "—";
+    }
+
+    return `${Math.round(Number(value))}°`;
+
+}
+
+
 function updateLiveUi(){
 
     const statusEl = document.querySelector("[data-live-status]");
 
     if(statusEl){
-        statusEl.textContent = `${appState.bluetooth.connected ? "🟢" : "🔴"} ${appState.bluetooth.device || "Geen apparaat"} · Batterij ${Math.round(appState.bluetooth.battery)}%`;
+        const batteryText = appState.bluetooth.battery === null || appState.bluetooth.battery === undefined
+            ? "Batterij —%"
+            : `Batterij ${Math.round(appState.bluetooth.battery)}%`;
+
+        statusEl.textContent = `${appState.bluetooth.connected ? "🟢" : "🔴"} ${appState.bluetooth.device || "Geen apparaat"} · ${appState.bluetooth.connected ? batteryText : "Wacht op Bluetooth-data"}`;
     }
 
 
@@ -21,7 +36,7 @@ function updateLiveUi(){
         const probe = appState.probes.find(p => p.id === probeId);
 
         if(probe){
-            el.textContent = `${Math.round(probe.temperature)}°`;
+            el.textContent = formatTemperatureValue(probe.temperature);
         }
 
     });
@@ -75,7 +90,7 @@ function dashboardView(){
 
                     <div class="temp" data-probe-temperature data-probe-id="${p.id}">
 
-                        ${Math.round(p.temperature)}°
+                        ${formatTemperatureValue(p.temperature)}
 
                     </div>
 
@@ -136,7 +151,7 @@ function dashboardView(){
 
                         <div class="temp" style="font-size:36px" data-probe-temperature data-probe-id="${p.id}">
 
-                            ${Math.round(p.temperature)}°
+                            ${formatTemperatureValue(p.temperature)}
 
                         </div>
 

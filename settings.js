@@ -7,13 +7,8 @@
 
 
 // Startwaarde voor een sonde die net actief wordt en nog geen meting heeft
+// We tonen geen valse waarden meer; de UI blijft neutral tot er een echte meting binnenkomt.
 function defaultStartTemperature(type){
-
-    if(type === "dome") return 20;
-
-    if(type === "meat") return 15;
-
-    if(type === "ambient") return 20;
 
     return null;
 

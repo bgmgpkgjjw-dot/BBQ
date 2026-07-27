@@ -231,6 +231,7 @@ function rerenderPreservingScroll(){
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
+            .then(registration => registration.update())
             .catch(err => console.error('Service worker registration failed:', err));
     });
 }
