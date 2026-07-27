@@ -1,59 +1,89 @@
 /* ==========================================================
    Hermanos Grill Companion
+
    styles.css
+
+   Premium BBQ Theme
    ========================================================== */
+
 
 :root{
 
---bg:#0B0906;
---surface:#16130F;
---card:#211C16;
+--bg:#090807;
+--surface:#12100E;
+--card:#1B1713;
 
---text:#EDE6D6;
---muted:#8A8175;
+--text:#F3EBDD;
+--muted:#988D7D;
 
---accent:#C1272D;
---accent-soft:rgba(193,39,45,.18);
+--accent:#FF6B1A;
+--accent-soft:rgba(255,107,26,.18);
 
---smoke:#6FA8A0;
+--green:#4CAF50;
+--yellow:#FFC107;
+--red:#D32F2F;
 
---radius:18px;
+--border:rgba(255,255,255,.08);
+
+--radius:22px;
 
 --shadow:
-0 18px 40px rgba(0,0,0,.45);
+0 20px 50px rgba(0,0,0,.55);
 
 }
 
+
+
 *{
+
 margin:0;
 padding:0;
 box-sizing:border-box;
+
 }
+
+
 
 html{
 
 height:100%;
-
 background:var(--bg);
 
 }
+
+
 
 body{
 
 height:100%;
 
-background:var(--bg);
+background:
+
+radial-gradient(
+circle at top,
+rgba(255,107,26,.12),
+transparent 35%
+),
+
+var(--bg);
+
 
 font-family:
+
 Inter,
 system-ui,
 sans-serif;
+
 
 color:var(--text);
 
 overflow:hidden;
 
 }
+
+
+
+
 
 #app{
 
@@ -65,31 +95,32 @@ justify-content:center;
 
 align-items:center;
 
-padding:20px;
+padding:0;
 
 }
 
+
+
+
+
 /* ==========================================================
-PHONE
+PHONE / APP CONTAINER
 ========================================================== */
+
 
 .phone{
 
-width:380px;
+width:100%;
 
-height:780px;
+height:100%;
+
+max-width:480px;
 
 background:var(--surface);
-
-border-radius:42px;
 
 overflow:hidden;
 
 position:relative;
-
-box-shadow:var(--shadow);
-
-border:6px solid #000;
 
 display:flex;
 
@@ -97,31 +128,24 @@ flex-direction:column;
 
 }
 
+
+
+
+
 .notch{
 
-position:absolute;
-
-top:0;
-
-left:50%;
-
-transform:translateX(-50%);
-
-width:160px;
-
-height:34px;
-
-background:#000;
-
-border-radius:0 0 18px 18px;
-
-z-index:50;
+display:none;
 
 }
+
+
+
+
 
 /* ==========================================================
 TOPBAR
 ========================================================== */
+
 
 .topbar{
 
@@ -133,27 +157,34 @@ display:flex;
 
 align-items:center;
 
-justify-content:space-between;
+border-bottom:
 
-border-bottom:1px solid rgba(255,255,255,.06);
+1px solid var(--border);
 
 }
+
+
 
 .topbar h1{
 
 font-size:18px;
 
-font-weight:700;
+font-weight:800;
 
-letter-spacing:.05em;
+letter-spacing:.08em;
 
 text-transform:uppercase;
 
 }
 
+
+
+
+
 /* ==========================================================
 CONTENT
 ========================================================== */
+
 
 .content{
 
@@ -161,9 +192,11 @@ flex:1;
 
 overflow:auto;
 
-padding:24px;
+padding:20px;
 
 }
+
+
 
 .content::-webkit-scrollbar{
 
@@ -171,9 +204,14 @@ display:none;
 
 }
 
+
+
+
+
 /* ==========================================================
 CARDS
 ========================================================== */
+
 
 .card{
 
@@ -181,45 +219,296 @@ background:var(--card);
 
 border-radius:var(--radius);
 
-padding:18px;
+padding:20px;
 
 margin-bottom:18px;
 
-border:1px solid rgba(255,255,255,.05);
+border:
+
+1px solid var(--border);
 
 }
+
+
 
 .card h2{
 
-font-size:17px;
+font-size:20px;
 
-margin-bottom:12px;
+margin-bottom:10px;
 
 }
 
+
+
 .card h3{
 
-font-size:14px;
-
-margin-bottom:10px;
+font-size:13px;
 
 color:var(--muted);
 
 text-transform:uppercase;
 
-letter-spacing:.08em;
+letter-spacing:.12em;
 
 }
+
+
+
+
+
+/* ==========================================================
+STATUS
+========================================================== */
+
+
+.status{
+
+font-size:13px;
+
+color:#8fd18f;
+
+margin-bottom:18px;
+
+}
+
+
+
+
+
+/* ==========================================================
+COOK HEADER
+========================================================== */
+
+
+.cook-header{
+
+margin-bottom:22px;
+
+}
+
+
+
+.cook-header h2{
+
+font-size:28px;
+
+font-weight:800;
+
+letter-spacing:-.03em;
+
+}
+
+
+
+.cook-header p{
+
+color:var(--muted);
+
+margin-top:5px;
+
+}
+
+
+
+
+
+/* ==========================================================
+PROBES
+========================================================== */
+
+
+.probe-container{
+
+display:flex;
+
+flex-direction:column;
+
+gap:16px;
+
+}
+
+
+
+
+
+.probe-card{
+
+background:var(--card);
+
+border-radius:26px;
+
+padding:22px;
+
+border:
+
+1px solid var(--border);
+
+transition:.2s;
+
+}
+
+
+
+
+
+.probe-card.ready{
+
+border-color:
+
+rgba(76,175,80,.5);
+
+}
+
+
+
+.probe-card.hot{
+
+border-color:
+
+rgba(255,107,26,.5);
+
+}
+
+
+
+
+
+.probe-header{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+font-size:17px;
+
+font-weight:700;
+
+}
+
+
+
+
+
+.probe-number{
+
+font-size:12px;
+
+color:var(--muted);
+
+}
+
+
+
+
+
+.big-temperature{
+
+font-size:86px;
+
+font-weight:900;
+
+letter-spacing:-.07em;
+
+line-height:1;
+
+text-align:center;
+
+margin:
+
+18px 0;
+
+}
+
+
+
+
+
+.probe-target{
+
+text-align:center;
+
+color:var(--muted);
+
+font-size:14px;
+
+}
+
+
+
+
+
+/* ==========================================================
+PROGRESS
+========================================================== */
+
+
+.progress-bar{
+
+height:10px;
+
+background:#332B23;
+
+border-radius:20px;
+
+overflow:hidden;
+
+margin-top:18px;
+
+}
+
+
+
+.progress-value{
+
+height:100%;
+
+background:
+
+linear-gradient(
+90deg,
+var(--accent),
+#FFB347
+);
+
+border-radius:20px;
+
+transition:
+
+width .5s ease;
+
+}
+
+
+
+.ready .progress-value{
+
+background:
+
+linear-gradient(
+90deg,
+#4CAF50,
+#8BC34A
+);
+
+}
+
+
+
+
 
 /* ==========================================================
 BUTTONS
 ========================================================== */
 
+
 .button{
 
 width:100%;
 
-height:54px;
+height:58px;
 
 border:none;
 
@@ -229,21 +518,17 @@ background:var(--accent);
 
 color:white;
 
-font-size:16px;
+font-size:17px;
 
-font-weight:700;
+font-weight:800;
 
 cursor:pointer;
 
-transition:.25s;
+margin-top:10px;
 
 }
 
-.button:hover{
 
-transform:translateY(-2px);
-
-}
 
 .button:active{
 
@@ -251,159 +536,79 @@ transform:scale(.98);
 
 }
 
+
+
 .button.secondary{
 
 background:transparent;
 
-border:1px solid rgba(255,255,255,.12);
+border:
+
+1px solid var(--border);
 
 }
 
-/* ==========================================================
-TEMPERATURE
-========================================================== */
 
-.temp{
 
-font-size:72px;
 
-font-weight:700;
 
-text-align:center;
+.button:disabled{
 
-font-family:monospace;
-
-line-height:1;
+opacity:.5;
 
 }
 
-.label{
 
-text-align:center;
 
-color:var(--muted);
 
-margin-top:6px;
-
-text-transform:uppercase;
-
-font-size:12px;
-
-letter-spacing:.12em;
-
-}
-
-/* ==========================================================
-GAUGE
-========================================================== */
-
-.gauge{
-
-width:240px;
-
-height:240px;
-
-margin:0 auto 26px;
-
-border-radius:50%;
-
-border:14px solid #2a241d;
-
-display:flex;
-
-justify-content:center;
-
-align-items:center;
-
-position:relative;
-
-}
-
-.gauge::after{
-
-content:"";
-
-position:absolute;
-
-inset:-14px;
-
-border-radius:50%;
-
-border:14px solid var(--smoke);
-
-clip-path:polygon(0 0,100% 0,100% 40%,0 40%);
-
-opacity:.85;
-
-}
-
-/* ==========================================================
-STATUS
-========================================================== */
-
-.status{
-
-display:flex;
-
-align-items:center;
-
-gap:8px;
-
-font-size:13px;
-
-color:var(--smoke);
-
-margin-bottom:16px;
-
-}
 
 /* ==========================================================
 RECIPES
 ========================================================== */
 
+
 .recipe{
-
-padding:16px;
-
-border-radius:16px;
 
 background:var(--card);
 
+border-radius:18px;
+
+padding:18px;
+
 margin-bottom:14px;
 
-cursor:pointer;
+border:
 
-transition:.2s;
-
-border:1px solid rgba(255,255,255,.05);
+1px solid var(--border);
 
 }
 
-.recipe:hover{
 
-transform:translateY(-2px);
-
-}
 
 .recipe h2{
 
-font-size:16px;
-
-margin-bottom:6px;
+font-size:18px;
 
 }
+
+
 
 .recipe p{
 
-font-size:13px;
-
 color:var(--muted);
 
+font-size:14px;
+
 }
+
+
+
+
 
 /* ==========================================================
 RECIPE DETAIL
 ========================================================== */
+
 
 .ingredient-row{
 
@@ -411,375 +616,147 @@ display:flex;
 
 justify-content:space-between;
 
-padding:8px 0;
+padding:10px 0;
 
-border-bottom:1px solid rgba(255,255,255,.05);
+border-bottom:
 
-}
-
-.ingredient-row:last-child{
-
-border-bottom:none;
+1px solid var(--border);
 
 }
 
-.setup-list{
 
-padding-left:18px;
-
-}
 
 .setup-list li{
 
-margin-bottom:8px;
-
-font-size:14px;
-
-color:var(--text);
-
-}
-
-.scale-row{
-
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-margin-bottom:12px;
-
-}
-
-.scale-row:last-child{
-
-margin-bottom:0;
-
-}
-
-.scale-row label{
-
-font-size:14px;
-
-color:var(--muted);
-
-}
-
-.scale-row input{
-
-width:90px;
-
-height:40px;
-
-border-radius:10px;
-
-border:1px solid rgba(255,255,255,.12);
-
-background:var(--bg);
-
-color:var(--text);
-
-text-align:center;
-
-font-size:15px;
-
-font-family:monospace;
-
-}
-
-/* ==========================================================
-PROBE GRID (dashboard)
-========================================================== */
-
-.probe-grid{
-
-display:grid;
-
-grid-template-columns:1fr 1fr;
-
-gap:14px;
-
-margin-bottom:18px;
-
-}
-
-.probe-card{
-
-margin-bottom:0;
-
-}
-
-/* ==========================================================
-PROBE SETTINGS
-========================================================== */
-
-.probe-settings-row{
-
-display:flex;
-
-align-items:center;
-
-gap:8px;
-
-margin-bottom:12px;
-
-}
-
-.probe-settings-row:last-child{
-
-margin-bottom:0;
-
-}
-
-.probe-name-input{
-
-flex:1;
-
-min-width:0;
-
-height:40px;
-
-border-radius:10px;
-
-border:1px solid rgba(255,255,255,.12);
-
-background:var(--bg);
-
-color:var(--text);
-
-padding:0 10px;
-
-font-size:13px;
-
-}
-
-.probe-name-input:disabled{
-
-color:var(--muted);
-
-opacity:.6;
-
-}
-
-.probe-type-select{
-
-height:40px;
-
-border-radius:10px;
-
-border:1px solid rgba(255,255,255,.12);
-
-background:var(--bg);
-
-color:var(--text);
-
-font-size:13px;
-
-padding:0 6px;
-
-}
-
-.probe-type-select:disabled{
-
-color:var(--muted);
-
-opacity:.6;
-
-}
-
-.probe-toggle{
-
-height:40px;
-
-min-width:52px;
-
-border-radius:10px;
-
-border:1px solid rgba(255,255,255,.12);
-
-background:transparent;
-
-color:var(--muted);
-
-font-size:13px;
-
-font-weight:700;
-
-cursor:pointer;
-
-}
-
-.probe-toggle.on{
-
-background:var(--accent);
-
-color:white;
-
-border-color:var(--accent);
-
-}
-.probe-container{
-display:flex;
-flex-direction:column;
-gap:16px;
-}
-
-
-.probe-card{
-
-background:var(--card);
-border-radius:24px;
-padding:22px;
-border:1px solid rgba(255,255,255,.06);
-
-}
-
-
-.probe-header{
-
-font-size:16px;
-font-weight:700;
 margin-bottom:10px;
 
 }
 
 
-.big-temperature{
-
-font-size:84px;
-font-weight:800;
-letter-spacing:-5px;
-text-align:center;
-
-}
 
 
-.target{
 
-text-align:center;
-color:var(--muted);
-margin-top:8px;
-
-}
+/* ==========================================================
+SETTINGS INPUTS
+========================================================== */
 
 
-.progress{
+.probe-name-input,
+.probe-type-select,
+.scale-row input{
 
-height:10px;
-background:#332c25;
-border-radius:10px;
-overflow:hidden;
-margin-top:18px;
+height:42px;
 
-}
+border-radius:12px;
 
+background:var(--bg);
 
-.progress div{
+color:var(--text);
 
-height:100%;
-background:var(--accent);
+border:
+
+1px solid var(--border);
+
+padding:0 12px;
 
 }
 
 
 
-.probe-card.ready .progress div{
 
-background:#4CAF50;
-
-}
-
-
-
-.probe-card.hot .progress div{
-
-background:#FF6B1A;
-
-}
-
-
-
-.cook-header{
-
-margin-bottom:20px;
-
-}
-
-
-.cook-header h2{
-
-font-size:26px;
-
-}
 
 /* ==========================================================
 BLUETOOTH
 ========================================================== */
 
+
 .bluetooth-status{
 
-font-size:13px;
-color:var(--smoke);
-margin-bottom:8px;
+color:#8fd18f;
+
+font-size:14px;
 
 }
+
+
 
 .bluetooth-meta{
 
-font-size:13px;
 color:var(--muted);
-margin-bottom:6px;
 
 }
+
+
 
 .bluetooth-error{
 
-font-size:13px;
 color:#ff8f8f;
-margin:10px 0 0;
 
 }
 
-.button-row{
 
-display:flex;
-flex-direction:column;
-gap:10px;
-margin-top:12px;
-}
 
-.button:disabled{
-opacity:.5;
-cursor:not-allowed;
-transform:none;
-}
 
-.button.secondary:disabled{
-background:transparent;
-border:1px solid rgba(255,255,255,.08);
-}
 
 /* ==========================================================
 BOTTOM NAV
 ========================================================== */
 
-.nav { height:70px; background:#211C16; display:flex; justify-content:space-around; align-items:center; flex-shrink:0;}
 
-.nav button { background:none; border:none; color:#EDE6D6; font-size:12px; }
+.nav{
+
+height:76px;
+
+background:#17130F;
+
+display:flex;
+
+justify-content:space-around;
+
+align-items:center;
+
+border-top:
+
+1px solid var(--border);
+
+}
+
+
+
+.nav button{
+
+background:none;
+
+border:none;
+
+color:var(--muted);
+
+font-size:12px;
+
+}
+
+
 
 .nav button.active{
 
 color:var(--accent);
 
-font-weight:700;
+font-weight:800;
 
 }
+
+
+
+
 
 /* ==========================================================
 LOADING
 ========================================================== */
 
+
 .loading{
+
+height:100%;
 
 display:flex;
 
@@ -789,27 +766,31 @@ justify-content:center;
 
 align-items:center;
 
-gap:16px;
-
-height:100%;
+gap:15px;
 
 }
 
+
+
 .logo{
 
-font-size:64px;
+font-size:70px;
 
 animation:pulse 2s infinite;
 
 }
 
+
+
 .loading h1{
 
-font-size:30px;
+font-size:32px;
 
-letter-spacing:.08em;
+letter-spacing:.12em;
 
 }
+
+
 
 .loading p{
 
@@ -817,11 +798,12 @@ color:var(--muted);
 
 }
 
-/* ==========================================================
-ANIMATIONS
-========================================================== */
+
+
+
 
 @keyframes pulse{
+
 
 0%{
 
@@ -829,16 +811,19 @@ transform:scale(1);
 
 }
 
+
 50%{
 
 transform:scale(1.08);
 
 }
 
+
 100%{
 
 transform:scale(1);
 
 }
+
 
 }

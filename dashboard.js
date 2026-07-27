@@ -1,9 +1,11 @@
 /* ==========================================================
    Hermanos Grill Companion
+
    dashboard.js
 
    Premium BBQ dashboard
    ========================================================== */
+
 
 
 function formatTemperatureValue(value){
@@ -22,34 +24,89 @@ function formatTemperatureValue(value){
 
 
 
-function temperatureProgress(current,target){
 
-    if(!current || !target){
+function getProbeTarget(probe){
+
+    if(!appState.cook){
+        return null;
+    }
+
+
+    if(probe.type === "dome"){
+
+        return appState.cook.domeTarget || null;
+
+    }
+
+
+    if(probe.type === "meat"){
+
+        return appState.cook.meatTarget || null;
+
+    }
+
+
+    return null;
+
+}
+
+
+
+
+function getTemperatureProgress(probe){
+
+    const target = getProbeTarget(probe);
+
+
+    if(
+        !target ||
+        !probe.temperature
+    ){
         return 0;
     }
 
+
     return Math.min(
         100,
-        Math.round((current / target) * 100)
+        Math.round(
+            (probe.temperature / target) * 100
+        )
     );
 
 }
 
 
 
-function temperatureClass(temp,target){
+
+function getTemperatureState(probe){
+
+    const temp = Number(probe.temperature);
+
+    const target = Number(
+        getProbeTarget(probe)
+    );
+
 
     if(!temp){
+
         return "cold";
+
     }
+
 
     if(target && temp >= target){
+
         return "ready";
+
     }
 
-    if(temp > 70){
+
+    if(temp >= 70){
+
         return "hot";
+
     }
+
 
     return "warming";
 
@@ -57,26 +114,53 @@ function temperatureClass(temp,target){
 
 
 
+
+
 function updateLiveUi(){
 
 
     const statusEl =
-        document.querySelector("[data-live-status]");
+        document.querySelector(
+            "[data-live-status]"
+        );
 
 
     if(statusEl){
 
-        statusEl.innerHTML = `
 
-        ${appState.bluetooth.connected ? "🟢" : "🔴"}
+        if(appState.bluetooth.connected){
 
-        ${appState.bluetooth.device || "Geen apparaat"}
 
-        ${appState.bluetooth.connected ? "· verbonden" : ""}
+            const battery =
+                appState.bluetooth.battery === null ||
+                appState.bluetooth.battery === undefined
 
-        `;
+                ?
+
+                ""
+
+                :
+
+                ` · 🔋 ${Math.round(appState.bluetooth.battery)}%`;
+
+
+            statusEl.textContent =
+                `🟢 ${appState.bluetooth.device || "Bluetooth"} connected${battery}`;
+
+
+        }
+        else{
+
+
+            statusEl.textContent =
+                "🔴 Geen Bluetooth verbinding";
+
+
+        }
 
     }
+
+
 
 
 
@@ -84,28 +168,40 @@ function updateLiveUi(){
     .querySelectorAll("[data-probe-temperature]")
     .forEach(el=>{
 
-        const id =
-            Number(el.dataset.probeId);
+
+        const probeId =
+            Number(
+                el.getAttribute(
+                    "data-probe-id"
+                )
+            );
 
 
         const probe =
             appState.probes.find(
-                p=>p.id===id
+                p=>p.id === probeId
             );
 
 
         if(probe){
+
 
             el.textContent =
                 formatTemperatureValue(
                     probe.temperature
                 );
 
+
         }
+
 
     });
 
+
+
 }
+
+
 
 
 
@@ -114,43 +210,67 @@ function renderProbeCard(probe){
 
 
     const target =
-        probe.type==="meat"
-        ? appState.cook.meatTarget
-        : appState.cook.domeTarget;
+        getProbeTarget(probe);
 
 
     const progress =
-        temperatureProgress(
-            probe.temperature,
-            target
-        );
+        getTemperatureProgress(probe);
+
+
+    const state =
+        getTemperatureState(probe);
+
+
+
+    const icon =
+        probe.type === "meat"
+        ?
+        "🥩"
+        :
+        "🔥";
+
 
 
     return `
 
-    <div class="
-        probe-card
-        ${temperatureClass(
-            probe.temperature,
-            target
-        )}
-    ">
+
+    <div class="probe-card ${state}">
 
 
         <div class="probe-header">
 
+
             <span>
-                ${probe.type==="meat" ? "🥩":"🔥"}
+
+                ${icon}
+
                 ${probe.name}
+
             </span>
+
+
+            <span class="probe-number">
+
+                P${probe.id}
+
+            </span>
+
 
         </div>
 
 
 
-        <div class="big-temperature"
-             data-probe-temperature
-             data-probe-id="${probe.id}">
+
+
+        <div
+
+            class="big-temperature"
+
+            data-probe-temperature
+
+            data-probe-id="${probe.id}"
+
+        >
 
             ${formatTemperatureValue(probe.temperature)}
 
@@ -158,30 +278,58 @@ function renderProbeCard(probe){
 
 
 
-        <div class="target">
 
-            Target ${target || "—"}°
+
+        <div class="probe-target">
+
+
+            ${
+                target
+
+                ?
+
+                `Target ${target}°C`
+
+                :
+
+                "Geen doeltemperatuur"
+
+            }
+
 
         </div>
 
 
 
-        <div class="progress">
+
+
+        <div class="progress-bar">
+
 
             <div
-            style="
-            width:${progress}%
-            ">
-            </div>
+
+                class="progress-value"
+
+                style="width:${progress}%"
+
+            ></div>
+
 
         </div>
+
+
 
 
     </div>
 
+
     `;
 
+
 }
+
+
+
 
 
 
@@ -190,100 +338,170 @@ function renderProbeCard(probe){
 function dashboardView(){
 
 
-const activeProbes =
-appState.probes.filter(
-p=>p.active && p.type!=="unused"
-);
 
-
-
-return `
-
-
-<div class="status"
-data-live-status>
-
-${appState.bluetooth.connected ? "🟢":"🔴"}
-
-${appState.bluetooth.device || "Geen apparaat"}
-
-</div>
-
-
-
-<div class="cook-header">
-
-
-<h2>
-
-🔥 ${appState.cook.active
-? appState.cook.name
-:"Nieuwe cook"}
-
-</h2>
-
-
-<p>
-
-${appState.cook.active
-?"Actieve sessie"
-:"Geen actieve cook"}
-
-</p>
-
-
-</div>
-
-
-
-
-<div class="probe-container">
-
-
-${
-activeProbes.length
-
-?
-
-activeProbes
-.map(renderProbeCard)
-.join("")
-
-:
-
-`
-
-<div class="card">
-
-Geen actieve probes
-
-</div>
-
-`
-
-}
-
-
-</div>
+    const activeProbes =
+        appState.probes.filter(
+            p =>
+            p.active &&
+            p.type !== "unused"
+        );
 
 
 
 
 
-<button
-
-class="button"
-
-onclick="navigate('recipes')"
-
->
-
-🍖 Kies recept
-
-</button>
+    return `
 
 
 
-`;
+
+    <div
+
+        class="status"
+
+        data-live-status
+
+    >
+
+        ${
+            appState.bluetooth.connected
+            ?
+            "🟢 Verbonden"
+            :
+            "🔴 Niet verbonden"
+        }
+
+
+    </div>
+
+
+
+
+
+    <div class="cook-header">
+
+
+        <h2>
+
+
+        ${
+            appState.cook.active
+
+            ?
+
+            `🔥 ${appState.cook.name}`
+
+            :
+
+            "🔥 Nieuwe cook"
+
+        }
+
+
+        </h2>
+
+
+
+        <p>
+
+
+        ${
+            appState.cook.active
+
+            ?
+
+            "Actieve grillsessie"
+
+            :
+
+            "Start een recept om te beginnen"
+
+        }
+
+
+        </p>
+
+
+
+    </div>
+
+
+
+
+
+
+
+    <div class="probe-container">
+
+
+        ${
+            activeProbes.length
+
+
+            ?
+
+
+            activeProbes
+            .map(
+                renderProbeCard
+            )
+            .join("")
+
+
+
+            :
+
+
+            `
+
+
+            <div class="card empty-card">
+
+
+                <p>
+
+                    Geen actieve probes.
+
+                    Activeer probes via instellingen.
+
+                </p>
+
+
+            </div>
+
+
+            `
+
+        }
+
+
+    </div>
+
+
+
+
+
+
+
+
+    <button
+
+        class="button"
+
+        onclick="navigate('recipes')"
+
+    >
+
+        🍖 Kies een recept
+
+
+    </button>
+
+
+
+
+
+    `;
+
 
 }
