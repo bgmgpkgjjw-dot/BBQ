@@ -42,22 +42,45 @@ function handleBluetoothNotification(event){
         .map(b => b.toString(16).padStart(2, "0"))
         .join(" ");
 
+    appState.bluetooth.lastPayload = appState.bluetooth.lastRawHex;
+    appState.bluetooth.lastUpdatedAt = new Date().toISOString();
+
+    console.log("BLE length:", bytes.length);
     console.log("BLE:", Array.from(bytes));
     console.log("HEX:", appState.bluetooth.lastRawHex);
 
-    for(let i = 0; i < 6; i++){
-        const offset = BLE.HEADER_LENGTH + (i * 2);
+    const candidateOffsets = [BLE.HEADER_LENGTH, 0, 1, 2, 4];
 
-        if(offset + 1 >= bytes.length) break;
+    let decodedAny = false;
 
-        const raw = bytes[offset] | (bytes[offset + 1] << 8);
-        const probe = appState.probes.find(p => p.id === i + 1);
+    for(const offsetBase of candidateOffsets){
+        const parsed = [];
 
-        if(!probe) continue;
+        for(let i = 0; i < 6; i++){
+            const offset = offsetBase + (i * 2);
 
-        if(raw === 0xFFFF) continue;
+            if(offset + 1 >= bytes.length) break;
 
-        probe.temperature = raw / 10;
+            const raw = bytes[offset] | (bytes[offset + 1] << 8);
+            parsed.push(raw);
+        }
+
+        if(parsed.some(value => value !== 0 && value !== 0xFFFF)){
+            decodedAny = true;
+
+            parsed.forEach((raw, index) => {
+                const probe = appState.probes.find(p => p.id === index + 1);
+                if(!probe) return;
+                if(raw === 0xFFFF || raw === 0) return;
+                probe.temperature = raw / 10;
+            });
+
+            break;
+        }
+    }
+
+    if(!decodedAny){
+        console.warn("No temperature values decoded from BLE packet.");
     }
 
     updateLiveUi();
