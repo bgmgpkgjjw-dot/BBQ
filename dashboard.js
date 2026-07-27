@@ -82,7 +82,7 @@ function renderProbeCard(probe) {
 }
 
 function formatElapsedTime() {
-  if (!appState.cook.startedAt) return "00:00";
+  if (!appState.cook.startedAt) return "00:00:00";
 
   const start = new Date(appState.cook.startedAt);
   const seconds = Math.floor((Date.now() - start.getTime()) / 1000);
