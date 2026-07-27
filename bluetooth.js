@@ -12,6 +12,8 @@ const BLE = {
 
     NOTIFY: "0000ffb2-0000-1000-8000-00805f9b34fb",
 
+    HEADER_LENGTH: 3,
+
     device: null,
     server: null,
     service: null,
@@ -34,20 +36,32 @@ function onBluetoothDisconnected(){
 
 function handleBluetoothNotification(event){
     const value = event.target.value;
-    const bytes = [];
+    const bytes = new Uint8Array(value.buffer);
 
-    for(let i = 0; i < value.byteLength; i++){
-        bytes.push(value.getUint8(i));
+    appState.bluetooth.lastRawHex = Array.from(bytes)
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join(" ");
+
+    console.log("BLE:", Array.from(bytes));
+    console.log("HEX:", appState.bluetooth.lastRawHex);
+
+    for(let i = 0; i < 6; i++){
+        const offset = BLE.HEADER_LENGTH + (i * 2);
+
+        if(offset + 1 >= bytes.length) break;
+
+        const raw = bytes[offset] | (bytes[offset + 1] << 8);
+        const probe = appState.probes.find(p => p.id === i + 1);
+
+        if(!probe) continue;
+
+        if(raw === 0xFFFF) continue;
+
+        probe.temperature = raw / 10;
     }
 
-    console.log("BLE:", bytes);
-    console.log(
-        "HEX:",
-        bytes.map(b => b.toString(16).padStart(2, "0")).join(" ")
-    );
-
-    const rawValue = bytes.map(b => String.fromCharCode(b)).join("");
-    applyTemperatureReading(rawValue);
+    updateLiveUi();
+    render();
 }
 
 
