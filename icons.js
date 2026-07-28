@@ -10,26 +10,25 @@ const Icons = {
 
     cook: `
 
-<svg class="nav-icon"
-viewBox="0 0 24 24">
+<svg class="nav-icon" viewBox="0 0 24 24">
 
-<!-- Kamado dome -->
-<path d="M3 13a9 9 0 0 1 18 0"/>
+    <!-- spatula head -->
+    <rect
+        x="8"
+        y="3"
+        width="8"
+        height="8"
+        rx="1"
+    />
 
-<!-- base -->
-<path d="M5 13h14"/>
+    <!-- slots -->
+    <path d="M10 4v6" />
+    <path d="M12 4v6" />
+    <path d="M14 4v6" />
 
-<path d="M6 13v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4"/>
-
-<!-- thermometer / heat indicator -->
-<path d="M12 5v3"/>
-
-<circle cx="12" cy="4" r="1"/>
-
-<!-- small heat lines -->
-<path d="M8 9c0-1 1-2 2-3"/>
-
-<path d="M16 9c0-1-1-2-2-3"/>
+    <!-- handle -->
+    <path d="M12 11v8" />
+    <path d="M10.5 19h3" />
 
 </svg>
 
