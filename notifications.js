@@ -28,23 +28,27 @@ function sendNotification(
     tag = "general"
 ) {
 
-    if (
-        !appState.settings.notifications
-    ) {
-        return;
+    function recordAlert(type, message){
+
+    appState.alerts.history.unshift({
+        type,
+        message,
+        timestamp: new Date().toISOString()
+    });
+
+    if(appState.alerts.history.length > 100){
+        appState.alerts.history.pop();
     }
 
-    if (
-        Notification.permission !==
-        "granted"
-    ) {
-        return;
+    if(typeof saveAppState === "function"){
+        saveAppState();
+    }
     }
 
     new Notification(title, {
         body,
         tag,
-        silent: false
+        requireInteraction: true
     });
 }
 
@@ -98,6 +102,41 @@ function checkAlerts() {
     checkMeatTarget(meat);
     checkDomeDeviation(dome);
     checkBluetoothAlert();
+    checkBatteryAlert();
+    checkProbeHealth();
+}
+
+function checkProbeHealth(){
+
+    appState.probes.forEach(probe => {
+
+        if(
+            !probe.active ||
+            !probe.lastSeen
+        ){
+            return;
+        }
+
+        const seconds =
+            (Date.now() - probe.lastSeen) / 1000;
+
+        if(seconds > 60){
+
+            if(
+                shouldTriggerAlert(
+                    `probe-${probe.id}-offline`,
+                    15
+                )
+            ){
+
+                sendNotification(
+                    "⚠ Probe Offline",
+                    `${probe.name} stopped updating`,
+                    `probe-${probe.id}`
+                );
+            }
+        }
+    });
 }
 
 function checkMeatTarget(meat) {
@@ -213,6 +252,34 @@ function checkBluetoothAlert() {
         sendNotification(
             "⚠ Bluetooth disconnected",
             "Thermometer connection lost."
+        );
+    }
+}
+
+function checkBatteryAlert(){
+
+    const battery =
+        appState.bluetooth.battery;
+
+    if(
+        battery === null ||
+        battery === undefined
+    ){
+        return;
+    }
+
+    if(
+        battery <= 15 &&
+        shouldTriggerAlert(
+            "battery-low",
+            60
+        )
+    ){
+
+        sendNotification(
+            "🔋 Low Battery",
+            `Thermometer battery is ${battery}%`,
+            "battery-low"
         );
     }
 }

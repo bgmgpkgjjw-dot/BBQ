@@ -427,6 +427,11 @@ if (
 
 // start app
 
-initializeNotifications();
+if(
+    typeof initializeNotifications ===
+    "function"
+){
+    initializeNotifications();
+}
 
 render();

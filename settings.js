@@ -8,25 +8,25 @@
 
 // Startwaarde voor een sonde die net actief wordt en nog geen meting heeft
 // We tonen geen valse waarden meer; de UI blijft neutral tot er een echte meting binnenkomt.
-function defaultStartTemperature(type){
+function defaultStartTemperature(type) {
 
     return null;
 
 }
 
 
-function toggleProbeActive(id){
+function toggleProbeActive(id) {
 
     const probe = appState.probes.find(p => p.id === id);
 
-    if(!probe) return;
+    if (!probe) return;
 
 
     probe.active = !probe.active;
 
 
     // Bij activeren zonder rol: standaard op "vlees" zetten
-    if(probe.active && probe.type === "unused"){
+    if (probe.active && probe.type === "unused") {
 
         probe.type = "meat";
 
@@ -34,7 +34,7 @@ function toggleProbeActive(id){
 
 
     // Zorg dat een net actieve sonde direct een zinnige waarde heeft
-    if(probe.active && probe.temperature === null){
+    if (probe.active && probe.temperature === null) {
 
         probe.temperature = defaultStartTemperature(probe.type);
 
@@ -46,17 +46,17 @@ function toggleProbeActive(id){
 }
 
 
-function setProbeType(id, type){
+function setProbeType(id, type) {
 
     const probe = appState.probes.find(p => p.id === id);
 
-    if(!probe) return;
+    if (!probe) return;
 
 
     probe.type = type;
 
 
-    if(probe.active && probe.temperature === null){
+    if (probe.active && probe.temperature === null) {
 
         probe.temperature = defaultStartTemperature(type);
 
@@ -68,11 +68,11 @@ function setProbeType(id, type){
 }
 
 
-function setProbeName(id, name){
+function setProbeName(id, name) {
 
     const probe = appState.probes.find(p => p.id === id);
 
-    if(!probe) return;
+    if (!probe) return;
 
 
     probe.name = name;
@@ -83,7 +83,7 @@ function setProbeName(id, name){
 }
 
 
-function setBluetoothStatus(status, error = ""){
+function setBluetoothStatus(status, error = "") {
 
     appState.bluetooth.status = status;
     appState.bluetooth.error = error;
@@ -93,15 +93,15 @@ function setBluetoothStatus(status, error = ""){
 }
 
 
-function parseTemperaturePayload(payload){
+function parseTemperaturePayload(payload) {
 
-    if(!payload) return null;
+    if (!payload) return null;
 
     const values = payload.split(/[^0-9.-]+/).filter(Boolean);
 
-    if(values.length >= 1){
+    if (values.length >= 1) {
         const temp = Number(values[0]);
-        if(Number.isFinite(temp)) return temp;
+        if (Number.isFinite(temp)) return temp;
     }
 
     return null;
@@ -109,20 +109,20 @@ function parseTemperaturePayload(payload){
 }
 
 
-function applyTemperatureReading(rawValue){
+function applyTemperatureReading(rawValue) {
 
     const temperature = parseTemperaturePayload(rawValue);
 
-    if(temperature === null) return;
+    if (temperature === null) return;
 
     const domeProbe = appState.probes.find(p => p.active && p.type === "dome");
     const meatProbe = appState.probes.find(p => p.active && p.type === "meat");
 
-    if(domeProbe){
+    if (domeProbe) {
         domeProbe.temperature = temperature;
     }
 
-    if(meatProbe){
+    if (meatProbe) {
         meatProbe.temperature = temperature;
     }
 
@@ -134,11 +134,11 @@ function applyTemperatureReading(rawValue){
 }
 
 
-function connectBluetoothDevice(){
+function connectBluetoothDevice() {
 
     setBluetoothStatus("Requesting device...");
 
-    if(!navigator.bluetooth || !navigator.bluetooth.requestDevice){
+    if (!navigator.bluetooth || !navigator.bluetooth.requestDevice) {
         setBluetoothStatus("Not supported", "Web Bluetooth is not available in this browser.");
         return;
     }
@@ -156,9 +156,9 @@ function connectBluetoothDevice(){
 }
 
 
-function disconnectBluetoothDevice(){
+function disconnectBluetoothDevice() {
 
-    if(appState.bluetooth.deviceRef?.gatt?.connected){
+    if (appState.bluetooth.deviceRef?.gatt?.connected) {
 
         appState.bluetooth.deviceRef.gatt.disconnect();
 
@@ -176,7 +176,7 @@ function disconnectBluetoothDevice(){
 }
 
 
-function settingsView(){
+function settingsView() {
 
     return `
 
@@ -196,9 +196,7 @@ function settingsView(){
 
         </p>
 
-        ${
-
-            appState.probes.map(p => `
+        ${appState.probes.map(p => `
 
                 <div class="probe-settings-row">
 
@@ -273,6 +271,27 @@ function settingsView(){
         </div>
 
     </div>
+
+    <div class="card">
+    <h2>Alerts</h2>
+
+    ${appState.alerts.history.length
+            ? appState.alerts.history
+                .slice(0, 10)
+                .map(alert => `
+                    <div class="alert-item">
+                        <strong>${alert.type}</strong>
+                        ${alert.message}
+                    </div>
+                `)
+                .join("")
+            : `
+                <p>Geen alerts</p>
+            `
+        }
+    </div>
+
+
 
 
     <div class="card">

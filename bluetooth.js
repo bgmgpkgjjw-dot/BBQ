@@ -208,8 +208,9 @@ function handleBluetoothNotification(event){
 
 
 
-        probe.temperature =
-            temperature;
+        probe.temperature = temperature;
+        probe.lastSeen = Date.now();
+        probe.online = true;
 
 
 
