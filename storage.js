@@ -192,25 +192,14 @@ function recordTemperatureHistory() {
         return;
     }
 
-    if (
-        session.temperatureHistory.length % 20 === 0
-    ) {
-        saveSessions();
-        saveAppState();
-    }
-
-    const session =
-        getCurrentSession();
+    const session = getCurrentSession();
 
     if (!session) {
         return;
     }
 
-
     session.temperatureHistory.push({
-
-        timestamp:
-            Date.now(),
+        timestamp: Date.now(),
 
         dome:
             appState.probes.find(
@@ -221,23 +210,25 @@ function recordTemperatureHistory() {
             appState.probes.find(
                 p => p.type === "meat"
             )?.temperature ?? null
-
     });
-
 
     /*
         Save every 20 measurements
         to reduce writes.
     */
-
     if (
         session.temperatureHistory.length % 20 === 0
     ) {
 
         saveSessions();
 
+        if (
+            typeof saveAppState === "function"
+        ) {
+            saveAppState();
+        }
+ 
     }
-
 }
 
 
