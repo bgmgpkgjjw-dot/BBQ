@@ -427,4 +427,6 @@ if (
 
 // start app
 
+initializeNotifications();
+
 render();

@@ -377,6 +377,13 @@ async function connectBluetooth(){
                 handleBluetoothNotification
             );
 
+            if(
+            typeof checkAlerts ===
+            "function"
+            ){
+            checkAlerts();
+            }
+
 
 
 

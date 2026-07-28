@@ -290,3 +290,25 @@ function updateState(callback) {
 
 }
 
+
+
+function recordAlert(type,message){
+
+    appState.alerts.history.unshift({
+        type,
+        message,
+        timestamp:
+            new Date().toISOString()
+    });
+
+    if(
+        appState.alerts.history.length>100
+    ){
+        appState.alerts.history.pop();
+    }
+
+    if(typeof saveAppState==="function"){
+        saveAppState();
+    }
+}
+
