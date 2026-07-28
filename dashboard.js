@@ -280,13 +280,31 @@ function renderCookPanel() {
           <span>Tijd</span>
           <strong data-cook-time>${formatElapsedTime()}</strong>
         </div>
+
         <div>
-          <span>Dome</span>
-          <strong>${appState.cook.domeTarget || "—"}°C</strong>
+        <span>Dome doel</span>
+
+        <input
+            type="number"
+            min="50"
+            max="400"
+            value="${appState.cook.domeTarget ?? ""}"
+            onchange="updateDomeTarget(this.value)"
+        >
         </div>
+
         <div>
-          <span>Kern</span>
-          <strong>${appState.cook.meatTarget || "—"}°C</strong>
+        <span>Kern doel</span>
+
+        <input
+            type="number"
+            min="30"
+            max="120"
+            value="${appState.cook.meatTarget ?? ""}"
+            onchange="updateMeatTarget(this.value)"
+        >
+        </div>
+
         </div>
       </div>
 
@@ -404,6 +422,45 @@ function stopCook() {
     render();
 }
 
+function updateDomeTarget(value) {
+
+    const target = Number(value);
+
+    if (Number.isNaN(target)) {
+        return;
+    }
+
+    appState.cook.domeTarget = target;
+
+    if (typeof saveAppState === "function") {
+        saveAppState();
+    }
+
+    render();
+}
+
+function updateMeatTarget(value) {
+
+    if (value === "") {
+        appState.cook.meatTarget = null;
+    } else {
+
+        const target = Number(value);
+
+        if (Number.isNaN(target)) {
+            return;
+        }
+
+        appState.cook.meatTarget = target;
+    }
+
+    if (typeof saveAppState === "function") {
+        saveAppState();
+    }
+
+    render();
+}
+
 setInterval(() => {
 
     if (
@@ -416,3 +473,9 @@ setInterval(() => {
     }
 
 }, 1000);
+
+window.updateDomeTarget =
+    updateDomeTarget;
+
+window.updateMeatTarget =
+    updateMeatTarget;
