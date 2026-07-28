@@ -606,7 +606,7 @@ function historyDetailView() {
             :
             "—";
 
-
+    setTimeout( () => renderHistoryDetailChart(), 50 );
 
     return `
 
@@ -727,10 +727,7 @@ function historyDetailView() {
 
     </div>
     
-    setTimeout(
-    () => renderHistoryDetailChart(),
-    50
-    );
+    
 
     `;
 
