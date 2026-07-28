@@ -657,6 +657,20 @@ function historyDetailView() {
         ${session.duration || "—"}
         </p>
 
+        <p>
+        🔥 Dome doel:
+        <strong>
+        ${session.domeTarget ?? "—"}°C
+        </strong>
+        </p>
+
+        <p>
+        🥩 Kern doel:
+        <strong>
+        ${session.meatTarget ?? "—"}°C
+        </strong>
+        </p>
+
 
     </div>
 
