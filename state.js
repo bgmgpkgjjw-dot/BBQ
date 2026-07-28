@@ -58,7 +58,7 @@ const appState = {
     },
 
     //History zien
-    selectedHistory:null,
+    selectedHistory: null,
 
     // ======================================================
     // ACTIEVE COOK
@@ -110,13 +110,13 @@ const appState = {
 
     },
 
-// ==========================================================
-// Saved cook sessions
-// ==========================================================
+    // ==========================================================
+    // Saved cook sessions
+    // ==========================================================
 
-sessions: [],
+    sessions: [],
 
-currentSessionId: null,
+    currentSessionId: null,
 
 
     // ======================================================
@@ -269,14 +269,19 @@ currentSessionId: null,
 // STATE UPDATE HELPER
 // ==========================================================
 
-function updateState(callback){
+function updateState(callback) {
 
 
     callback(appState);
 
+    if (
+        typeof scheduleStateSave ===
+        "function"
+    ) {
+        scheduleStateSave();
+    }
 
-
-    if(typeof render === "function"){
+    if (typeof render === "function") {
 
         render();
 

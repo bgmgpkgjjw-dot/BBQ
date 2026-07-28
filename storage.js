@@ -7,28 +7,29 @@
    ========================================================== */
 
 const STORAGE_KEY = "hermanos_grill_sessions_v1";
+const APP_STATE_KEY = "hermanos_grill_app_state_v1";
 
 
 /* ==========================================================
    INITIALIZE
 ========================================================== */
 
-function initializeStorage(){
+function initializeStorage() {
 
-    try{
+    try {
 
         const saved =
             localStorage.getItem(STORAGE_KEY);
 
         appState.sessions =
             saved
-            ?
-            JSON.parse(saved)
-            :
-            [];
+                ?
+                JSON.parse(saved)
+                :
+                [];
 
     }
-    catch(error){
+    catch (error) {
 
         console.error(
             "Unable to load sessions",
@@ -46,9 +47,9 @@ function initializeStorage(){
    SAVE
 ========================================================== */
 
-function saveSessions(){
+function saveSessions() {
 
-    try{
+    try {
 
         localStorage.setItem(
 
@@ -61,7 +62,7 @@ function saveSessions(){
         );
 
     }
-    catch(error){
+    catch (error) {
 
         console.error(
             "Unable to save sessions",
@@ -77,7 +78,7 @@ function saveSessions(){
    START SESSION
 ========================================================== */
 
-function startCookSession(){
+function startCookSession() {
 
     const session = {
 
@@ -137,13 +138,13 @@ function startCookSession(){
    FINISH SESSION
 ========================================================== */
 
-function finishCookSession(){
+function finishCookSession() {
 
     const session =
         getCurrentSession();
 
 
-    if(!session){
+    if (!session) {
 
         console.warn(
             "No active cook session found"
@@ -185,17 +186,23 @@ function finishCookSession(){
    RECORD TEMPERATURE
 ========================================================== */
 
-function recordTemperatureHistory(){
+function recordTemperatureHistory() {
 
-    if(!appState.cook.active){
+    if (!appState.cook.active) {
         return;
     }
 
+    if (
+        session.temperatureHistory.length % 20 === 0
+    ) {
+        saveSessions();
+        saveAppState();
+    }
 
     const session =
         getCurrentSession();
 
-    if(!session){
+    if (!session) {
         return;
     }
 
@@ -207,12 +214,12 @@ function recordTemperatureHistory(){
 
         dome:
             appState.probes.find(
-                p=>p.type==="dome"
+                p => p.type === "dome"
             )?.temperature ?? null,
 
         meat:
             appState.probes.find(
-                p=>p.type==="meat"
+                p => p.type === "meat"
             )?.temperature ?? null
 
     });
@@ -223,9 +230,9 @@ function recordTemperatureHistory(){
         to reduce writes.
     */
 
-    if(
+    if (
         session.temperatureHistory.length % 20 === 0
-    ){
+    ) {
 
         saveSessions();
 
@@ -238,23 +245,23 @@ function recordTemperatureHistory(){
    HELPERS
 ========================================================== */
 
-function getCurrentSession(){
+function getCurrentSession() {
 
-    if(!appState.currentSessionId){
+    if (!appState.currentSessionId) {
         return null;
     }
 
 
     return appState.sessions.find(
         s =>
-        s.id === appState.currentSessionId
+            s.id === appState.currentSessionId
     );
 
 }
 
 
 
-function deleteCookSession(id){
+function deleteCookSession(id) {
 
     appState.sessions =
         appState.sessions.filter(
@@ -269,7 +276,7 @@ function deleteCookSession(id){
 
 
 
-function clearAllSessions(){
+function clearAllSessions() {
 
     appState.sessions = [];
 
@@ -279,17 +286,17 @@ function clearAllSessions(){
 
 
 
-function calculateDuration(start,end){
+function calculateDuration(start, end) {
 
     const ms =
         new Date(end) -
         new Date(start);
 
     const minutes =
-        Math.round(ms/60000);
+        Math.round(ms / 60000);
 
     const hours =
-        Math.floor(minutes/60);
+        Math.floor(minutes / 60);
 
     const mins =
         minutes % 60;
@@ -298,9 +305,151 @@ function calculateDuration(start,end){
 
 }
 
+/* ==========================================================
+   APP STATE PERSISTENCE
+========================================================== */
+
+function serializeAppState() {
+    return {
+        cook: appState.cook,
+        probes: appState.probes,
+        alerts: appState.alerts,
+        settings: appState.settings,
+        theme: appState.theme,
+
+        bluetooth: {
+            device: appState.bluetooth.device,
+            battery: appState.bluetooth.battery,
+            lastUpdatedAt:
+                appState.bluetooth.lastUpdatedAt
+        }
+    };
+}
+
+function saveAppState() {
+    try {
+        localStorage.setItem(
+            APP_STATE_KEY,
+            JSON.stringify(
+                serializeAppState()
+            )
+        );
+    }
+    catch (error) {
+        console.error(
+            "Unable to save app state",
+            error
+        );
+    }
+}
+
+function loadAppState() {
+    try {
+
+        const raw =
+            localStorage.getItem(
+                APP_STATE_KEY
+            );
+
+        if (!raw) {
+            return;
+        }
+
+        const saved =
+            JSON.parse(raw);
+
+        if (saved.cook) {
+            Object.assign(
+                appState.cook,
+                saved.cook
+            );
+        }
+
+        if (saved.probes) {
+            appState.probes =
+                saved.probes;
+        }
+
+        if (saved.alerts) {
+            appState.alerts =
+                saved.alerts;
+        }
+
+        if (saved.settings) {
+            appState.settings =
+                saved.settings;
+        }
+
+        if (saved.theme) {
+            appState.theme =
+                saved.theme;
+        }
+
+        if (saved.bluetooth) {
+            appState.bluetooth.battery =
+                saved.bluetooth.battery ?? null;
+
+            appState.bluetooth.device =
+                saved.bluetooth.device ?? null;
+
+            appState.bluetooth.lastUpdatedAt =
+                saved.bluetooth.lastUpdatedAt ?? null;
+        }
+
+        console.log(
+            "App state restored"
+        );
+
+    }
+    catch (error) {
+        console.error(
+            "Unable to load app state",
+            error
+        );
+    }
+}
+
+/* ==========================================================
+   AUTO SAVE
+========================================================== */
+
+let saveTimeout = null;
+
+function scheduleStateSave() {
+
+    if (saveTimeout) {
+        clearTimeout(saveTimeout);
+    }
+
+    saveTimeout = setTimeout(
+        saveAppState,
+        500
+    );
+}
 
 /* ==========================================================
    LOAD ON STARTUP
 ========================================================== */
 
 initializeStorage();
+loadAppState();
+restoreActiveCook();
+
+function restoreActiveCook() {
+
+    if (
+        appState.cook &&
+        appState.cook.active &&
+        appState.cook.startedAt
+    ) {
+
+        console.log(
+            "Restored active cook:",
+            appState.cook.name
+        );
+
+        return true;
+    }
+
+    return false;
+}
