@@ -648,6 +648,8 @@ function historyDetailView() {
 
         <br>
 
+
+
         <p>
         Gestart:
         ${new Date(session.startedAt).toLocaleString("nl-NL")}
@@ -659,15 +661,17 @@ function historyDetailView() {
         ${session.duration || "—"}
         </p>
 
+
         <p>
-        🔥 Dome doel:
+        Dome doel:
         <strong>
         ${session.domeTarget ?? "—"}°C
         </strong>
         </p>
 
+
         <p>
-        🥩 Kern doel:
+        Kern doel:
         <strong>
         ${session.meatTarget ?? "—"}°C
         </strong>
@@ -687,19 +691,19 @@ function historyDetailView() {
 
 
         <p>
-        🌡 Metingen:
+        Metingen:
         ${samples.length}
         </p>
 
 
         <p>
-        🔥 Max dome:
+        Max dome:
         ${maxDome}°C
         </p>
 
 
         <p>
-        🥩 Max kern temperatuur:
+        Max kern temperatuur:
         ${maxMeat}°C
         </p>
 
