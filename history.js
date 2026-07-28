@@ -636,7 +636,7 @@ function historyDetailView() {
 
         </button>
 
-        <br><br>
+        <br>
 
         <button
         class="button danger"
@@ -645,6 +645,8 @@ function historyDetailView() {
         🗑 Verwijder cook
 
         </button>
+
+        <br>
 
         <p>
         Gestart:
