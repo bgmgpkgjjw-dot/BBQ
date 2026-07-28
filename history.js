@@ -716,34 +716,21 @@ function historyDetailView() {
 
 
         <h3>
-        Timeline
+        Temperatuurverloop
         </h3>
 
-
-        ${samples.slice(-10).map(
-        s => `
-
-                <div class="ingredient-row">
-
-                    <span>
-                    ${new Date(s.timestamp)
-                .toLocaleTimeString("nl-NL")}
-                    </span>
-
-                    <strong>
-                    ${s.dome ?? "—"}° /
-                    ${s.meat ?? "—"}°
-                    </strong>
-
-                </div>
-
-                `
-    ).join("")
-        }
-
+        <div class="chart-container">
+            <canvas
+                id="historyChart">
+            </canvas>
+        </div>
 
     </div>
-
+    
+    setTimeout(
+    () => renderHistoryDetailChart(),
+    50
+    );
 
     `;
 
@@ -810,14 +797,14 @@ function renameCook(sessionId) {
 
 }
 
-function deleteCook(sessionId){
+function deleteCook(sessionId) {
 
     const session =
         appState.sessions.find(
             s => s.id === sessionId
         );
 
-    if(!session){
+    if (!session) {
         return;
     }
 
@@ -826,7 +813,7 @@ function deleteCook(sessionId){
             `Cook "${session.name || session.recipe}" verwijderen?\n\nDeze actie kan niet ongedaan worden gemaakt.`
         );
 
-    if(!confirmed){
+    if (!confirmed) {
         return;
     }
 
@@ -841,4 +828,141 @@ function deleteCook(sessionId){
 
     render();
 
+}
+
+let historyDetailChart = null;
+
+function renderHistoryDetailChart() {
+
+    const session =
+        appState.selectedHistory;
+
+    if (!session) {
+        return;
+    }
+
+    const canvas =
+        document.getElementById(
+            "historyChart"
+        );
+
+    if (!canvas) {
+        return;
+    }
+
+    const samples =
+        session.temperatureHistory || [];
+
+    if (!samples.length) {
+        return;
+    }
+
+    if (historyDetailChart) {
+        historyDetailChart.destroy();
+    }
+
+    historyDetailChart =
+        new Chart(canvas, {
+
+            type: "line",
+
+            data: {
+
+                labels: samples.map(
+                    s =>
+                        new Date(
+                            s.timestamp
+                        ).toLocaleTimeString(
+                            "nl-NL",
+                            {
+                                hour: "2-digit",
+                                minute: "2-digit"
+                            }
+                        )
+                ),
+
+                datasets: [
+
+                    {
+                        label: "🔥 Dome",
+
+                        data: samples.map(
+                            s => s.dome
+                        ),
+
+                        borderColor:
+                            "#ff6b1a",
+
+                        backgroundColor:
+                            "rgba(255,107,26,.15)",
+
+                        tension: .3,
+
+                        pointRadius: 0
+                    },
+
+                    {
+                        label: "🥩 Kern",
+
+                        data: samples.map(
+                            s => s.meat
+                        ),
+
+                        borderColor:
+                            "#c1272d",
+
+                        backgroundColor:
+                            "rgba(193,39,45,.15)",
+
+                        tension: .3,
+
+                        pointRadius: 0
+                    }
+
+                ]
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                interaction: {
+                    mode: "index",
+                    intersect: false
+                },
+
+                plugins: {
+
+                    legend: {
+                        labels: {
+                            color: "#F2EBDD"
+                        }
+                    }
+                },
+
+                scales: {
+
+                    x: {
+                        ticks: {
+                            color: "#918678",
+                            maxTicksLimit: 10
+                        }
+                    },
+
+                    y: {
+                        ticks: {
+                            color: "#918678"
+                        },
+
+                        title: {
+                            display: true,
+                            text: "°C",
+                            color: "#918678"
+                        }
+                    }
+                }
+            }
+        });
 }
