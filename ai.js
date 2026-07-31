@@ -76,21 +76,24 @@ Format:
             }
         );
 
-        const data =
-            await response.json();
+        const data = await response.json();
 
-        console.log(
-            "OpenRouter response:",
-             data
-        );
+        console.log("HTTP Status:", response.status);
+        console.log("OpenRouter Response:", data);
 
         let text =
             data?.choices?.[0]
-            ?.message?.content;
+                ?.message?.content;
 
         if (!text) {
+
+            console.error(
+                "No content returned",
+                data
+            );
+
             throw new Error(
-                "No response received."
+                JSON.stringify(data)
             );
         }
 
@@ -103,7 +106,7 @@ Format:
             JSON.parse(text);
 
     }
-    catch(error) {
+    catch (error) {
 
         console.error(error);
 
