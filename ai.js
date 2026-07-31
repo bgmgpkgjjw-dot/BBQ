@@ -278,13 +278,9 @@ function renderAiRecipe(recipe, index) {
 
         <button
             class="button"
-            onclick="
-                saveAiRecipe(
-                    ${JSON.stringify(recipe)}
-                )
-            "
+            onclick="saveAiRecipe(${index})"
         >
-            Save Recipe
+            💾 Save Recipe
         </button>
 
         <button
@@ -299,16 +295,22 @@ function renderAiRecipe(recipe, index) {
     `;
 }
 
-function saveAiRecipe(recipe) {
+function saveAiRecipe(index){
+
+    const recipe =
+        appState.ai.results[index];
+
+    if(!recipe){
+        return;
+    }
 
     appState.ai.savedRecipes.push(
-        recipe
+        structuredClone(recipe)
     );
 
-    if (
-        typeof saveAppState ===
-        "function"
-    ) {
+    if(
+        typeof saveAppState === "function"
+    ){
         saveAppState();
     }
 
@@ -382,3 +384,6 @@ function startAiCook(index) {
 
 window.startAiCook =
     startAiCook;
+
+window.saveAiRecipe =
+    saveAiRecipe;
