@@ -79,11 +79,14 @@ Format:
         const data =
             await response.json();
 
-        console.log(data);
+        console.log(
+            "OpenRouter response:",
+             data
+        );
 
         let text =
-            data.choices?.[0]
-                ?.message?.content;
+            data?.choices?.[0]
+            ?.message?.content;
 
         if (!text) {
             throw new Error(
