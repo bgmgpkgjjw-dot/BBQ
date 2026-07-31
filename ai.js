@@ -23,7 +23,7 @@ async function generateOpenRouterRecipes() {
 
     try {
 
-         const prompt = `
+        const prompt = `
 
             You are a professional Kamado BBQ chef.
 
@@ -50,17 +50,17 @@ async function generateOpenRouterRecipes() {
 
             [
             {
-                "title": "",
-                "description": "",
-                "temperature": "",
-                "target_temperature": "",
-                "duration": "",
-                "difficulty": "",
-                "ingredients": [],
-                "steps": []
+            "title": "",
+            "description": "",
+            "dome_temperature": "180°C",
+            "target_temperature": "72°C",
+            "duration": "45 minutes",
+            "difficulty": "Easy",
+            "ingredients": [],
+            "steps": []
             }
             ]
-            
+
 
             `;
 
@@ -238,8 +238,9 @@ function aiAssistantView() {
         `
             :
             appState.ai.results.map(
-                renderAiRecipe
-            ).join("")
+                (recipe, index) =>
+                    renderAiRecipe(recipe, index)
+            )
         }
     `;
 }
@@ -286,6 +287,13 @@ function renderAiRecipe(recipe) {
             Save Recipe
         </button>
 
+        <button
+            class="button"
+            onclick="startAiCook(${index})"
+        >
+            Start Cook
+        </button>
+
     </div>
 
     `;
@@ -306,3 +314,71 @@ function saveAiRecipe(recipe) {
 
     render();
 }
+
+// Start AI Cook Recipe
+
+function startAiCook(index) {
+
+    const recipe =
+        appState.ai.results[index];
+
+    if (!recipe) {
+        return;
+    }
+
+    const domeTarget =
+        parseInt(recipe.temperature);
+
+    const meatTarget =
+        parseInt(recipe.target_temperature);
+
+    appState.cook.active = true;
+
+    appState.cook.name =
+        recipe.title;
+
+    appState.cook.recipe =
+    recipe.title;
+
+    appState.cook.domeTarget =
+        isNaN(domeTarget)
+            ? 120
+            : domeTarget;
+
+    appState.cook.meatTarget =
+        isNaN(meatTarget)
+            ? null
+            : meatTarget;
+
+    appState.cook.duration =
+        recipe.duration;
+
+    appState.cook.phase = 0;
+
+    appState.cook.phases = [
+        [
+            "AI Recipe",
+            recipe.description
+        ]
+    ];
+
+    appState.cook.startedAt =
+        new Date().toISOString();
+
+    startCookSession();
+
+    if (
+        typeof saveAppState ===
+        "function"
+    ) {
+        saveAppState();
+    }
+
+    appState.screen =
+        "dashboard";
+
+    render();
+}
+
+window.startAiCook =
+    startAiCook;
