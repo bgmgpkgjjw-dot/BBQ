@@ -341,6 +341,143 @@ function saveAiRecipe(index){
     render();
 }
 
+function aiRecipeDetailView() {
+
+    const recipe =
+        appState.ai.selectedRecipe;
+
+    if (!recipe) {
+        return `
+            <div class="card">
+                <h2>Recipe Not Found</h2>
+            </div>
+        `;
+    }
+
+    return `
+
+        <div class="card">
+
+            <button
+                class="button"
+                onclick="
+                    appState.screen='ai';
+                    render();
+                "
+            >
+                ← Back
+            </button>
+
+            <h2>${recipe.title}</h2>
+
+            <p>${recipe.description}</p>
+
+            <br>
+
+            <p>
+                🔥 Dome Temperature:
+                ${recipe.temperature}
+            </p>
+
+            <p>
+                🥩 Target Temperature:
+                ${recipe.target_temperature}
+            </p>
+
+            <p>
+                ⏱ Duration:
+                ${recipe.duration}
+            </p>
+
+            <p>
+                ⭐ Difficulty:
+                ${recipe.difficulty}
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Ingredients</h3>
+
+            ${
+                (recipe.ingredients || [])
+                    .map(
+                        ingredient =>
+                            `<p>• ${ingredient}</p>`
+                    )
+                    .join("")
+            }
+
+        </div>
+
+        <div class="card">
+
+            <h3>Steps</h3>
+
+            ${
+                (recipe.steps || [])
+                    .map(
+                        step =>
+                            `<p>${step}</p>`
+                    )
+                    .join("")
+            }
+
+        </div>
+
+        <button
+            class="button"
+            onclick="startAiCookFromSelectedRecipe()"
+        >
+            🔥 Start Cook
+        </button>
+
+    `;
+}
+``
+
+function startAiCookFromSelectedRecipe() {
+
+    const recipe =
+        appState.ai.selectedRecipe;
+
+    if (!recipe) {
+        return;
+    }
+
+    const dome =
+        parseInt(recipe.temperature);
+
+    const target =
+        parseInt(
+            recipe.target_temperature
+        );
+
+    appState.cook.active = true;
+
+    appState.cook.name =
+        recipe.title;
+
+    appState.cook.domeTarget =
+        dome;
+
+    appState.cook.meatTarget =
+        target;
+
+    appState.cook.startedAt =
+        new Date().toISOString();
+
+    startCookSession();
+
+    saveAppState();
+
+    appState.screen = "dashboard";
+
+    render();
+}
+``
+
 // Start AI Cook Recipe
 
 function startAiCook(index) {
