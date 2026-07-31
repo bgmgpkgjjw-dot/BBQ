@@ -1,5 +1,5 @@
 const OPENROUTER_API_KEY =
-    "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";
+    "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";
 
 const AI_CATEGORIES = [
 
@@ -23,38 +23,46 @@ async function generateOpenRouterRecipes() {
 
     try {
 
-        const prompt = `
-            You are a Kamado BBQ expert.
+         const prompt = `
 
-            Ingredients:
+            You are a professional Kamado BBQ chef.
+
+            IMPORTANT RULES:
+
+            - Always write in English.
+            - Always use Celsius (°C).
+            - Always use metric units (g, kg, ml).
+            - Never use Fahrenheit.
+            - Never use cups, ounces or pounds.
+            - Return ONLY valid JSON.
+            - Generate exactly 3 recipes.
+            - Only use the best rated recipes, preferably from reknown bbq chefs.
+
+            Available ingredients:
+
             ${appState.ai.ingredients}
 
-            Category:
+            Recipe style:
+
             ${appState.ai.category}
 
-            Generate exactly 3 creative Kamado recipes.
-
-            Return ONLY valid JSON.
-
-            Format:
+            Return JSON in this format:
 
             [
             {
-            "title":"",
-            "description":"",
-            "temperature":"",
-            "duration":"",
-            "difficulty":"",
-            "ingredients":[],
-            "steps":[]
+                "title": "",
+                "description": "",
+                "temperature": "",
+                "target_temperature": "",
+                "duration": "",
+                "difficulty": "",
+                "ingredients": [],
+                "steps": []
             }
             ]
+            
 
-            No markdown.
-            No explanations.
-            JSON only.
-
-        `;
+            `;
 
         const response = await fetch(
             "https://openrouter.ai/api/v1/chat/completions",
