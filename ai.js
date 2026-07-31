@@ -13,12 +13,14 @@ const AI_CATEGORIES = [
 
 ];
 
-async function generateGeminiRecipes() {
+async function generateOpenRouterRecipes() {
 
     appState.ai.loading = true;
     render();
 
-    const prompt = `
+    try {
+
+        const prompt = `
 You are a Kamado BBQ expert.
 
 Ingredients:
@@ -27,79 +29,98 @@ ${appState.ai.ingredients}
 Category:
 ${appState.ai.category}
 
-Generate 3 recipes.
+Generate exactly 3 creative Kamado recipes.
 
-Return JSON only.
+Return ONLY valid JSON.
 
-Schema:
+Format:
 
 [
-  {
-    "title":"",
-    "description":"",
-    "temperature":"",
-    "duration":"",
-    "difficulty":"",
-    "ingredients":[],
-    "steps":[]
-  }
+ {
+   "title":"",
+   "description":"",
+   "temperature":"",
+   "duration":"",
+   "difficulty":"",
+   "ingredients":[],
+   "steps":[]
+ }
 ]
 `;
 
-    try {
+        const response = await fetch(
+            "https://openrouter.ai/api/v1/chat/completions",
+            {
+                method: "POST",
 
-        const response =
-            await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=...`,
-                {
-                    method: "POST",
+                headers: {
+                    "Content-Type":
+                        "application/json",
 
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
+                    "Authorization":
+                        "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"
+                },
 
-                    body: JSON.stringify({
-                        contents: [
-                            {
-                                parts: [
-                                    {
-                                        text: prompt
-                                    }
-                                ]
-                            }
-                        ]
-                    })
-                }
-            );
+                body: JSON.stringify({
+
+                    model:
+                        "google/gemini-2.5-flash-lite",
+
+                    messages: [
+                        {
+                            role: "user",
+                            content: prompt
+                        }
+                    ]
+                })
+            }
+        );
 
         const data =
             await response.json();
 
-        const text =
-            data.candidates?.[0]
-                ?.content?.parts?.[0]
-                ?.text;
+        console.log(data);
+
+        let text =
+            data.choices?.[0]
+                ?.message?.content;
+
+        if (!text) {
+            throw new Error(
+                "No response received."
+            );
+        }
+
+        text = text.replace(
+            /```json|```/g,
+            ""
+        );
 
         appState.ai.results =
-            JSON.parse(
-                text.replace(
-                    /```json|```/g,
-                    ""
-                )
-            );
+            JSON.parse(text);
 
     }
-    catch (error) {
+    catch(error) {
 
         console.error(error);
 
         appState.ai.results = [
             {
                 title:
-                    "Generation failed",
+                    "Recipe generation failed",
+
                 description:
-                    error.message
+                    error.message,
+
+                temperature: "-",
+
+                duration: "-",
+
+                difficulty: "-",
+
+                ingredients: [],
+
+                steps: []
             }
         ];
     }
@@ -160,7 +181,8 @@ function aiAssistantView() {
 
         <button
             class="button"
-                onclick="generateGeminiRecipes()"        >
+                onclick="generateOpenRouterRecipes()"    
+                >
             Generate Recipes
         </button>
 
