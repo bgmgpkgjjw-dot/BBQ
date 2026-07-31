@@ -295,10 +295,22 @@ function recipeListView(){
 
     }
 
-
+    
 
     return `
 
+
+    <button
+        class="button"
+        onclick="
+            appState.screen='ai';
+            render();
+        "
+    >
+        AI Recipe Assistant
+    </button>
+
+    <br><br>
 
     <button
     class="button"
