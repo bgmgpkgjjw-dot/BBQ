@@ -1,75 +1,112 @@
 const AI_CATEGORIES = [
 
-    "anything",
-    "dessert",
-    "low-slow",
-    "hot-fast",
-    "weeknight",
-    "beef",
-    "pork",
-    "chicken",
-    "fish",
-    "vegetarian",
-    "pizza"
+    "Anything",
+    "Dessert",
+    "Low & Slow",
+    "Hot & Fast",
+    "Beef",
+    "Pork",
+    "Chicken",
+    "Fish",
+    "Vegetarian",
+    "Pizza"
 
 ];
 
-function generateMockRecipes() {
+async function generateGeminiRecipes() {
 
     appState.ai.loading = true;
-
     render();
 
-    setTimeout(() => {
+    const prompt = `
+You are a Kamado BBQ expert.
+
+Ingredients:
+${appState.ai.ingredients}
+
+Category:
+${appState.ai.category}
+
+Generate 3 recipes.
+
+Return JSON only.
+
+Schema:
+
+[
+  {
+    "title":"",
+    "description":"",
+    "temperature":"",
+    "duration":"",
+    "difficulty":"",
+    "ingredients":[],
+    "steps":[]
+  }
+]
+`;
+
+    try {
+
+        const response =
+            await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AQ.Ab8RN6JE8N8nI33k2m-B7yL83WVPgtPGXwMA6Bz8VPweXooWAA`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        contents: [
+                            {
+                                parts: [
+                                    {
+                                        text: prompt
+                                    }
+                                ]
+                            }
+                        ]
+                    })
+                }
+            );
+
+        const data =
+            await response.json();
+
+        const text =
+            data.candidates?.[0]
+                ?.content?.parts?.[0]
+                ?.text;
+
+        appState.ai.results =
+            JSON.parse(
+                text.replace(
+                    /```json|```/g,
+                    ""
+                )
+            );
+
+    }
+    catch (error) {
+
+        console.error(error);
 
         appState.ai.results = [
-
             {
-                title: "Grilled Peaches & Mascarpone",
-                temperature: "180°C",
-                duration: "20 min",
-                difficulty: "Easy",
-
-                ingredients: [
-                    "Peaches",
-                    "Mascarpone",
-                    "Honey"
-                ],
-
-                steps: [
-                    "Heat Kamado to 180°C",
-                    "Halve peaches",
-                    "Grill 10 minutes",
-                    "Serve with mascarpone"
-                ]
-            },
-
-            {
-                title: "Smoked Peach Crumble",
-                temperature: "160°C",
-                duration: "45 min",
-                difficulty: "Medium",
-
-                ingredients: [
-                    "Peaches",
-                    "Honey",
-                    "Butter"
-                ],
-
-                steps: [
-                    "Prepare crumble",
-                    "Add peaches",
-                    "Smoke for 45 min"
-                ]
+                title:
+                    "Generation failed",
+                description:
+                    error.message
             }
-
         ];
+    }
 
-        appState.ai.loading = false;
+    appState.ai.loading = false;
 
-        render();
-
-    }, 1500);
+    render();
 }
 
 function aiAssistantView() {
@@ -106,48 +143,45 @@ function aiAssistantView() {
         >
 
             ${AI_CATEGORIES.map(
-                category => `
+        category => `
                     <option
                         value="${category}"
-                        ${
-                            appState.ai.category === category
-                            ? "selected"
-                            : ""
-                        }
+                        ${appState.ai.category === category
+                ? "selected"
+                : ""
+            }
                     >
                         ${category}
                     </option>
                 `
-            ).join("")}
+    ).join("")}
 
         </select>
 
         <button
             class="button"
-            onclick="generateMockRecipes()"
-        >
+                onclick="generateGeminiRecipes()"        >
             Generate Recipes
         </button>
 
     </div>
 
-    ${
-        appState.ai.loading
-        ?
-        `
+    ${appState.ai.loading
+            ?
+            `
         <div class="card">
             Generating recipes...
         </div>
         `
-        :
-        appState.ai.results.map(
-            renderAiRecipe
-        ).join("")
-    }
+            :
+            appState.ai.results.map(
+                renderAiRecipe
+            ).join("")
+        }
     `;
 }
 
-function renderAiRecipe(recipe){
+function renderAiRecipe(recipe) {
 
     return `
 
@@ -172,9 +206,9 @@ function renderAiRecipe(recipe){
         </h3>
 
         ${recipe.ingredients.map(
-            ingredient =>
-                `<p>• ${ingredient}</p>`
-        ).join("")}
+        ingredient =>
+            `<p>• ${ingredient}</p>`
+    ).join("")}
 
         <br>
 
@@ -194,16 +228,16 @@ function renderAiRecipe(recipe){
     `;
 }
 
-function saveAiRecipe(recipe){
+function saveAiRecipe(recipe) {
 
     appState.ai.savedRecipes.push(
         recipe
     );
 
-    if(
+    if (
         typeof saveAppState ===
         "function"
-    ){
+    ) {
         saveAppState();
     }
 
