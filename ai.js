@@ -58,7 +58,7 @@ Format:
                         "application/json",
 
                     "Authorization":
-                        "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"
+                        "Bearer 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"
                 },
 
                 body: JSON.stringify({
