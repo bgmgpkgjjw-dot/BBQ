@@ -12,23 +12,27 @@ const Icons = {
 
     <svg class="nav-icon" viewBox="0 0 24 24">
 
-        <!-- spatula head -->
+        <!-- knob -->
+        <path d="M9.5 2.2 C9.5 1.5 10 1 10.7 1 h2.6 c0.7 0 1.2 0.5 1.2 1.2 v3.3 h-4.5 z" />
+
+        <!-- vent window -->
         <rect
-            x="8"
-            y="3"
-            width="8"
-            height="8"
-            rx="1"
+            x="10.8"
+            y="2.4"
+            width="2.4"
+            height="1.6"
+            rx="0.2"
         />
 
-        <!-- slots -->
-        <path d="M10 4v6" />
-        <path d="M12 4v6" />
-        <path d="M14 4v6" />
+        <!-- grill body -->
+        <circle cx="12" cy="13.2" r="7" />
 
-        <!-- handle -->
-        <path d="M12 11v8" />
-        <path d="M10.5 19h3" />
+        <!-- handle bar / divider -->
+        <path d="M3.3 13.2 h17.4" />
+
+        <!-- legs -->
+        <path d="M9.3 19.8 L8 23" />
+        <path d="M14.7 19.8 L16 23" />
 
     </svg>
 
