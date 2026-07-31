@@ -273,7 +273,7 @@ function startManualCook() {
 ========================================================== */
 
 function recipeListView() {
-
+    
 
     if (
         !appState.recipes ||
@@ -281,144 +281,126 @@ function recipeListView() {
     ) {
 
         return `
-
-        <div class="card">
-
-            <p>
-            Geen recepten beschikbaar.
-            </p>
-
-        </div>
-
+            <div class="card">
+                <p>
+                    Geen recepten beschikbaar.
+                </p>
+            </div>
         `;
-
     }
 
     return `
 
+        <button
+            class="button"
+            onclick="
+                appState.screen='ai';
+                render();
+            "
+        >
+            🧠 AI Recipe Assistant
+        </button>
+
+        <br><br>
+
+        <button
+            class="button"
+            onclick="startManualCook()"
+        >
+            🔥 Start handmatige cook
+        </button>
+
+        <br><br>
+
         <h2>Saved AI Recipes</h2>
 
-        ${appState.ai.savedRecipes.length
+        ${
+            appState.ai.savedRecipes.length
+
             ? appState.ai.savedRecipes.map(
                 (recipe, index) => `
 
-                        <div class="card">
-
-                            <h3>
-                                ${recipe.title}
-                            </h3>
-
-                            <p>
-                                ${recipe.description}
-                            </p>
-
-                            <button
-                                class="button"
-                                onclick="openSavedAiRecipe(${index})"
-                            >
-                                📖 Open
-                            </button>
-
-                            <button
-                                class="button"
-                                onclick="startSavedAiCook(${index})"
-                            >
-                                🔥 Start Cook
-                            </button>
-
-                            <button
-                                class="button secondary"
-                                onclick="deleteSavedAiRecipe(${index})"
-                            >
-                                🗑 Delete
-                            </button>
-
-                            </div>
-
-                    `
-            ).join("")
-            : `
                     <div class="card">
-                        No saved AI recipes yet.
+
+                        <h3>
+                            ${recipe.title}
+                        </h3>
+
+                        <p>
+                            ${recipe.description}
+                        </p>
+
+                        <button
+                            class="button"
+                            onclick="openSavedAiRecipe(${index})"
+                        >
+                            📖 Open
+                        </button>
+
+                        <button
+                            class="button"
+                            onclick="startSavedAiCook(${index})"
+                        >
+                            🔥 Start Cook
+                        </button>
+
+                        <button
+                            class="button secondary"
+                            onclick="deleteSavedAiRecipe(${index})"
+                        >
+                            🗑 Delete
+                        </button>
+
                     </div>
+
                 `
+            ).join("")
+
+            : `
+
+                <div class="card">
+                    No saved AI recipes yet.
+                </div>
+
+            `
         }
 
-    `;
+        <br>
 
+        <h2>Standard Recipes</h2>
 
-    return `
+        <div class="recipe-list">
 
+            ${
+                appState.recipes.map(
+                    recipe => `
 
-    <button
-        class="button"
-        onclick="
-            appState.screen='ai';
-            render();
-        "
-    >
-        AI Recipe Assistant
-    </button>
+                        <div
+                            class="recipe"
+                            onclick="selectRecipe('${recipe.id}')"
+                        >
 
-    <br><br>
+                            <h2>
+                                ${recipe.name}
+                            </h2>
 
-    <button
-    class="button"
-    onclick="startManualCook()">
+                            <p>
+                                ${recipe.meat}
+                                ·
+                                ${recipe.dome}°C
+                                ·
+                                ${recipe.duration}
+                            </p>
 
-    🔥 Start handmatige cook
+                        </div>
 
-    </button>
-
-
-    <br><br>
-
-
-
-    <div class="recipe-list">
-
-
-    ${appState.recipes.map(recipe => `
-
-
-        <div
-        class="recipe"
-        onclick="selectRecipe('${recipe.id}')">
-
-
-            <h2>
-            ${recipe.name}
-            </h2>
-
-
-            <p>
-
-            ${recipe.meat}
-
-            ·
-
-            ${recipe.dome}°C
-
-            ·
-
-            ${recipe.duration}
-
-            </p>
-
+                    `
+                ).join("")
+            }
 
         </div>
 
-
-        `).join("")
-        }
-
-
-    </div>
-
-
     `;
-
-
 }
 
 
