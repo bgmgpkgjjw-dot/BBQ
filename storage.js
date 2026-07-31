@@ -122,6 +122,12 @@ function startCookSession() {
 
     appState.currentSessionId =
         session.id;
+    if (
+        typeof saveAppState ===
+        "function"
+    ) {
+        saveAppState();
+    }
 
 
     appState.sessions.unshift(
