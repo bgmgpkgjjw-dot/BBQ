@@ -21,32 +21,37 @@ async function generateOpenRouterRecipes() {
     try {
 
         const prompt = `
-You are a Kamado BBQ expert.
+            You are a Kamado BBQ expert.
 
-Ingredients:
-${appState.ai.ingredients}
+            Ingredients:
+            ${appState.ai.ingredients}
 
-Category:
-${appState.ai.category}
+            Category:
+            ${appState.ai.category}
 
-Generate exactly 3 creative Kamado recipes.
+            Generate exactly 3 creative Kamado recipes.
 
-Return ONLY valid JSON.
+            Return ONLY valid JSON.
 
-Format:
+            Format:
 
-[
- {
-   "title":"",
-   "description":"",
-   "temperature":"",
-   "duration":"",
-   "difficulty":"",
-   "ingredients":[],
-   "steps":[]
- }
-]
-`;
+            [
+            {
+            "title":"",
+            "description":"",
+            "temperature":"",
+            "duration":"",
+            "difficulty":"",
+            "ingredients":[],
+            "steps":[]
+            }
+            ]
+
+            No markdown.
+            No explanations.
+            JSON only.
+
+        `;  
 
         const response = await fetch(
             "https://openrouter.ai/api/v1/chat/completions",
@@ -54,17 +59,24 @@ Format:
                 method: "POST",
 
                 headers: {
+
+                    "Authorization":
+                        `Bearer ${sk - or - v1 - cccdd2fb87d96f1d1bb430bc11c1f0a691d24e519c011d3693697e65fb219cb5}`,
+
                     "Content-Type":
                         "application/json",
 
-                    "Authorization":
-                        "Bearer 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"
+                    "HTTP-Referer":
+                        window.location.origin,
+
+                    "X-Title":
+                        "Hermanos Grill Companion"
                 },
 
                 body: JSON.stringify({
 
                     model:
-                        "google/gemini-2.5-flash-lite",
+                        "openrouter/free",
 
                     messages: [
                         {
