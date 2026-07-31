@@ -1,3 +1,6 @@
+const OPENROUTER_API_KEY =
+    "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";
+
 const AI_CATEGORIES = [
 
     "Anything",
@@ -51,7 +54,7 @@ async function generateOpenRouterRecipes() {
             No explanations.
             JSON only.
 
-        `;  
+        `;
 
         const response = await fetch(
             "https://openrouter.ai/api/v1/chat/completions",
@@ -59,9 +62,8 @@ async function generateOpenRouterRecipes() {
                 method: "POST",
 
                 headers: {
-
                     "Authorization":
-                        `Bearer $"sk - or - v1 - cccdd2fb87d96f1d1bb430bc11c1f0a691d24e519c011d3693697e65fb219cb5"`,
+                        `Bearer ${OPENROUTER_API_KEY}`,
 
                     "Content-Type":
                         "application/json",
@@ -75,8 +77,7 @@ async function generateOpenRouterRecipes() {
 
                 body: JSON.stringify({
 
-                    model:
-                        "openrouter/free",
+                    model: "openrouter/free",
 
                     messages: [
                         {
@@ -84,25 +85,34 @@ async function generateOpenRouterRecipes() {
                             content: prompt
                         }
                     ]
+
                 })
             }
         );
 
         const data = await response.json();
 
-        console.log("HTTP Status:", response.status);
-        console.log("OpenRouter Response:", data);
+        console.log(
+            "HTTP Status:",
+            response.status
+        );
+
+        console.log(
+            "OpenRouter Response:",
+            data
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                JSON.stringify(data)
+            );
+        }
 
         let text =
             data?.choices?.[0]
                 ?.message?.content;
 
         if (!text) {
-
-            console.error(
-                "No content returned",
-                data
-            );
 
             throw new Error(
                 JSON.stringify(data)
@@ -112,6 +122,11 @@ async function generateOpenRouterRecipes() {
         text = text.replace(
             /```json|```/g,
             ""
+        );
+
+        console.log(
+            "AI TEXT:",
+            text
         );
 
         appState.ai.results =
