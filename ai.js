@@ -245,7 +245,7 @@ function aiAssistantView() {
     `;
 }
 
-function renderAiRecipe(recipe) {
+function renderAiRecipe(recipe, index) {
 
     return `
 
