@@ -302,6 +302,16 @@ function renderAiRecipe(recipe, index) {
     `;
 }
 
+function openAiRecipe(index){
+
+    appState.ai.selectedRecipe =
+        appState.ai.results[index];
+
+    appState.screen = "aiRecipe";
+
+    render();
+}
+
 function saveAiRecipe(index){
 
     console.log(
@@ -401,3 +411,6 @@ window.startAiCook =
 
 window.saveAiRecipe =
     saveAiRecipe;
+
+window.openAiRecipe =
+    openAiRecipe;

@@ -306,6 +306,9 @@ function renderScreen() {
         case "settings":
 
             return settingsView();
+
+        case "aiRecipe":
+            return aiRecipeDetailView();
         
         default:
 
