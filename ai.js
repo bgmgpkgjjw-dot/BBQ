@@ -285,6 +285,13 @@ function renderAiRecipe(recipe, index) {
 
         <button
             class="button"
+            onclick="openAiRecipe(${index})"
+        >
+        📖 View Recipe
+        </button>
+
+        <button
+            class="button"
             onclick="startAiCook(${index})"
         >
             Start Cook
@@ -297,8 +304,15 @@ function renderAiRecipe(recipe, index) {
 
 function saveAiRecipe(index){
 
+    console.log(
+        "Saving recipe",
+        index
+    );
+
     const recipe =
         appState.ai.results[index];
+
+    console.log(recipe);
 
     if(!recipe){
         return;
@@ -308,11 +322,11 @@ function saveAiRecipe(index){
         structuredClone(recipe)
     );
 
-    if(
-        typeof saveAppState === "function"
-    ){
-        saveAppState();
-    }
+    console.log(
+        appState.ai.savedRecipes
+    );
+
+    saveAppState();
 
     render();
 }
@@ -340,7 +354,7 @@ function startAiCook(index) {
         recipe.title;
 
     appState.cook.recipe =
-    recipe.title;
+        recipe.title;
 
     appState.cook.domeTarget =
         isNaN(domeTarget)
