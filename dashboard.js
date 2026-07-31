@@ -283,7 +283,7 @@ function renderCookPanel() {
         <span>Dome doel</span>
 
         <input
-            type="number"
+            type="tel"
             min="0"
             max="600"
             inputmode="numeric"
@@ -297,7 +297,7 @@ function renderCookPanel() {
         <span>Kern doel</span>
 
         <input
-            type="number"
+            type="tel"
             min="0"
             max="250"
             inputmode="numeric"
