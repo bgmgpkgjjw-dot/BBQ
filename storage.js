@@ -140,36 +140,49 @@ function startCookSession() {
 
 function finishCookSession() {
 
-    const session =
-        getCurrentSession();
+    function finishCookSession() {
 
+        let session =
+            getCurrentSession();
 
-    if (!session) {
+        if (
+            !session &&
+            appState.sessions?.length
+        ) {
 
-        console.warn(
-            "No active cook session found"
-        );
+            session =
+                appState.sessions.find(
+                    s => !s.finishedAt
+                );
+        }
 
-        return;
+        if (!session) {
 
+            console.warn(
+                "No active cook session found"
+            );
+
+            return;
+        }
+
+        session.finishedAt =
+            new Date().toISOString();
+
+        session.duration =
+            calculateDuration(
+                session.startedAt,
+                session.finishedAt
+            );
+
+        saveSessions();
+
+        if (
+            typeof saveAppState ===
+            "function"
+        ) {
+            saveAppState();
+        }
     }
-
-
-
-    session.finishedAt =
-        new Date().toISOString();
-
-
-
-    session.duration =
-        calculateDuration(
-            session.startedAt,
-            session.finishedAt
-        );
-
-
-
-    saveSessions();
 
 
 
@@ -227,7 +240,7 @@ function recordTemperatureHistory() {
         ) {
             saveAppState();
         }
- 
+
     }
 }
 
@@ -305,6 +318,7 @@ function serializeAppState() {
         cook: appState.cook,
         probes: appState.probes,
         alerts: appState.alerts,
+        currentSessionId: appState.currentSessionId,
         settings: appState.settings,
         theme: appState.theme,
 
@@ -364,6 +378,11 @@ function loadAppState() {
         if (saved.alerts) {
             appState.alerts =
                 saved.alerts;
+        }
+
+        if (saved.currentSessionId) {
+            appState.currentSessionId =
+                saved.currentSessionId;
         }
 
         if (saved.settings) {
