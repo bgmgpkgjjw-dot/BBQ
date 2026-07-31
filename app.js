@@ -281,30 +281,22 @@ function renderScreen() {
 
 
     switch (appState.screen) {
-
-
-
+        
         case "dashboard":
 
             return dashboardView();
 
-
-
-
-
         case "recipes":
 
             return recipeListView();
-
-
-
-
-
+        
         case "recipeDetail":
 
             return recipeDetailView();
 
-
+        case "AI Assistant":
+            return aiAssistantView();
+        
         case "history":
 
             setTimeout(
@@ -322,16 +314,11 @@ function renderScreen() {
         case "settings":
 
             return settingsView();
-
-
-
-
+        
         default:
 
             return dashboardView();
-
-
-
+            
     }
 
 
@@ -427,11 +414,12 @@ if (
 
 // start app
 
-if(
+if (
     typeof initializeNotifications ===
     "function"
-){
+) {
     initializeNotifications();
 }
 
 render();
+

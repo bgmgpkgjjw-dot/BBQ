@@ -60,6 +60,15 @@ const appState = {
     //History zien
     selectedHistory: null,
 
+    // AI Recepeten
+    ai: {
+    ingredients: "",
+        category: "anything",
+            loading: false,
+                results: [],
+                    savedRecipes: []
+},
+
     // ======================================================
     // ACTIEVE COOK
     // ======================================================
@@ -292,7 +301,7 @@ function updateState(callback) {
 
 
 
-function recordAlert(type,message){
+function recordAlert(type, message) {
 
     appState.alerts.history.unshift({
         type,
@@ -301,14 +310,16 @@ function recordAlert(type,message){
             new Date().toISOString()
     });
 
-    if(
-        appState.alerts.history.length>100
-    ){
+    if (
+        appState.alerts.history.length > 100
+    ) {
         appState.alerts.history.pop();
     }
 
-    if(typeof saveAppState==="function"){
+    if (typeof saveAppState === "function") {
         saveAppState();
     }
 }
+
+
 
