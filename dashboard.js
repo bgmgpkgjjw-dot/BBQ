@@ -100,12 +100,11 @@ function renderProbeCard(probe) {
 
 
 
-        ${
-        isDome
+        ${isDome
 
-        ?
+            ?
 
-        `
+            `
 
         <div class="dome-gauge">
 
@@ -136,10 +135,10 @@ function renderProbeCard(probe) {
         `
 
 
-        :
+            :
 
 
-        `
+            `
 
 
         <div class="thermometer-box">
@@ -171,13 +170,12 @@ function renderProbeCard(probe) {
 
         <div class="probe-info">
 
-            ${
-                target
-                ?
-                `Doel ${target}°C`
-                :
-                "Geen doel"
-            }
+            ${target
+            ?
+            `Doel ${target}°C`
+            :
+            "Geen doel"
+        }
 
         </div>
 
@@ -243,7 +241,7 @@ function formatElapsedTime() {
 
 function renderCookPanel() {
     if (!appState.cook.active) {
-    return `
+        return `
       <div class="card cook-card">
 
         <h3>
@@ -286,8 +284,10 @@ function renderCookPanel() {
 
         <input
             type="number"
-            min="50"
-            max="400"
+            min="0"
+            max="600"
+            inputmode="numeric"
+            pattern="[0-9]*"
             value="${appState.cook.domeTarget ?? ""}"
             onchange="updateDomeTarget(this.value)"
         >
@@ -298,8 +298,10 @@ function renderCookPanel() {
 
         <input
             type="number"
-            min="30"
-            max="120"
+            min="0"
+            max="250"
+            inputmode="numeric"
+            pattern="[0-9]*"
             value="${appState.cook.meatTarget ?? ""}"
             onchange="updateMeatTarget(this.value)"
         >

@@ -801,7 +801,7 @@ input {
    height: 40px;
    padding: 0 10px;
    color: var(--text);
-   font-size: 14px;
+   font-size: 16px;
 }
 
 input:focus,
