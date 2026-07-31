@@ -554,6 +554,22 @@ function openSavedAiRecipe(index){
     render();
 }
 
+function deleteSavedAiRecipe(index) {
+
+    appState.ai.savedRecipes.splice(
+        index,
+        1
+    );
+
+    if (
+        typeof saveAppState === "function"
+    ) {
+        saveAppState();
+    }
+
+    render();
+}
+
 window.openSavedAiRecipe =
     openSavedAiRecipe;
 
@@ -565,3 +581,6 @@ window.saveAiRecipe =
 
 window.openAiRecipe =
     openAiRecipe;
+
+window.deleteSavedAiRecipe =
+    deleteSavedAiRecipe;
