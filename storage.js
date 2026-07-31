@@ -321,6 +321,7 @@ function serializeAppState() {
         currentSessionId: appState.currentSessionId,
         settings: appState.settings,
         theme: appState.theme,
+        ai: appState.ai,
 
         bluetooth: {
             device: appState.bluetooth.device,
@@ -393,6 +394,10 @@ function loadAppState() {
         if (saved.theme) {
             appState.theme =
                 saved.theme;
+        }
+
+        if(saved.ai){
+            appState.ai = saved.ai;
         }
 
         if (saved.bluetooth) {
