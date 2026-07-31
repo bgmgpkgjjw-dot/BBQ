@@ -146,59 +146,53 @@ function startCookSession() {
 
 function finishCookSession() {
 
-    function finishCookSession() {
+    let session =
+        getCurrentSession();
 
-        let session =
-            getCurrentSession();
+    if (
+        !session &&
+        appState.sessions?.length
+    ) {
 
-        if (
-            !session &&
-            appState.sessions?.length
-        ) {
-
-            session =
-                appState.sessions.find(
-                    s => !s.finishedAt
-                );
-        }
-
-        if (!session) {
-
-            console.warn(
-                "No active cook session found"
+        session =
+            appState.sessions.find(
+                s => !s.finishedAt
             );
-
-            return;
-        }
-
-        session.finishedAt =
-            new Date().toISOString();
-
-        session.duration =
-            calculateDuration(
-                session.startedAt,
-                session.finishedAt
-            );
-
-        saveSessions();
-
-        if (
-            typeof saveAppState ===
-            "function"
-        ) {
-            saveAppState();
-        }
     }
 
+    if (!session) {
 
+        console.warn(
+            "No active cook session found"
+        );
+
+        return;
+    }
+
+    session.finishedAt =
+        new Date().toISOString();
+
+    session.duration =
+        calculateDuration(
+            session.startedAt,
+            session.finishedAt
+        );
+
+    saveSessions();
+
+    if (
+        typeof saveAppState ===
+        "function"
+    ) {
+        saveAppState();
+    }
 
     console.log(
         "Cook session saved:",
         session
     );
-
-
 }
+
 
 
 /* ==========================================================
