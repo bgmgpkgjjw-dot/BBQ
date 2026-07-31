@@ -15,7 +15,7 @@
 ========================================================== */
 
 
-function selectRecipe(recipeId){
+function selectRecipe(recipeId) {
 
     appState.selectedRecipe = recipeId;
 
@@ -29,7 +29,7 @@ function selectRecipe(recipeId){
 
 
 
-function backToRecipes(){
+function backToRecipes() {
 
     appState.selectedRecipe = null;
 
@@ -46,13 +46,13 @@ function backToRecipes(){
 ========================================================== */
 
 
-function setServings(recipeId,value){
+function setServings(recipeId, value) {
 
     const recipe = appState.recipes.find(
         r => r.id === recipeId
     );
 
-    if(!recipe) return;
+    if (!recipe) return;
 
 
     const servings = Math.max(
@@ -73,14 +73,14 @@ function setServings(recipeId,value){
 
 
 
-function setPrimaryAmount(recipeId,value){
+function setPrimaryAmount(recipeId, value) {
 
     const recipe = appState.recipes.find(
         r => r.id === recipeId
     );
 
 
-    if(!recipe) return;
+    if (!recipe) return;
 
 
     const primary =
@@ -89,7 +89,7 @@ function setPrimaryAmount(recipeId,value){
         );
 
 
-    if(!primary) return;
+    if (!primary) return;
 
 
     const amount = Math.max(
@@ -110,7 +110,7 @@ function setPrimaryAmount(recipeId,value){
 
 
 
-function scaledIngredients(recipe){
+function scaledIngredients(recipe) {
 
     return recipe.ingredients.map(item => ({
 
@@ -130,7 +130,7 @@ function scaledIngredients(recipe){
 
 
 
-function scaledServings(recipe){
+function scaledServings(recipe) {
 
     return Math.round(
         recipe.baseServings *
@@ -143,16 +143,16 @@ function scaledServings(recipe){
 
 
 
-function roundAmount(value,unit){
+function roundAmount(value, unit) {
 
-    if(unit === "g" || unit === "ml"){
+    if (unit === "g" || unit === "ml") {
 
         return Math.round(value);
 
     }
 
 
-    if(unit === "kg"){
+    if (unit === "kg") {
 
         return Math.round(value * 100) / 100;
 
@@ -167,9 +167,9 @@ function roundAmount(value,unit){
 
 
 
-function formatAmount(item){
+function formatAmount(item) {
 
-    if(!item.unit){
+    if (!item.unit) {
 
         return `${item.amount}x`;
 
@@ -187,13 +187,13 @@ function formatAmount(item){
 ========================================================== */
 
 
-function loadRecipeIntoCook(recipeId){
+function loadRecipeIntoCook(recipeId) {
 
     const recipe = appState.recipes.find(
         r => r.id === recipeId
     );
 
-    if(!recipe){
+    if (!recipe) {
         console.error("Recipe not found:", recipeId);
         return;
     }
@@ -226,28 +226,28 @@ function loadRecipeIntoCook(recipeId){
 
 
 
-function startManualCook(){
+function startManualCook() {
 
 
     Object.assign(
         appState.cook,
         {
 
-            active:true,
+            active: true,
 
-            name:"Handmatige cook",
+            name: "Handmatige cook",
 
-            domeTarget:110,
+            domeTarget: 110,
 
-            meatTarget:null,
+            meatTarget: null,
 
-            duration:"",
+            duration: "",
 
-            phase:0,
+            phase: 0,
 
-            phases:[],
+            phases: [],
 
-            servings:null,
+            servings: null,
 
             startedAt:
                 new Date().toISOString()
@@ -257,7 +257,7 @@ function startManualCook(){
     );
 
 
-    appState.screen="dashboard";
+    appState.screen = "dashboard";
 
 
     render();
@@ -272,14 +272,13 @@ function startManualCook(){
    RECIPE LIST
 ========================================================== */
 
+function recipeListView() {
 
-function recipeListView(){
 
-
-    if(
+    if (
         !appState.recipes ||
         appState.recipes.length === 0
-    ){
+    ) {
 
         return `
 
@@ -295,7 +294,58 @@ function recipeListView(){
 
     }
 
-    
+    return `
+
+        <h2>Saved AI Recipes</h2>
+
+        ${appState.ai.savedRecipes.length
+            ? appState.ai.savedRecipes.map(
+                (recipe, index) => `
+
+                        <div class="card">
+
+                            <h3>
+                                ${recipe.title}
+                            </h3>
+
+                            <p>
+                                ${recipe.description}
+                            </p>
+
+                            <button
+                                class="button"
+                                onclick="openSavedAiRecipe(${index})"
+                            >
+                                📖 Open
+                            </button>
+
+                            <button
+                                class="button"
+                                onclick="startSavedAiCook(${index})"
+                            >
+                                🔥 Start Cook
+                            </button>
+
+                            <button
+                                class="button secondary"
+                                onclick="deleteSavedAiRecipe(${index})"
+                            >
+                                🗑 Delete
+                            </button>
+
+                            </div>
+
+                    `
+            ).join("")
+            : `
+                    <div class="card">
+                        No saved AI recipes yet.
+                    </div>
+                `
+        }
+
+    `;
+
 
     return `
 
@@ -328,8 +378,7 @@ function recipeListView(){
     <div class="recipe-list">
 
 
-    ${
-        appState.recipes.map(recipe => `
+    ${appState.recipes.map(recipe => `
 
 
         <div
@@ -361,7 +410,7 @@ function recipeListView(){
 
 
         `).join("")
-    }
+        }
 
 
     </div>
@@ -379,7 +428,7 @@ function recipeListView(){
 ========================================================== */
 
 
-function recipeDetailView(){
+function recipeDetailView() {
 
 
     const recipe =
@@ -389,7 +438,7 @@ function recipeDetailView(){
 
 
 
-    if(!recipe){
+    if (!recipe) {
 
         return `
 
@@ -419,7 +468,7 @@ function recipeDetailView(){
 
 
 
-return `
+    return `
 
 
 <button
@@ -458,17 +507,16 @@ Dome:
 </p>
 
 
-${
-recipe.target
-?
-`
+${recipe.target
+            ?
+            `
 <p>
 Kern:
 <strong>${recipe.target}°C</strong>
 </p>
 `
-:""
-}
+            : ""
+        }
 
 
 <p>
@@ -506,10 +554,9 @@ onchange="setServings('${recipe.id}',this.value)"
 
 
 
-${
-primary
-?
-`
+${primary
+            ?
+            `
 
 <div class="scale-row">
 
@@ -528,8 +575,8 @@ onchange="setPrimaryAmount('${recipe.id}',this.value)"
 </div>
 
 `
-:""
-}
+            : ""
+        }
 
 
 </div>
@@ -543,8 +590,7 @@ onchange="setPrimaryAmount('${recipe.id}',this.value)"
 <h3>Ingrediënten</h3>
 
 
-${
-ingredients.map(item => `
+${ingredients.map(item => `
 
 <div class="ingredient-row">
 
@@ -560,7 +606,7 @@ ${formatAmount(item)}
 </div>
 
 `).join("")
-}
+        }
 
 
 </div>
@@ -577,11 +623,10 @@ ${formatAmount(item)}
 
 <ol class="setup-list">
 
-${
-recipe.setup.map(
-step => `<li>${step}</li>`
-).join("")
-}
+${recipe.setup.map(
+            step => `<li>${step}</li>`
+        ).join("")
+        }
 
 </ol>
 
@@ -598,9 +643,8 @@ step => `<li>${step}</li>`
 <h3>Fases</h3>
 
 
-${
-recipe.phases.map(
-phase => `
+${recipe.phases.map(
+            phase => `
 
 <div class="ingredient-row">
 
@@ -616,8 +660,8 @@ ${phase[1]}
 </div>
 
 `
-).join("")
-}
+        ).join("")
+        }
 
 
 </div>

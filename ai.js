@@ -543,6 +543,20 @@ function startAiCook(index) {
     render();
 }
 
+function openSavedAiRecipe(index){
+
+    appState.ai.selectedRecipe =
+        appState.ai.savedRecipes[index];
+
+    appState.screen =
+        "aiRecipe";
+
+    render();
+}
+
+window.openSavedAiRecipe =
+    openSavedAiRecipe;
+
 window.startAiCook =
     startAiCook;
 
