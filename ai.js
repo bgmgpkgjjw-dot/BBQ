@@ -116,7 +116,7 @@ function aiAssistantView() {
     <div class="card">
 
         <h2>
-        AI Recipe Assistant
+        AI Recept Assistent
         </h2>
 
         <p>
