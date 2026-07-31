@@ -62,12 +62,12 @@ const appState = {
 
     // AI Recepeten
     ai: {
-    ingredients: "",
+        ingredients: "",
         category: "anything",
-            loading: false,
-                results: [],
-                    savedRecipes: []
-},
+        loading: false,
+        results: [],
+        savedRecipes: []
+    },
 
     // ======================================================
     // ACTIEVE COOK

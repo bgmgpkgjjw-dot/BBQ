@@ -238,6 +238,7 @@ function getTitle() {
 
 
     const titles = {
+
         
         dashboard:"Mijn Kamado",
 
