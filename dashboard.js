@@ -410,17 +410,32 @@ function completePhase() {
 }
 
 function stopCook() {
-    // NEW
+
     finishCookSession();
+
     appState.cook.active = false;
     appState.cook.name = "";
+    appState.cook.recipe = null;
+
+    appState.cook.domeTarget = null;
+    appState.cook.meatTarget = null;
+
     appState.cook.phases = [];
     appState.cook.phase = 0;
     appState.cook.startedAt = null;
     appState.cook.completedPhases = [];
+
     appState.currentSessionId = null;
+
+    if (
+        typeof saveAppState === "function"
+    ) {
+        saveAppState();
+    }
+
     render();
 }
+
 
 function updateDomeTarget(value) {
 
