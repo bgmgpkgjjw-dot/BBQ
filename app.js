@@ -285,7 +285,7 @@ function renderScreen() {
 
             return recipeDetailView();
 
-        case "AI Assistant":
+        case "ai":
             return aiAssistantView();
         
         case "history":
