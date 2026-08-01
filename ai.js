@@ -29,14 +29,32 @@ async function generateOpenRouterRecipes() {
 
             IMPORTANT RULES:
 
-            - Always write in English.
-            - Always use Celsius (°C).
-            - Always use metric units (g, kg, ml).
-            - Never use Fahrenheit.
-            - Never use cups, ounces or pounds.
-            - Return ONLY valid JSON.
-            - Generate exactly 3 recipes.
-            - Only use the best rated recipes, preferably from reknown bbq chefs.
+            Recipe must popular online, used by professionals, stick to BBQ basics, like Smokey Goodness, Kamado Joe, Big Green Egg.
+
+            For each recipe provide:
+
+            title
+            description
+            temperature
+            (required dome temperature in Celsius)
+            target_temperature
+            (required internal meat temperature in Celsius or null)
+            duration
+            difficulty
+            ingredients
+            steps
+
+            IMPORTANT:
+            temperature MUST contain the primary cooking temperature used in the recipe.
+
+            If the recipe says:
+            "Preheat to 130°C"
+
+            then return:
+
+            "temperature": "130°C"
+
+            Do NOT leave temperature blank.
 
             Available ingredients:
 
@@ -302,7 +320,7 @@ function renderAiRecipe(recipe, index) {
     `;
 }
 
-function openAiRecipe(index){
+function openAiRecipe(index) {
 
     appState.ai.selectedRecipe =
         appState.ai.results[index];
@@ -312,7 +330,7 @@ function openAiRecipe(index){
     render();
 }
 
-function saveAiRecipe(index){
+function saveAiRecipe(index) {
 
     console.log(
         "Saving recipe",
@@ -324,7 +342,7 @@ function saveAiRecipe(index){
 
     console.log(recipe);
 
-    if(!recipe){
+    if (!recipe) {
         return;
     }
 
@@ -400,14 +418,13 @@ function aiRecipeDetailView() {
 
             <h3>Ingredients</h3>
 
-            ${
-                (recipe.ingredients || [])
-                    .map(
-                        ingredient =>
-                            `<p>• ${ingredient}</p>`
-                    )
-                    .join("")
-            }
+            ${(recipe.ingredients || [])
+            .map(
+                ingredient =>
+                    `<p>• ${ingredient}</p>`
+            )
+            .join("")
+        }
 
         </div>
 
@@ -415,14 +432,13 @@ function aiRecipeDetailView() {
 
             <h3>Steps</h3>
 
-            ${
-                (recipe.steps || [])
-                    .map(
-                        step =>
-                            `<p>${step}</p>`
-                    )
-                    .join("")
-            }
+            ${(recipe.steps || [])
+            .map(
+                step =>
+                    `<p>${step}</p>`
+            )
+            .join("")
+        }
 
         </div>
 
@@ -543,7 +559,7 @@ function startAiCook(index) {
     render();
 }
 
-function openSavedAiRecipe(index){
+function openSavedAiRecipe(index) {
 
     appState.ai.selectedRecipe =
         appState.ai.savedRecipes[index];
