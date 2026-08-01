@@ -42,18 +42,16 @@ const Icons = {
 
     recipes: `
 
-        <svg class="nav-icon"
-        viewBox="0 0 24 24">
+        <svg class="nav-icon" viewBox="0 0 24 24">
 
-        <path d="M6 3h10a3 3 0 0 1 3 3v15H8a2 2 0 0 0-2-2V3z"/>
+        <!-- book cover -->
+        <path d="M4 4.3 C4 3.3 4.8 2.5 5.8 2.5 H18.2 C19.2 2.5 20 3.3 20 4.3 V19.5 C20 20.5 19.2 21.3 18.2 21.3 H5.8 C4.8 21.3 4 20.5 4 19.5 Z" />
 
-        <path d="M8 3v16"/>
+        <!-- spine -->
+        <path d="M7.5 2.5 V21.3" />
 
-        <path d="M11 8h5"/>
-
-        <path d="M11 12h5"/>
-
-        <path d="M14 16h3"/>
+        <!-- bookmark ribbon -->
+        <path d="M14.5 2.5 V8.8 L16.5 7 L18.5 8.8 V2.5" />
 
         </svg>
 
@@ -63,23 +61,18 @@ const Icons = {
 
     history: `
 
-            <svg class="nav-icon"
-            viewBox="0 0 24 24">
+            <svg class="nav-icon" viewBox="0 0 24 24">
 
-            <!-- journal -->
-            <path d="M6 3h11a2 2 0 0 1 2 2v16H8a2 2 0 0 0-2-2V3z"/>
+        <!-- clock face, open arc -->
+        <path d="M5.3 7 A8 8 0 1 1 4.8 15.3" />
 
-            <path d="M8 3v16"/>
+        <!-- rewind arrowhead -->
+        <path d="M3 6.3 L5.3 7 L4.6 9.5" />
 
-            <!-- temperature trace -->
-            <path d="M11 15l2-3 2 2 2-4"/>
+        <!-- clock hands -->
+        <path d="M12.3 9 V13.3 L15.8 15.3" />
 
-            <!-- small thermometer -->
-            <path d="M12 8v3"/>
-
-            <circle cx="12" cy="12" r="1"/>
-
-            </svg>
+        </svg>
 
             `,
 
