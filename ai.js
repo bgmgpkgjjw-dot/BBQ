@@ -280,7 +280,11 @@ function renderAiRecipe(recipe, index) {
             </h2>
 
             <p>
-                🌡 ${recipe.temperature}
+                🌡 ${
+                    recipe.dome_temperature ??
+                    recipe.temperature ??
+                    "--"
+                }
                 ·
                 ⏱ ${recipe.duration}
                 ·
