@@ -369,7 +369,7 @@ function recipeListView() {
 
         <br>
 
-        <h2>Standard Recipes</h2>
+    <h2>Standard Recipes</h2>
 
         <div class="recipe-list">
 
