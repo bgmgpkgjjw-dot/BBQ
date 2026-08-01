@@ -191,75 +191,82 @@ async function generateOpenRouterRecipes() {
 
 function aiAssistantView() {
 
-    return `
+            return `
 
-    <div class="card">
+        <div class="card">
 
-        <h2>
-        AI Recept Assistent
-        </h2>
+            <h2>
+                🧠 AI Recipe Assistant
+            </h2>
 
-        <p>
-        What ingredients do you have?
-        </p>
+            <label>
+                Ingredients
+            </label>
 
-        <input
-            type="text"
-            value="${appState.ai.ingredients}"
-            oninput="
-                appState.ai.ingredients=this.value
-            "
-            placeholder="
-                peaches, honey, mascarpone
-            "
-        >
+            <input
+                type="text"
+                value="${appState.ai.ingredients}"
+                oninput="
+                    appState.ai.ingredients=this.value
+                "
+                placeholder="
+                    e.g. peaches, honey, mascarpone
+                "
+            >
 
-        <br><br>
+            <div class="ai-action-row">
 
-        <select
-            onchange="
-                appState.ai.category=this.value
-            "
-        >
-
-            ${AI_CATEGORIES.map(
-        category => `
-                    <option
-                        value="${category}"
-                        ${appState.ai.category === category
-                ? "selected"
-                : ""
-            }
-                    >
-                        ${category}
-                    </option>
-                `
-    ).join("")}
-
-        </select>
-
-        <button
-            class="button"
-                onclick="generateOpenRouterRecipes()"    
+                <select
+                    onchange="
+                        appState.ai.category=this.value
+                    "
                 >
-            Generate Recipes
-        </button>
 
-    </div>
+                    ${AI_CATEGORIES.map(
+                category => `
+                            <option
+                                value="${category}"
+                                ${appState.ai.category === category
+                        ? "selected"
+                        : ""
+                    }
+                            >
+                                ${category}
+                            </option>
+                        `
+            ).join("")}
 
-    ${appState.ai.loading
-            ?
-            `
+                </select>
+
+                <button
+                    class="button"
+                    onclick="generateOpenRouterRecipes()"
+                >
+                    Generate Recipes
+                </button>
+
+            </div>
+
+        </div>
+        
+        ';
+
+        
+
+    ${
+        appState.ai.loading
+        ?
+        `
         <div class="card">
             Generating recipes...
         </div>
         `
-            :
-            appState.ai.results.map(
-                (recipe, index) =>
-                    renderAiRecipe(recipe, index)
-            )
-        }
+        :
+        appState.ai.results.map(
+            (recipe, index) =>
+                renderAiRecipe(recipe, index)
+        )
+    }
     `;
 }
 
@@ -267,7 +274,7 @@ function renderAiRecipe(recipe, index) {
 
     return `
 
-    <div class="card">
+        < div class="card" >
 
         <h2>
         ${recipe.title}
