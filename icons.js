@@ -61,20 +61,20 @@ const Icons = {
 
     history: `
 
-            <svg class="nav-icon" viewBox="0 0 24 24">
+        <svg class="nav-icon" viewBox="0 0 24 24" stroke-width="2.2">
 
-        <!-- clock face, open arc -->
-        <path d="M5.3 7 A8 8 0 1 1 4.8 15.3" />
+        <!-- hook / rewind arrow -->
+        <path d="M4 4.3 V9.6 H9.3" />
 
-        <!-- rewind arrowhead -->
-        <path d="M3 6.3 L5.3 7 L4.6 9.5" />
+        <!-- broken circle arc -->
+        <path d="M9.4 4.2 A9 9 0 1 1 4.1 9.7" />
 
         <!-- clock hands -->
-        <path d="M12.3 9 V13.3 L15.8 15.3" />
+        <path d="M12.5 8.8 V13.3 L16 15.9" />
 
         </svg>
 
-            `,
+        `,
 
 
 
