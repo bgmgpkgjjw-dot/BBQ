@@ -58,6 +58,29 @@ async function generateOpenRouterRecipes() {
 
             Do NOT leave temperature blank.
 
+            IMPORTANT:
+
+            Include cooking phases whenever the recipe naturally contains them.
+
+            Examples:
+
+            Pulled Pork:
+            - Smoke
+            - Wrap
+            - Finish
+
+            Brisket:
+            - Smoke
+            - Wrap
+            - Rest
+
+            Ribs:
+            - Smoke
+            - Wrap
+            - Sauce
+
+            Simple recipes may contain a single phase.
+
             Available ingredients:
 
             ${appState.ai.ingredients}
@@ -76,6 +99,18 @@ async function generateOpenRouterRecipes() {
             "target_temperature": "72°C",
             "duration": "45 minutes",
             "difficulty": "Easy",
+            "phases": [
+                {
+                "name": "Smoke",
+                "dome_temperature": 120,
+                "target_temperature": 75
+                },
+                {
+                "name": "Wrap",
+                "dome_temperature": 130,
+                "target_temperature": 92
+                }
+            ]
             "ingredients": [],
             "steps": []
             }
@@ -280,11 +315,10 @@ function renderAiRecipe(recipe, index) {
             </h2>
 
             <p>
-                🌡 ${
-                    recipe.dome_temperature ??
-                    recipe.temperature ??
-                    "--"
-                }
+                🌡 ${recipe.dome_temperature ??
+        recipe.temperature ??
+        "--"
+        }
                 ·
                 ⏱ ${recipe.duration}
                 ·
@@ -297,14 +331,13 @@ function renderAiRecipe(recipe, index) {
                 Ingredients
             </h3>
 
-            ${
-                (recipe.ingredients || [])
-                    .map(
-                        ingredient =>
-                            `<p>• ${ingredient}</p>`
-                    )
-                    .join("")
-            }
+            ${(recipe.ingredients || [])
+            .map(
+                ingredient =>
+                    `<p>• ${ingredient}</p>`
+            )
+            .join("")
+        }
 
             <div class="recipe-actions">
 
@@ -381,9 +414,12 @@ function aiRecipeDetailView() {
         appState.ai.selectedRecipe;
 
     if (!recipe) {
+
         return `
             <div class="card">
-                <h2>Recipe Not Found</h2>
+                <h2>
+                    Recipe Not Found
+                </h2>
             </div>
         `;
     }
@@ -402,20 +438,31 @@ function aiRecipeDetailView() {
                 ← Back
             </button>
 
-            <h2>${recipe.title}</h2>
+            <h2>
+                ${recipe.title}
+            </h2>
 
-            <p>${recipe.description}</p>
+            <p>
+                ${recipe.description}
+            </p>
 
             <br>
 
             <p>
                 🔥 Dome Temperature:
-                ${recipe.temperature}
+                ${
+                    recipe.dome_temperature ??
+                    recipe.temperature ??
+                    "Not specified"
+                }
             </p>
 
             <p>
                 🥩 Target Temperature:
-                ${recipe.target_temperature}
+                ${
+                    recipe.target_temperature ??
+                    "Not specified"
+                }
             </p>
 
             <p>
@@ -430,31 +477,76 @@ function aiRecipeDetailView() {
 
         </div>
 
+        ${
+            recipe.phases?.length
+
+                ? `
+
+                    <div class="card">
+
+                        <h3>
+                            Cook Phases
+                        </h3>
+
+                        ${recipe.phases.map(
+                            phase => `
+
+                                <div class="ingredient-row">
+
+                                    <span>
+                                        ${phase.name}
+                                    </span>
+
+                                    <strong>
+                                        🔥 ${phase.dome_temperature}°C
+                                        ${
+                                            phase.target_temperature
+                                                ? ` · 🥩 ${phase.target_temperature}°C`
+                                                : ""
+                                        }
+                                    </strong>
+
+                                </div>
+
+                            `
+                        ).join("")}
+
+                    </div>
+
+                `
+
+                : ""
+        }
+
         <div class="card">
 
-            <h3>Ingredients</h3>
+            <h3>
+                Ingredients
+            </h3>
 
             ${(recipe.ingredients || [])
-            .map(
-                ingredient =>
-                    `<p>• ${ingredient}</p>`
-            )
-            .join("")
-        }
+                .map(
+                    ingredient =>
+                        `<p>• ${ingredient}</p>`
+                )
+                .join("")
+            }
 
         </div>
 
         <div class="card">
 
-            <h3>Steps</h3>
+            <h3>
+                Steps
+            </h3>
 
             ${(recipe.steps || [])
-            .map(
-                step =>
-                    `<p>${step}</p>`
-            )
-            .join("")
-        }
+                .map(
+                    step =>
+                        `<p>${step}</p>`
+                )
+                .join("")
+            }
 
         </div>
 
@@ -467,7 +559,7 @@ function aiRecipeDetailView() {
 
     `;
 }
-``
+
 
 function startAiCookFromSelectedRecipe() {
 
