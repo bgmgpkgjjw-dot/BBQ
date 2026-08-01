@@ -29,6 +29,8 @@ async function generateOpenRouterRecipes() {
 
             IMPORTANT RULES:
 
+            Generate 3 unique recipes based on the ingredients and recipe style provided.
+
             Recipe must popular online, used by professionals, stick to BBQ basics, like Smokey Goodness, Kamado Joe, Big Green Egg.
 
             For each recipe provide:
@@ -250,9 +252,6 @@ function aiAssistantView() {
 
         </div>
         
-        ';
-
-        
 
     ${appState.ai.loading
             ?
@@ -274,55 +273,61 @@ function renderAiRecipe(recipe, index) {
 
     return `
 
-        < div class="card" >
+        <div class="card">
 
-        <h2>
-        ${recipe.title}
-        </h2>
+            <h2>
+                ${recipe.title}
+            </h2>
 
-        <p>
-        🌡 ${recipe.temperature}
-        ·
-        ⏱ ${recipe.duration}
-        ·
-        ⭐ ${recipe.difficulty}
-        </p>
+            <p>
+                🌡 ${recipe.temperature}
+                ·
+                ⏱ ${recipe.duration}
+                ·
+                ⭐ ${recipe.difficulty}
+            </p>
 
-        <br>
+            <br>
 
-        <h3>
-        Ingredients
-        </h3>
+            <h3>
+                Ingredients
+            </h3>
 
-        ${recipe.ingredients.map(
-        ingredient =>
-            `<p>• ${ingredient}</p>`
-    ).join("")}
+            ${
+                (recipe.ingredients || [])
+                    .map(
+                        ingredient =>
+                            `<p>• ${ingredient}</p>`
+                    )
+                    .join("")
+            }
 
-        <br>
+            <div class="recipe-actions">
 
-        <button
-            class="button"
-            onclick="saveAiRecipe(${index})"
-        >
-            💾 Save Recipe
-        </button>
+                <button
+                    class="button"
+                    onclick="saveAiRecipe(${index})"
+                >
+                    💾 Save
+                </button>
 
-        <button
-            class="button"
-            onclick="openAiRecipe(${index})"
-        >
-        📖 View Recipe
-        </button>
+                <button
+                    class="button"
+                    onclick="openAiRecipe(${index})"
+                >
+                    📖 Open
+                </button>
 
-        <button
-            class="button"
-            onclick="startAiCook(${index})"
-        >
-            Start Cook
-        </button>
+                <button
+                    class="button"
+                    onclick="startAiCook(${index})"
+                >
+                    🔥 Start
+                </button>
 
-    </div>
+            </div>
+
+        </div>
 
     `;
 }
