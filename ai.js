@@ -191,7 +191,7 @@ async function generateOpenRouterRecipes() {
 
 function aiAssistantView() {
 
-            return `
+    return `
 
         <div class="card">
 
@@ -217,24 +217,25 @@ function aiAssistantView() {
             <div class="ai-action-row">
 
                 <select
+                    class="button ai-select"
                     onchange="
                         appState.ai.category=this.value
                     "
-                >
+               >
 
                     ${AI_CATEGORIES.map(
-                category => `
+        category => `
                             <option
                                 value="${category}"
                                 ${appState.ai.category === category
-                        ? "selected"
-                        : ""
-                    }
+                ? "selected"
+                : ""
+            }
                             >
                                 ${category}
                             </option>
                         `
-            ).join("")}
+    ).join("")}
 
                 </select>
 
@@ -253,20 +254,19 @@ function aiAssistantView() {
 
         
 
-    ${
-        appState.ai.loading
-        ?
-        `
+    ${appState.ai.loading
+            ?
+            `
         <div class="card">
             Generating recipes...
         </div>
         `
-        :
-        appState.ai.results.map(
-            (recipe, index) =>
-                renderAiRecipe(recipe, index)
-        )
-    }
+            :
+            appState.ai.results.map(
+                (recipe, index) =>
+                    renderAiRecipe(recipe, index)
+            )
+        }
     `;
 }
 
