@@ -273,7 +273,7 @@ function startManualCook() {
 ========================================================== */
 
 function recipeListView() {
-    
+
 
     if (
         !appState.recipes ||
@@ -314,8 +314,7 @@ function recipeListView() {
 
         <h2>Saved AI Recipes</h2>
 
-        ${
-            appState.ai.savedRecipes.length
+        ${appState.ai.savedRecipes.length
 
             ? appState.ai.savedRecipes.map(
                 (recipe, index) => `
@@ -330,6 +329,8 @@ function recipeListView() {
                             ${recipe.description}
                         </p>
 
+                        <div class="recipe-actions">
+
                         <button
                             class="button"
                             onclick="openSavedAiRecipe(${index})"
@@ -341,7 +342,7 @@ function recipeListView() {
                             class="button"
                             onclick="startSavedAiCook(${index})"
                         >
-                            🔥 Start Cook
+                            🔥 Start
                         </button>
 
                         <button
@@ -352,6 +353,7 @@ function recipeListView() {
                         </button>
 
                     </div>
+
 
                 `
             ).join("")
@@ -371,9 +373,8 @@ function recipeListView() {
 
         <div class="recipe-list">
 
-            ${
-                appState.recipes.map(
-                    recipe => `
+            ${appState.recipes.map(
+            recipe => `
 
                         <div
                             class="recipe"
@@ -395,8 +396,8 @@ function recipeListView() {
                         </div>
 
                     `
-                ).join("")
-            }
+        ).join("")
+        }
 
         </div>
 
