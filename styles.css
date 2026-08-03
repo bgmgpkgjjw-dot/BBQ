@@ -380,6 +380,22 @@ body {
    margin-bottom: 6px;
 }
 
+.phase-actions {
+
+    display: flex;
+
+    gap: 8px;
+
+    margin-top: 12px;
+}
+
+.phase-actions button {
+
+    flex: 1;
+
+    margin: 0;
+}
+
 .cook-progress {
    height: 8px;
    background: #342B22;

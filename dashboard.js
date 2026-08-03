@@ -358,21 +358,21 @@ function renderCookPanel() {
                     : ""
             }
         >
-            ← Previous
+            ← Previous Phase
         </button>
 
         <button
             class="button"
             onclick="completePhase()"
         >
-            ✓ Complete
+            ✓ Next Phase
         </button>
 
         <button
             class="button secondary"
             onclick="stopCook()"
         >
-            Stop
+            Finish Cook
         </button>
 
     </div>
