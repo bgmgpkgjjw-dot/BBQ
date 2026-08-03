@@ -527,6 +527,30 @@ function startAiCookFromSelectedRecipe() {
 
     appState.cook.active = true;
 
+    appState.cook.phases =
+    (recipe.phases || []).map(
+        phase => ({
+
+            name:
+                phase.name,
+
+            domeTarget:
+                Number(
+                    phase.dome_temperature
+                ),
+
+            meatTarget:
+                phase.target_temperature != null
+                    ? Number(
+                        phase.target_temperature
+                    )
+                    : null,
+
+            completed:
+                false
+        })
+    );
+
     appState.cook.name =
         recipe.title;
 
@@ -589,12 +613,29 @@ function startAiCook(index) {
 
     appState.cook.phase = 0;
 
-    appState.cook.phases = [
-        [
-            "AI Recipe",
-            recipe.description
-        ]
-    ];
+    appState.cook.phases =
+    (recipe.phases || []).map(
+        phase => ({
+
+            name:
+                phase.name,
+
+            domeTarget:
+                Number(
+                    phase.dome_temperature
+                ),
+
+            meatTarget:
+                phase.target_temperature != null
+                    ? Number(
+                        phase.target_temperature
+                    )
+                    : null,
+
+            completed:
+                false
+        })
+    );
 
     appState.cook.startedAt =
         new Date().toISOString();

@@ -2,7 +2,7 @@
    Hermanos Grill Companion
    settings.js
 
-   Instellingen scherm: sondebeheer (tot 6 sondes) + app instellingen
+   Instellingen scherm: probe beheer (tot 6 probes) + app instellingen
    ========================================================== */
 
 
@@ -184,14 +184,14 @@ function settingsView() {
 
         <h2>
 
-            Sondes
+            Probes
 
         </h2>
 
         <p style="color:var(--muted); font-size:13px; margin-bottom:14px">
 
-            Tot 6 sondes. Zet een sonde aan en kies de rol
-            (dome / vlees / ambient). Inactieve sondes worden
+            Tot 6 probes. Zet een probe aan en kies de rol
+            (dome / vlees / ambient). Inactieve probes worden
             niet getoond op het dashboard.
 
         </p>
