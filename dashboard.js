@@ -402,14 +402,6 @@ function dashboardView() {
             }
         </div>
 
-        <div class="cook-header">
-
-            <p>
-                Live temperatuur overzicht
-            </p>
-
-        </div>
-
         <div class="probe-container">
 
             ${
