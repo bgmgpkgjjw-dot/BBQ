@@ -382,30 +382,87 @@ function renderCookPanel() {
 }
 
 function dashboardView() {
-    const probes = appState.probes.filter(p => p.active && p.type !== "unused");
+
+    const probes =
+        appState.probes.filter(
+            p => p.active &&
+            p.type !== "unused"
+        );
 
     return `
-    <div class="status" data-live-status>
-      ${appState.bluetooth.connected ? "🟢 Verbonden" : "🔴 Niet verbonden"}
-    </div>
 
-    <div class="cook-header">
-      <h2>${appState.cook.active ? "🔥 " + appState.cook.name : "🔥 Mijn Kamado"}</h2>
-      <p>Live temperatuur overzicht</p>
-    </div>
+        <div
+            class="status"
+            data-live-status
+        >
+            ${
+                appState.bluetooth.connected
+                    ? "🟢 Verbonden"
+                    : "🔴 Niet verbonden"
+            }
+        </div>
 
-    <div class="probe-container">
-      ${probes.length
-            ? probes.map(renderProbeCard).join("")
-            : `<div class="card">Geen actieve probes</div>`
+        <div class="cook-header">
+
+            <h2>
+                ${
+                    appState.cook.active
+                        ? appState.cook.name
+                        : "Mijn Kamado"
+                }
+            </h2>
+
+            <p>
+                Live temperatuur overzicht
+            </p>
+
+        </div>
+
+        <div class="probe-container">
+
+            ${
+                probes.length
+
+                    ? probes
+                        .map(renderProbeCard)
+                        .join("")
+
+                    : `
+                        <div class="card">
+                            Geen actieve probes
+                        </div>
+                    `
+            }
+
+        </div>
+
+        ${renderCookPanel()}
+
+        ${
+            !appState.cook.active
+
+                ? `
+
+                    <button
+                        class="button"
+                        onclick="navigate('recipes')"
+                    >
+                        Kies een recept
+                    </button>
+
+                    <button
+                        class="button"
+                        onclick="startManualCook()"
+                    >
+                        Start nieuwe cook
+                    </button>
+
+                `
+
+                : ""
         }
-    </div>
 
-    ${renderCookPanel()}
-
-    <button class="button" onclick="navigate('recipes')">  Kies een recept</button>
-    <button class="button" onclick="startManualCook()"> Start nieuwe cook</button>
-  `;
+    `;
 }
 
 function startManualCook() {
