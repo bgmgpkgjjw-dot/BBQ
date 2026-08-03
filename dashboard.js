@@ -376,7 +376,7 @@ function renderCookPanel() {
         </button>
 
     </div>
-
+ </div>
   `;
 }
 
