@@ -88,7 +88,7 @@ function renderProbeCard(probe) {
         <div class="probe-title">
 
             <span>
-                ${isDome ? "🔥 Kamado Dome" : "🥩 " + probe.name}
+                ${isDome ? "Kamado Dome" : probe.name}
             </span>
 
 
@@ -403,14 +403,6 @@ function dashboardView() {
         </div>
 
         <div class="cook-header">
-
-            <h2>
-                ${
-                    appState.cook.active
-                        ? appState.cook.name
-                        : "Mijn Kamado"
-                }
-            </h2>
 
             <p>
                 Live temperatuur overzicht
