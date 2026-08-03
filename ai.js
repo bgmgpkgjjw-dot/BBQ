@@ -25,97 +25,44 @@ async function generateOpenRouterRecipes() {
 
         const prompt = `
 
-            You are a professional Kamado BBQ chef.
+            You are a professional Kamado BBQ chef. Generate exactly 3 recipes using the ingredients and style below.
 
-            IMPORTANT RULES:
+            RECIPE MIX (strict):
+            - 2 of the 3 recipes must be classic, well-known, low-effort Kamado dishes — the kind of recipes that show up constantly on Big Green Egg, Kamado Joe, and Smokey Goodness content (e.g. pulled pork, ribs, chicken thighs, smoked salmon, pizza, burgers). Simple ingredient lists, minimal steps, no unusual techniques.
+            - 1 of the 3 recipes may be more "surprising" — a twist on a classic or a less common cut/method — but it must still be realistic for a home Kamado grill with normal supermarket ingredients. No fusion cuisine, no molecular techniques, no hard-to-find ingredients.
 
-            Generate 3 unique recipes based on the ingredients and recipe style provided.
+            LABOR CONSTRAINT:
+            - Prefer recipes with 5-8 steps and default difficulty "Easy" or "Medium." Avoid multi-day brines/marinades or techniques requiring special equipment unless the recipe style explicitly calls for it.
 
-            Recipe must popular online, used by professionals, stick to BBQ basics, like Smokey Goodness, Kamado Joe, Big Green Egg.
+            TEMPERATURE RULES:
+            - "dome_temperature" = required dome/cooking temperature in Celsius, always filled in (e.g. "180°C"). Never leave blank.
+            - "target_temperature" = required internal meat temperature in Celsius, or null if not applicable.
 
-            For each recipe provide:
+            PHASES:
+            - Include multiple phases only when the recipe naturally has them (e.g. pulled pork: Smoke → Wrap → Finish; brisket: Smoke → Wrap → Rest; ribs: Smoke → Wrap → Sauce).
+            - Simple recipes (burgers, veg, fish) should have a single phase.
 
-            title
-            description
-            temperature
-            (required dome temperature in Celsius)
-            target_temperature
-            (required internal meat temperature in Celsius or null)
-            duration
-            difficulty
-            ingredients
-            steps
+            Available ingredients: ${appState.ai.ingredients}
+            Recipe style: ${appState.ai.category}
 
-            IMPORTANT:
-            temperature MUST contain the primary cooking temperature used in the recipe.
-
-            If the recipe says:
-            "Preheat to 130°C"
-
-            then return:
-
-            "temperature": "130°C"
-
-            Do NOT leave temperature blank.
-
-            IMPORTANT:
-
-            Include cooking phases whenever the recipe naturally contains them.
-
-            Examples:
-
-            Pulled Pork:
-            - Smoke
-            - Wrap
-            - Finish
-
-            Brisket:
-            - Smoke
-            - Wrap
-            - Rest
-
-            Ribs:
-            - Smoke
-            - Wrap
-            - Sauce
-
-            Simple recipes may contain a single phase.
-
-            Available ingredients:
-
-            ${appState.ai.ingredients}
-
-            Recipe style:
-
-            ${appState.ai.category}
-
-            Return JSON in this format:
+            Return ONLY valid JSON, no commentary, in this exact format:
 
             [
             {
-            "title": "",
-            "description": "",
-            "dome_temperature": "180°C",
-            "target_temperature": "72°C",
-            "duration": "45 minutes",
-            "difficulty": "Easy",
-            "phases": [
-                {
-                "name": "Smoke",
-                "dome_temperature": 120,
-                "target_temperature": 75
-                },
-                {
-                "name": "Wrap",
-                "dome_temperature": 130,
-                "target_temperature": 92
-                }
-            ]
-            "ingredients": [],
-            "steps": []
+                "title": "",
+                "description": "",
+                "dome_temperature": "180°C",
+                "target_temperature": "72°C",
+                "duration": "45 minutes",
+                "difficulty": "Easy",
+                "phases": [
+                { "name": "Smoke", "dome_temperature": 120, "target_temperature": 75 },
+                { "name": "Wrap", "dome_temperature": 130, "target_temperature": 92 }
+                ],
+                "ingredients": [],
+                "steps": []
             }
             ]
-
 
             `;
 
