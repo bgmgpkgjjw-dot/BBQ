@@ -377,6 +377,7 @@ function renderCookPanel() {
 
     </div>
  </div>
+</div>
   `;
 }
 
