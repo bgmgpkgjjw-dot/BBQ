@@ -319,7 +319,6 @@ function renderCookPanel() {
         </div>
 
         </div>
-      </div>
 
       <div class="phase-box">
 
@@ -343,7 +342,6 @@ function renderCookPanel() {
             }
         </p>
 
-        </div>
 
       <div class="cook-progress">
         <div style="width:${phaseProgress}%"></div>
