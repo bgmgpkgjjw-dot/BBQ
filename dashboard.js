@@ -256,10 +256,21 @@ function renderCookPanel() {
     `;
     }
 
-    const phases = appState.cook.phases || [];
-    const currentPhase = phases[appState.cook.phase] || ["Voorbereiden", ""];
+    const phases =
+        appState.cook.phases || [];
+
+    const currentPhase =
+        phases[appState.cook.phase] || {
+            name: "Voorbereiden",
+            domeTarget: null,
+            meatTarget: null
+        };
+
     const phaseProgress = phases.length
-        ? Math.round(((appState.cook.phase + 1) / phases.length) * 100)
+        ? Math.round(
+            ((appState.cook.phase + 1) /
+                phases.length) * 100
+        )
         : 0;
 
     return `
@@ -311,8 +322,8 @@ function renderCookPanel() {
       </div>
 
       <div class="phase-box">
-        <h3>${currentPhase[0]}</h3>
-        <p>${currentPhase[1]}</p>
+        <h3>${currentPhase.name}</h3>
+        <p>${currentPhase.meatTarget}</p>
       </div>
 
       <div class="cook-progress">
