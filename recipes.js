@@ -316,20 +316,20 @@ function recipeListView() {
 
         ${appState.ai.savedRecipes.length
 
-            ? appState.ai.savedRecipes.map(
-                (recipe, index) => `
+        ? appState.ai.savedRecipes.map(
+            (recipe, index) => `
 
-                    <div class="card">
+                <div class="card">
 
-                        <h3>
-                            ${recipe.title}
-                        </h3>
+                    <h3>
+                        ${recipe.title}
+                    </h3>
 
-                        <p>
-                            ${recipe.description}
-                        </p>
+                    <p>
+                        ${recipe.description}
+                    </p>
 
-                        <div class="recipe-actions">
+                    <div class="recipe-actions">
 
                         <button
                             class="button"
@@ -354,18 +354,19 @@ function recipeListView() {
 
                     </div>
 
-
-                `
-            ).join("")
-
-            : `
-
-                <div class="card">
-                    No saved AI recipes yet.
                 </div>
 
             `
-        }
+        ).join("")
+
+    : `
+
+        <div class="card">
+            No saved AI recipes yet.
+        </div>
+
+    `
+}
 
         <br>
 
