@@ -376,7 +376,7 @@ function aiRecipeDetailView() {
         <div class="card">
 
             <button
-                class="button"
+                class="button secondary"
                 onclick="
                     appState.screen='ai';
                     render();
@@ -393,41 +393,68 @@ function aiRecipeDetailView() {
                 ${recipe.description}
             </p>
 
-            <br>
-
-            <p>
-                🔥 Dome Temperature:
-                ${
-                    recipe.dome_temperature ??
-                    recipe.temperature ??
-                    "Not specified"
-                }
-            </p>
-
-            <p>
-                🥩 Target Temperature:
-                ${
-                    recipe.target_temperature ??
-                    "Not specified"
-                }
-            </p>
-
-            <p>
-                ⏱ Duration:
-                ${recipe.duration}
-            </p>
-
-            <p>
-                ⭐ Difficulty:
-                ${recipe.difficulty}
-            </p>
-
         </div>
 
-        ${
-            recipe.phases?.length
+        <div class="cook-grid">
 
-                ? `
+            <div>
+
+                <span>
+                    Dome
+                </span>
+
+                <strong>
+                    ${recipe.dome_temperature ??
+                recipe.temperature ??
+                "--"
+                }
+                </strong>
+
+            </div>
+
+            <div>
+
+                <span>
+                    Meat
+                </span>
+
+                <strong>
+                    ${recipe.target_temperature ??
+                "--"
+                }
+                </strong>
+
+            </div>
+
+            <div>
+
+                <span>
+                    Duration
+                </span>
+
+                <strong>
+                    ${recipe.duration}
+                </strong>
+
+            </div>
+
+            <div>
+
+                <span>
+                    Difficulty
+                </span>
+
+                <strong>
+                    ${recipe.difficulty}
+                </strong>
+
+            </div>
+
+</div>
+
+        ${recipe.phases?.length
+
+            ? `
 
                     <div class="card">
 
@@ -436,7 +463,7 @@ function aiRecipeDetailView() {
                         </h3>
 
                         ${recipe.phases.map(
-                            phase => `
+                phase => `
 
                                 <div class="ingredient-row">
 
@@ -446,23 +473,22 @@ function aiRecipeDetailView() {
 
                                     <strong>
                                         🔥 ${phase.dome_temperature}°C
-                                        ${
-                                            phase.target_temperature
-                                                ? ` · 🥩 ${phase.target_temperature}°C`
-                                                : ""
-                                        }
+                                        ${phase.target_temperature
+                        ? ` · 🥩 ${phase.target_temperature}°C`
+                        : ""
+                    }
                                     </strong>
 
                                 </div>
 
                             `
-                        ).join("")}
+            ).join("")}
 
                     </div>
 
                 `
 
-                : ""
+            : ""
         }
 
         <div class="card">
@@ -472,12 +498,12 @@ function aiRecipeDetailView() {
             </h3>
 
             ${(recipe.ingredients || [])
-                .map(
-                    ingredient =>
-                        `<p>• ${ingredient}</p>`
-                )
-                .join("")
-            }
+            .map(
+                ingredient =>
+                    `<p>• ${ingredient}</p>`
+            )
+            .join("")
+        }
 
         </div>
 
@@ -488,12 +514,12 @@ function aiRecipeDetailView() {
             </h3>
 
             ${(recipe.steps || [])
-                .map(
-                    step =>
-                        `<p>${step}</p>`
-                )
-                .join("")
-            }
+            .map(
+                step =>
+                    `<p>${step}</p>`
+            )
+            .join("")
+        }
 
         </div>
 
@@ -528,28 +554,28 @@ function startAiCookFromSelectedRecipe() {
     appState.cook.active = true;
 
     appState.cook.phases =
-    (recipe.phases || []).map(
-        phase => ({
+        (recipe.phases || []).map(
+            phase => ({
 
-            name:
-                phase.name,
+                name:
+                    phase.name,
 
-            domeTarget:
-                Number(
-                    phase.dome_temperature
-                ),
+                domeTarget:
+                    Number(
+                        phase.dome_temperature
+                    ),
 
-            meatTarget:
-                phase.target_temperature != null
-                    ? Number(
-                        phase.target_temperature
-                    )
-                    : null,
+                meatTarget:
+                    phase.target_temperature != null
+                        ? Number(
+                            phase.target_temperature
+                        )
+                        : null,
 
-            completed:
-                false
-        })
-    );
+                completed:
+                    false
+            })
+        );
 
     appState.cook.name =
         recipe.title;
@@ -614,28 +640,28 @@ function startAiCook(index) {
     appState.cook.phase = 0;
 
     appState.cook.phases =
-    (recipe.phases || []).map(
-        phase => ({
+        (recipe.phases || []).map(
+            phase => ({
 
-            name:
-                phase.name,
+                name:
+                    phase.name,
 
-            domeTarget:
-                Number(
-                    phase.dome_temperature
-                ),
+                domeTarget:
+                    Number(
+                        phase.dome_temperature
+                    ),
 
-            meatTarget:
-                phase.target_temperature != null
-                    ? Number(
-                        phase.target_temperature
-                    )
-                    : null,
+                meatTarget:
+                    phase.target_temperature != null
+                        ? Number(
+                            phase.target_temperature
+                        )
+                        : null,
 
-            completed:
-                false
-        })
-    );
+                completed:
+                    false
+            })
+        );
 
     appState.cook.startedAt =
         new Date().toISOString();
