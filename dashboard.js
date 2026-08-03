@@ -322,17 +322,63 @@ function renderCookPanel() {
       </div>
 
       <div class="phase-box">
-        <h3>${currentPhase.name}</h3>
-        <p>${currentPhase.meatTarget}</p>
-      </div>
+
+        <h3>
+            ${currentPhase.name}
+        </h3>
+
+        <p>
+            🔥 Dome:
+            ${currentPhase.domeTarget != null
+                ? `${currentPhase.domeTarget}°C`
+                : "--"
+            }
+        </p>
+
+        <p>
+            🥩 Meat:
+            ${currentPhase.meatTarget != null
+                ? `${currentPhase.meatTarget}°C`
+                : "--"
+            }
+        </p>
+
+        </div>
 
       <div class="cook-progress">
         <div style="width:${phaseProgress}%"></div>
       </div>
 
-      <button class="button" onclick="completePhase()">✅ Fase voltooid</button>
-      <button class="button secondary" onclick="stopCook()">Stop cook</button>
+      <div class="phase-actions">
+
+        <button
+            class="button secondary"
+            onclick="previousPhase()"
+            ${
+                appState.cook.phase === 0
+                    ? "disabled"
+                    : ""
+            }
+        >
+            ← Previous
+        </button>
+
+        <button
+            class="button"
+            onclick="completePhase()"
+        >
+            ✓ Complete
+        </button>
+
+        <button
+            class="button secondary"
+            onclick="stopCook()"
+        >
+            Stop
+        </button>
+
     </div>
+
   `;
 }
 
@@ -409,18 +455,72 @@ function startManualCook() {
 }
 
 function completePhase() {
-    if (!appState.cook.active) return;
 
-    appState.cook.completedPhases.push(appState.cook.phase);
-
-    if (appState.cook.phase < appState.cook.phases.length - 1) {
-        appState.cook.phase++;
+    if (!appState.cook.active) {
+        return;
     }
 
-    appState.cook.lastPhaseChange = new Date();
+    appState.cook.completedPhases.push(
+        appState.cook.phase
+    );
+
+    if (
+        appState.cook.phase <
+        appState.cook.phases.length - 1
+    ) {
+
+        appState.cook.phase++;
+
+        const phase =
+            appState.cook.phases[
+            appState.cook.phase
+            ];
+
+        if (phase) {
+
+            appState.cook.domeTarget =
+                phase.domeTarget;
+
+            appState.cook.meatTarget =
+                phase.meatTarget;
+        }
+    }
+
+    appState.cook.lastPhaseChange =
+        new Date();
+
+    saveAppState();
 
     render();
 }
+
+function previousPhase() {
+
+    if (!appState.cook.active) {
+        return;
+    }
+
+    if (appState.cook.phase > 0) {
+
+        appState.cook.phase--;
+
+        appState.cook.completedPhases =
+            appState.cook.completedPhases.filter(
+                phase =>
+                    phase !== appState.cook.phase
+            );
+    }
+
+    appState.cook.lastPhaseChange =
+        new Date();
+
+    saveAppState();
+
+    render();
+}
+
+window.previousPhase =
+    previousPhase;
 
 function stopCook() {
 
