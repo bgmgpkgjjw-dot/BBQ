@@ -226,48 +226,6 @@ function loadRecipeIntoCook(recipeId) {
 
 
 
-function startManualCook() {
-
-
-    Object.assign(
-        appState.cook,
-        {
-
-            active: true,
-
-            name: "Handmatige cook",
-
-            domeTarget: 110,
-
-            meatTarget: null,
-
-            duration: "",
-
-            phase: 0,
-
-            phases: [],
-
-            servings: null,
-
-            startedAt:
-                new Date().toISOString()
-
-        }
-
-    );
-
-
-    appState.screen = "dashboard";
-
-
-    render();
-
-
-}
-
-
-
-
 /* ==========================================================
    RECIPE LIST
 ========================================================== */

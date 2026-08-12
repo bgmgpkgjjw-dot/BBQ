@@ -291,11 +291,6 @@ function renderScreen() {
         
         case "history":
 
-            setTimeout(
-                renderTemperatureChart,
-                50
-            );
-
             if (appState.selectedHistory) {
 
                 return historyDetailView();

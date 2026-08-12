@@ -28,21 +28,8 @@ function sendNotification(
     tag = "general"
 ) {
 
-    function recordAlert(type, message){
-
-    appState.alerts.history.unshift({
-        type,
-        message,
-        timestamp: new Date().toISOString()
-    });
-
-    if(appState.alerts.history.length > 100){
-        appState.alerts.history.pop();
-    }
-
-    if(typeof saveAppState === "function"){
-        saveAppState();
-    }
+    if (typeof recordAlert === "function") {
+        recordAlert(tag, body);
     }
 
     new Notification(title, {

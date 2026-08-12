@@ -237,22 +237,6 @@ const appState = {
 
     },
 
-    // Temperatuur historie
-    history: {
-
-        activeSession: {
-
-            startedAt: null,
-
-            samples: []
-
-        },
-
-
-        sessions: []
-
-    },
-
     // ======================================================
     // APP INSTELLINGEN
     // ======================================================
