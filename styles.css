@@ -743,7 +743,7 @@ body {
 
    left: 50%;
 
-   bottom: calc(env(safe-area-inset-bottom) + 2px);
+   bottom: env(safe-area-inset-bottom);
 
    transform: translateX(-50%);
 
@@ -760,8 +760,6 @@ body {
    align-items: center;
 
    padding: 0 8px;
-   padding-bottom: max(8px, env(safe-area-inset-bottom));
-
 
    background:
       rgba(35, 35, 35, 0.78);
@@ -1002,11 +1000,7 @@ select:focus {
 }
 
 @supports(padding: max(0px)) {
-
-   .nav {
-      height: calc(76px + env(safe-area-inset-bottom));
-   }
-
+   /* No nav-specific overrides needed; content padding handles safe-area */
 }
 
 /* ==========================================================
