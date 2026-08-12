@@ -118,7 +118,7 @@ body {
    flex: 1;
    overflow-y: auto;
    padding: 16px;
-   padding-bottom: 90px;
+   padding-bottom: max(90px, calc(90px + env(safe-area-inset-bottom)));
 }
 
 .content::-webkit-scrollbar {
@@ -760,6 +760,7 @@ body {
    align-items: center;
 
    padding: 0 8px;
+   padding-bottom: max(8px, env(safe-area-inset-bottom));
 
 
    background:
@@ -1003,22 +1004,7 @@ select:focus {
 @supports(padding: max(0px)) {
 
    .nav {
-
-      padding-bottom:
-         max(12px,
-            env(safe-area-inset-bottom));
-
-      height:
-         calc(72px + env(safe-area-inset-bottom));
-
-   }
-
-
-   .content {
-
-      padding-bottom:
-         calc(90px + env(safe-area-inset-bottom));
-
+      height: calc(76px + env(safe-area-inset-bottom));
    }
 
 }
