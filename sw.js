@@ -9,7 +9,8 @@ const ASSETS = [
   './recipes.js',
   './settings.js',
   './simulator.js',
-  './state.js'
+  './state.js',
+  './sensecap.js'
 ];
 
 self.addEventListener('install', event => {

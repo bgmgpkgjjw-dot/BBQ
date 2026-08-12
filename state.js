@@ -69,6 +69,16 @@ const appState = {
         savedRecipes: []
     },
 
+    sensecap: {
+        enabled: false,
+        endpoint: "",
+        pollingIntervalSeconds: 15,
+        status: "Disabled",
+        lastUpdatedAt: null,
+        error: "",
+        sensorMapping: {}
+    },
+
     // ======================================================
     // ACTIEVE COOK
     // ======================================================

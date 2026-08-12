@@ -322,6 +322,7 @@ function serializeAppState() {
         settings: appState.settings,
         theme: appState.theme,
         ai: appState.ai,
+        sensecap: appState.sensecap,
 
         bluetooth: {
             device: appState.bluetooth.device,
@@ -398,6 +399,10 @@ function loadAppState() {
 
         if(saved.ai){
             appState.ai = saved.ai;
+        }
+
+        if(saved.sensecap){
+            appState.sensecap = saved.sensecap;
         }
 
         if (saved.bluetooth) {
