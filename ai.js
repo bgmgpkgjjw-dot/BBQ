@@ -525,14 +525,46 @@ function aiRecipeDetailView() {
 
         </div>
 
-        <button
-            class="button"
-            onclick="startAiCookFromSelectedRecipe()"
-        >
-            Start cook
-        </button>
+        <div class="recipe-actions">
+            <button
+                class="button"
+                onclick="startAiCookFromSelectedRecipe()"
+            >
+                Start cook
+            </button>
+
+            <button
+                class="button secondary"
+                onclick="deleteSelectedSavedAiRecipe()"
+            >
+                Delete
+            </button>
+        </div>
 
     `;
+}
+
+function deleteSelectedSavedAiRecipe() {
+    const selected = appState.ai.selectedRecipe;
+
+    if (!selected) return;
+
+    const index = appState.ai.savedRecipes.findIndex(saved =>
+        saved === selected ||
+        (saved.title === selected.title && saved.description === selected.description)
+    );
+
+    if (index >= 0) {
+        appState.ai.savedRecipes.splice(index, 1);
+    }
+
+    if (typeof saveAppState === "function") {
+        saveAppState();
+    }
+
+    appState.ai.selectedRecipe = null;
+    appState.screen = "ai";
+    render();
 }
 
 function startAiCookFromSelectedRecipe() {

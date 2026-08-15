@@ -299,31 +299,6 @@ function recipeListView() {
                         ${recipe.duration || "--"}
                     </p>
 
-                    <div class="recipe-actions">
-
-                        <button
-                            class="button"
-                            onclick="event.stopPropagation(); openSavedAiRecipe(${index})"
-                        >
-                            Open
-                        </button>
-
-                        <button
-                            class="button"
-                            onclick="event.stopPropagation(); startSavedAiCook(${index})"
-                        >
-                            Start
-                        </button>
-
-                        <button
-                            class="button secondary"
-                            onclick="event.stopPropagation(); deleteSavedAiRecipe(${index})"
-                        >
-                            Delete
-                        </button>
-
-                    </div>
-
                 </div>
 
             `
