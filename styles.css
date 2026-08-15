@@ -559,6 +559,17 @@ body {
     margin: 0;
 }
 
+.detail-actions-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.detail-actions-row .button {
+    margin-top: 0;
+}
+
 .ai-action-row {
 
     display: grid;

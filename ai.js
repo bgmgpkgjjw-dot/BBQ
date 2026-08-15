@@ -373,19 +373,33 @@ function aiRecipeDetailView() {
 
     return `
 
-        <div class="section-actions">
-            <button
-                class="button secondary"
-                onclick="
-                    appState.screen='ai';
-                    render();
-                "
-            >
-                ← Back
-            </button>
-        </div>
-
         <div class="card">
+
+            <div class="detail-actions-row">
+                <button
+                    class="button secondary"
+                    onclick="
+                        appState.screen='ai';
+                        render();
+                    "
+                >
+                    ← Back
+                </button>
+
+                <button
+                    class="button"
+                    onclick="startAiCookFromSelectedRecipe()"
+                >
+                    Start cook
+                </button>
+
+                <button
+                    class="button secondary"
+                    onclick="deleteSelectedSavedAiRecipe()"
+                >
+                    Delete
+                </button>
+            </div>
 
             <h2>
                 ${recipe.title}
@@ -523,22 +537,6 @@ function aiRecipeDetailView() {
             .join("")
         }
 
-        </div>
-
-        <div class="recipe-actions">
-            <button
-                class="button"
-                onclick="startAiCookFromSelectedRecipe()"
-            >
-                Start cook
-            </button>
-
-            <button
-                class="button secondary"
-                onclick="deleteSelectedSavedAiRecipe()"
-            >
-                Delete
-            </button>
         </div>
 
     `;
