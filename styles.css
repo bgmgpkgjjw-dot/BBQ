@@ -427,6 +427,25 @@ body {
    transition: transform .15s ease, opacity .15s ease, box-shadow .15s ease;
 }
 
+.section-actions {
+   margin-bottom: 12px;
+}
+
+.section-actions .button {
+   margin-top: 0;
+}
+
+.stacked-actions {
+   display: flex;
+   flex-direction: column;
+   gap: 10px;
+   margin: 12px 0 16px;
+}
+
+.stacked-actions .button {
+   margin-top: 0;
+}
+
 .button:active {
    transform: scale(.98);
    opacity: .92;

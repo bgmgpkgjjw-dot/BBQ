@@ -208,13 +208,13 @@ function historyDetailView() {
     return `
 
 
-    <button
-    class="button secondary"
-    onclick="closeHistoryDetail()">
-
-    ← Terug
-
-    </button>
+    <div class="section-actions">
+        <button
+            class="button secondary"
+            onclick="closeHistoryDetail()">
+            ← Terug
+        </button>
+    </div>
 
 
 
@@ -224,28 +224,20 @@ function historyDetailView() {
         <h2>
         ${session.name || session.recipe}
         </h2>
-        
-        <button
-        class="button secondary"
-        onclick="renameCook('${session.id}')">
 
-        ✏️ Naam wijzigen
+        <div class="stacked-actions">
+            <button
+                class="button secondary"
+                onclick="renameCook('${session.id}')">
+                ✏️ Naam wijzigen
+            </button>
 
-        </button>
-
-        <br>
-
-        <button
-        class="button danger"
-        onclick="deleteCook('${session.id}')">
-
-        🗑 Verwijder cook
-
-        </button>
-
-        <br>
-
-
+            <button
+                class="button danger"
+                onclick="deleteCook('${session.id}')">
+                🗑 Verwijder cook
+            </button>
+        </div>
 
         <p>
         Gestart:

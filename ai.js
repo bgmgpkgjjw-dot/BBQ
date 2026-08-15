@@ -373,8 +373,7 @@ function aiRecipeDetailView() {
 
     return `
 
-        <div class="card">
-
+        <div class="section-actions">
             <button
                 class="button secondary"
                 onclick="
@@ -384,6 +383,9 @@ function aiRecipeDetailView() {
             >
                 ← Back
             </button>
+        </div>
+
+        <div class="card">
 
             <h2>
                 ${recipe.title}

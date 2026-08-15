@@ -418,6 +418,7 @@ function recipeDetailView() {
     return `
 
 
+<div class="section-actions">
 <button
 class="button secondary"
 onclick="backToRecipes()">
@@ -425,6 +426,7 @@ onclick="backToRecipes()">
 ← Terug
 
 </button>
+</div>
 
 
 
