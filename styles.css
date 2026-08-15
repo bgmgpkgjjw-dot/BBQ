@@ -277,7 +277,9 @@ body {
    also carries the .card class in markup. This fixes the "active cook
    and probe touching" issue. */
 .cook-card {
-   background: var(--gradient-cook);
+   background: var(--gradient-card-surface);
+   border: 1px solid var(--border);
+   box-shadow: 0 10px 22px rgba(0,0,0,.18);
    margin-bottom: 12px;
 }
 
@@ -293,7 +295,8 @@ body {
 }
 
 .cook-info p {
-   background: #17130F;
+   background: rgba(255,255,255,0.02);
+   border: 1px solid var(--border);
    border-radius: 12px;
    padding: 10px;
    font-size: 13px;
@@ -336,7 +339,8 @@ body {
 }
 
 .cook-grid div {
-   background: #17130F;
+   background: rgba(255,255,255,0.02);
+   border: 1px solid var(--border);
    padding: 12px;
    border-radius: 12px;
    min-width: 0;
@@ -369,7 +373,8 @@ body {
 }
 
 .phase-box {
-   background: #17130F;
+   background: rgba(255,255,255,0.02);
+   border: 1px solid var(--border);
    padding: 14px;
    border-radius: 14px;
    margin-bottom: 12px;
