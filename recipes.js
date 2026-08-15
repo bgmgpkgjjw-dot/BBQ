@@ -246,7 +246,7 @@ function recipeListView() {
         return `
             <div class="card">
                 <p>
-                    Geen recepten beschikbaar.
+                    No recipes available.
                 </p>
             </div>
         `;
@@ -378,7 +378,7 @@ function recipeDetailView() {
         <div class="card">
 
         <p>
-        Recept niet gevonden.
+        Recipe not found.
         </p>
 
         </div>
@@ -409,7 +409,7 @@ function recipeDetailView() {
 class="button secondary"
 onclick="backToRecipes()">
 
-← Terug
+← Back
 
 </button>
 </div>
@@ -433,7 +433,7 @@ ${recipe.category}
 
 <div class="card">
 
-<h3>Instellingen</h3>
+<h3>Settings</h3>
 
 
 <p>
@@ -468,13 +468,13 @@ Tijd:
 
 <div class="card">
 
-<h3>Hoeveelheid</h3>
+<h3>Quantity</h3>
 
 
 <div class="scale-row">
 
 <label>
-Porties
+Servings
 </label>
 
 
@@ -522,7 +522,7 @@ onchange="setPrimaryAmount('${recipe.id}',this.value)"
 
 <div class="card">
 
-<h3>Ingrediënten</h3>
+<h3>Ingredients</h3>
 
 
 ${ingredients.map(item => `
@@ -575,7 +575,7 @@ ${recipe.setup.map(
 
 <div class="card">
 
-<h3>Fases</h3>
+<h3>Phases</h3>
 
 
 ${recipe.phases.map(
@@ -611,7 +611,7 @@ class="button"
 
 onclick="loadRecipeIntoCook('${recipe.id}')">
 
-🔥 Start cook
+Start cook
 
 </button>
 

@@ -86,7 +86,7 @@ function startCookSession() {
             Date.now().toString(),
 
         name: appState.cook.name ||
-            "Nieuwe cook",
+            "New cook",
 
         recipe: appState.cook.recipe ||
             null,

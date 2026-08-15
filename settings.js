@@ -2,12 +2,12 @@
    Hermanos Grill Companion
    settings.js
 
-   Instellingen scherm: probe beheer (tot 6 probes) + app instellingen
+   Settings screen: probe management (up to 6 probes) + app settings
    ========================================================== */
 
 
-// Startwaarde voor een sonde die net actief wordt en nog geen meting heeft
-// We tonen geen valse waarden meer; de UI blijft neutral tot er een echte meting binnenkomt.
+// Default starting value for a probe that has just been activated and has no reading yet
+// We no longer show false values; the UI stays neutral until a real measurement arrives.
 function defaultStartTemperature(type) {
 
     return null;
@@ -25,7 +25,7 @@ function toggleProbeActive(id) {
     probe.active = !probe.active;
 
 
-    // Bij activeren zonder rol: standaard op "vlees" zetten
+    // When activating without a role, default it to "meat"
     if (probe.active && probe.type === "unused") {
 
         probe.type = "meat";
@@ -33,7 +33,7 @@ function toggleProbeActive(id) {
     }
 
 
-    // Zorg dat een net actieve sonde direct een zinnige waarde heeft
+    // Ensure a newly active probe immediately has a sensible value
     if (probe.active && probe.temperature === null) {
 
         probe.temperature = defaultStartTemperature(probe.type);
@@ -77,8 +77,8 @@ function setProbeName(id, name) {
 
     probe.name = name;
 
-    // geen render() hier: anders springt de cursor in het tekstveld weg
-    // tijdens het typen. De naam staat al bij de volgende render goed.
+    // No render() here: otherwise the cursor jumps out of the text field while typing.
+    // The name will be refreshed on the next render anyway.
 
 }
 
@@ -246,7 +246,7 @@ function settingsView() {
                         ${p.active ? "" : "disabled"}
                     >
                         <option value="dome" ${p.type === "dome" ? "selected" : ""}>Dome</option>
-                        <option value="meat" ${p.type === "meat" ? "selected" : ""}>Vlees</option>
+                        <option value="meat" ${p.type === "meat" ? "selected" : ""}>Meat</option>
                         <option value="ambient" ${p.type === "ambient" ? "selected" : ""}>Ambient</option>
                     </select>
 
@@ -364,7 +364,7 @@ function settingsView() {
                 `)
                 .join("")
             : `
-                <p>Geen alerts</p>
+                <p>No alerts</p>
             `
         }
     </div>

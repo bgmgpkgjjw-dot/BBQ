@@ -170,7 +170,7 @@ const appState = {
         completedPhases: [],
 
 
-        // Voor toekomstige uitbreidingen
+        // For future expansion
 
         estimatedFinish: null,
 
@@ -212,7 +212,7 @@ const appState = {
         {
             id: 2,
 
-            name: "Vlees",
+            name: "Meat",
 
             type: "meat",
 

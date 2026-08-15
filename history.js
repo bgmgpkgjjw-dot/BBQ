@@ -20,11 +20,11 @@ function historyView() {
         <div class="card">
 
             <h2>
-            Geschiedenis
+            History
             </h2>
 
             <p style="color:var(--muted)">
-            Nog geen opgeslagen cooks.
+            No saved cooks yet.
             </p>
 
         </div>
@@ -41,7 +41,7 @@ function historyView() {
     <div class="card">
 
         <h2>
-        Cook geschiedenis
+        Cook history
         </h2>
 
     </div>
@@ -70,7 +70,7 @@ function renderHistoryCard(session) {
             session.startedAt
         )
             .toLocaleDateString(
-                "nl-NL"
+                "en-US"
             );
 
 
@@ -109,7 +109,7 @@ function renderHistoryCard(session) {
 
 
         <p>
-        ${samples} temperatuurmetingen
+        ${samples} temperature readings
         </p>
 
 
@@ -118,7 +118,7 @@ function renderHistoryCard(session) {
         class="button secondary"
         onclick="openHistorySession('${session.id}')">
 
-        Bekijk details
+        View details
 
         </button>
 
@@ -212,7 +212,7 @@ function historyDetailView() {
         <button
             class="button secondary"
             onclick="closeHistoryDetail()">
-            ← Terug
+            ← Back
         </button>
     </div>
 
@@ -229,30 +229,30 @@ function historyDetailView() {
             <button
                 class="button secondary"
                 onclick="renameCook('${session.id}')">
-                Naam wijzigen
+                Rename cook
             </button>
 
             <button
                 class="button danger"
                 onclick="deleteCook('${session.id}')">
-                Verwijder cook
+                Delete cook
             </button>
         </div>
 
         <p>
-        Gestart:
-        ${new Date(session.startedAt).toLocaleString("nl-NL")}
+        Started:
+        ${new Date(session.startedAt).toLocaleString("en-US")}
         </p>
 
 
         <p>
-        Duur:
+        Duration:
         ${session.duration || "—"}
         </p>
 
 
         <p>
-        Dome doel:
+        Dome target:
         <strong>
         ${session.domeTarget ?? "—"}°C
         </strong>
@@ -260,7 +260,7 @@ function historyDetailView() {
 
 
         <p>
-        Kern doel:
+        Core target:
         <strong>
         ${session.meatTarget ?? "—"}°C
         </strong>
@@ -275,12 +275,12 @@ function historyDetailView() {
     <div class="card">
 
         <h3>
-        Temperatuur data
+        Temperature data
         </h3>
 
 
         <p>
-        Metingen:
+        Measurements:
         ${samples.length}
         </p>
 
@@ -292,7 +292,7 @@ function historyDetailView() {
 
 
         <p>
-        Max kern temperatuur:
+        Max core temperature:
         ${maxMeat}°C
         </p>
 
@@ -305,7 +305,7 @@ function historyDetailView() {
 
 
         <h3>
-        Temperatuurverloop
+        Temperature trend
         </h3>
 
         <div class="chart-container">
@@ -352,12 +352,12 @@ function renameCook(sessionId) {
     const currentName =
         session.name ||
         session.recipe ||
-        "Nieuwe cook";
+        "New cook";
 
 
     const newName =
         prompt(
-            "Nieuwe naam voor deze cook:",
+            "New name for this cook:",
             currentName
         );
 
@@ -396,7 +396,7 @@ function deleteCook(sessionId) {
 
     const confirmed =
         confirm(
-            `Cook "${session.name || session.recipe}" verwijderen?\n\nDeze actie kan niet ongedaan worden gemaakt.`
+            `Delete cook "${session.name || session.recipe}"?\n\nThis action cannot be undone.`
         );
 
     if (!confirmed) {

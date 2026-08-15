@@ -9,566 +9,566 @@
 appState.recipes = [
 
         {
-            id: "pulled_pork", name: "Pulled Pork", category: "Varken",
-            meat: "Varkensschouder", dome: 110, target: 92, duration: "10-12 uur",
+            id: "pulled_pork", name: "Pulled Pork", category: "Pork",
+            meat: "Pork shoulder", dome: 110, target: 92, duration: "10-12 hours",
             baseServings: 8, primaryIngredientId: "i1",
             ingredients: [
-                { id: "i1", name: "Varkensschouder", amount: 3, unit: "kg" },
-                { id: "i2", name: "Mosterd (als binder)", amount: 2, unit: "tbsp" },
+                { id: "i1", name: "Pork shoulder", amount: 3, unit: "kg" },
+                { id: "i2", name: "Mustard (as binder)", amount: 2, unit: "tbsp" },
                 { id: "i3", name: "BBQ rub", amount: 4, unit: "tbsp" },
-                { id: "i4", name: "Appelsap (spritz)", amount: 250, unit: "ml" },
-                { id: "i5", name: "BBQ saus", amount: 200, unit: "ml" }
+                { id: "i4", name: "Apple juice (spritz)", amount: 250, unit: "ml" },
+                { id: "i5", name: "BBQ sauce", amount: 200, unit: "ml" }
             ],
             setup: [
-                "Indirecte opstelling met deflectorplaten",
-                "Vul met kamado-briketten tot net onder het vuurschaal-rooster",
-                "Voeg 2-3 stukken appel- of kersenhout toe",
-                "Stabiliseer de dome op 110°C voor je het vlees plaatst"
+                "Indirect setup with deflector plates",
+                "Fill with charcoal to just below the fire ring",
+                "Add 2-3 pieces of apple or cherry wood",
+                "Stabilize the dome at 110°C before placing the meat"
             ],
             phases: [
-                ["Roken", "110°C tot kern 65°C"],
-                ["Wrap", "Inpakken tot kern 92°C"],
-                ["Rust", "Min. 30 min laten rusten"]
+                ["Smoke", "110°C to core 65°C"],
+                ["Wrap", "Wrap until core reaches 92°C"],
+                ["Rest", "Rest for at least 30 minutes"]
             ]
         },
 
         {
-            id: "ribs", name: "Spare Ribs 3-2-1", category: "Varken",
-            meat: "Spare ribs", dome: 107, target: 88, duration: "6 uur",
+            id: "ribs", name: "Spare Ribs 3-2-1", category: "Pork",
+            meat: "Spare ribs", dome: 107, target: 88, duration: "6 hours",
             baseServings: 4, primaryIngredientId: "i1",
             ingredients: [
                 { id: "i1", name: "Spare ribs", amount: 2, unit: "kg" },
                 { id: "i2", name: "BBQ rub", amount: 3, unit: "tbsp" },
-                { id: "i3", name: "Appelsap (spritz)", amount: 200, unit: "ml" },
-                { id: "i4", name: "Honing", amount: 2, unit: "tbsp" },
-                { id: "i5", name: "BBQ saus", amount: 150, unit: "ml" }
+                { id: "i3", name: "Apple juice (spritz)", amount: 200, unit: "ml" },
+                { id: "i4", name: "Honey", amount: 2, unit: "tbsp" },
+                { id: "i5", name: "BBQ sauce", amount: 150, unit: "ml" }
             ],
             setup: [
-                "Indirecte opstelling met deflectorplaten",
-                "Vlies aan de achterzijde van het rek verwijderen",
-                "Kersen- of eikenhout toevoegen voor rook",
-                "Dome stabiliseren op 107°C"
+                "Indirect setup with deflector plates",
+                "Remove the membrane from the back of the rack",
+                "Add cherry or oak wood for smoke",
+                "Stabilize the dome at 107°C"
             ],
             phases: [
-                ["Roken", "3 uur onverpakt"],
-                ["Inpakken", "2 uur in folie met vocht"],
-                ["Afwerken", "1 uur onverpakt met saus"]
+                ["Smoke", "3 hours unwrapped"],
+                ["Wrap", "2 hours wrapped in foil with moisture"],
+                ["Finish", "1 hour unwrapped with sauce"]
             ]
         },
 
         {
-            id: "baby_back_ribs", name: "Baby Back Ribs", category: "Varken",
-            meat: "Baby back ribs", dome: 110, target: 90, duration: "5 uur",
+            id: "baby_back_ribs", name: "Baby Back Ribs", category: "Pork",
+            meat: "Baby back ribs", dome: 110, target: 90, duration: "5 hours",
             baseServings: 4, primaryIngredientId: "i1",
             ingredients: [
                 { id: "i1", name: "Baby back ribs", amount: 1.5, unit: "kg" },
                 { id: "i2", name: "BBQ rub", amount: 3, unit: "tbsp" },
-                { id: "i3", name: "Appelazijn (spritz)", amount: 150, unit: "ml" },
-                { id: "i4", name: "BBQ saus", amount: 150, unit: "ml" }
+                { id: "i3", name: "Apple cider vinegar (spritz)", amount: 150, unit: "ml" },
+                { id: "i4", name: "BBQ sauce", amount: 150, unit: "ml" }
             ],
             setup: [
-                "Indirecte opstelling met deflectorplaten",
-                "Vlies verwijderen en droogdeppen",
-                "Appelhout toevoegen voor milde rook",
-                "Dome stabiliseren op 110°C"
+                "Indirect setup with deflector plates",
+                "Remove the membrane and pat dry",
+                "Add apple wood for mild smoke",
+                "Stabilize the dome at 110°C"
             ],
             phases: [
-                ["Roken", "3 uur onverpakt"],
-                ["Inpakken", "1,5 uur in folie"],
-                ["Afwerken", "30 min met saus glaceren"]
+                ["Smoke", "3 hours unwrapped"],
+                ["Wrap", "1.5 hours wrapped in foil"],
+                ["Finish", "30 minutes glazing with sauce"]
             ]
         },
 
         {
-            id: "brisket", name: "Beef Brisket", category: "Rund",
-            meat: "Runderborst", dome: 110, target: 96, duration: "14 uur",
+            id: "brisket", name: "Beef Brisket", category: "Beef",
+            meat: "Beef brisket", dome: 110, target: 96, duration: "14 hours",
             baseServings: 10, primaryIngredientId: "i1",
             ingredients: [
-                { id: "i1", name: "Runderborst (briket)", amount: 5, unit: "kg" },
-                { id: "i2", name: "Grof zeezout", amount: 3, unit: "tbsp" },
-                { id: "i3", name: "Grof gemalen peper", amount: 3, unit: "tbsp" },
-                { id: "i4", name: "Slagersgaas / injectievocht", amount: 100, unit: "ml" }
+                { id: "i1", name: "Beef brisket", amount: 5, unit: "kg" },
+                { id: "i2", name: "Coarse sea salt", amount: 3, unit: "tbsp" },
+                { id: "i3", name: "Coarse black pepper", amount: 3, unit: "tbsp" },
+                { id: "i4", name: "Butcher paper / injection liquid", amount: 100, unit: "ml" }
             ],
             setup: [
-                "Indirecte opstelling met deflectorplaten en drippan",
-                "Vetlaag bijsnijden tot ca. 0,5 cm",
-                "Eikenhout toevoegen voor stevige rooksmaak",
-                "Dome stabiliseren op 110°C, plaats vetkant boven"
+                "Indirect setup with deflector plates and drip pan",
+                "Trim the fat cap to about 0.5 cm",
+                "Add oak for a fuller smoke flavor",
+                "Stabilize the dome at 110°C with the fat cap facing upward"
             ],
             phases: [
-                ["Roken", "110°C tot kern 70°C (the stall)"],
-                ["Wrap", "Inpakken in slagerspapier tot kern 96°C"],
-                ["Rust", "Min. 1 uur laten rusten in handdoek/koelbox"]
+                ["Smoke", "110°C until core reaches 70°C (the stall)"],
+                ["Wrap", "Wrap in butcher paper until core reaches 96°C"],
+                ["Rest", "Rest for at least 1 hour in a towel or cooler"]
             ]
         },
 
         {
-            id: "beer_can_chicken", name: "Beer Can Chicken", category: "Gevogelte",
-            meat: "Hele kip", dome: 180, target: 82, duration: "1,5 uur",
+            id: "beer_can_chicken", name: "Beer Can Chicken", category: "Poultry",
+            meat: "Whole chicken", dome: 180, target: 82, duration: "1.5 hours",
             baseServings: 4, primaryIngredientId: "i1",
             ingredients: [
-                { id: "i1", name: "Hele kip", amount: 1.6, unit: "kg" },
-                { id: "i2", name: "Kipkruiden rub", amount: 3, unit: "tbsp" },
-                { id: "i3", name: "Bier (blikje)", amount: 330, unit: "ml" },
-                { id: "i4", name: "Olijfolie", amount: 2, unit: "tbsp" }
+                { id: "i1", name: "Whole chicken", amount: 1.6, unit: "kg" },
+                { id: "i2", name: "Chicken seasoning rub", amount: 3, unit: "tbsp" },
+                { id: "i3", name: "Beer (can)", amount: 330, unit: "ml" },
+                { id: "i4", name: "Olive oil", amount: 2, unit: "tbsp" }
             ],
             setup: [
-                "Indirecte opstelling met deflectorplaten",
-                "Bierblik voor 1/3 legen en kip erop plaatsen",
-                "Kersenhout toevoegen voor lichte rook",
-                "Dome stabiliseren op 180°C"
+                "Indirect setup with deflector plates",
+                "Empty the beer can by one-third and place the chicken on top",
+                "Add cherry wood for light smoke",
+                "Stabilize the dome at 180°C"
             ],
             phases: [
-                ["Roken", "180°C tot kern 65°C"],
-                ["Afwerken", "Tot kern 82°C in de dijen"],
-                ["Rust", "10 min laten rusten"]
+                ["Smoke", "180°C to core 65°C"],
+                ["Finish", "Until the thighs reach 82°C"],
+                ["Rest", "Rest for 10 minutes"]
             ]
         },
 
         {
-            id: "spatchcock_chicken", name: "Spatchcock Kip", category: "Gevogelte",
-            meat: "Hele kip (gevlinderd)", dome: 200, target: 75, duration: "1 uur",
+            id: "spatchcock_chicken", name: "Spatchcock Chicken", category: "Poultry",
+            meat: "Whole chicken (spatchcocked)", dome: 200, target: 75, duration: "1 hour",
             baseServings: 4, primaryIngredientId: "i1",
             ingredients: [
-                { id: "i1", name: "Hele kip", amount: 1.8, unit: "kg" },
-                { id: "i2", name: "Boter (gesmolten)", amount: 3, unit: "tbsp" },
-                { id: "i3", name: "Kipkruiden rub", amount: 3, unit: "tbsp" },
-                { id: "i4", name: "Citroen", amount: 1, unit: null }
+                { id: "i1", name: "Whole chicken", amount: 1.8, unit: "kg" },
+                { id: "i2", name: "Melted butter", amount: 3, unit: "tbsp" },
+                { id: "i3", name: "Chicken seasoning rub", amount: 3, unit: "tbsp" },
+                { id: "i4", name: "Lemon", amount: 1, unit: null }
             ],
             setup: [
-                "Ruggengraat verwijderen en kip plat drukken",
-                "Indirecte opstelling, huid richting vuur",
-                "Appelhout toevoegen voor rook",
-                "Dome stabiliseren op 200°C"
+                "Remove the spine and flatten the chicken",
+                "Indirect setup, skin facing the heat",
+                "Add apple wood for smoke",
+                "Stabilize the dome at 200°C"
             ],
             phases: [
-                ["Grillen", "200°C indirect tot kern 65°C"],
-                ["Afwerken", "Huid krokant tot kern 75°C"],
-                ["Rust", "10 min laten rusten"]
+                ["Grill", "200°C indirect until core reaches 65°C"],
+                ["Finish", "Crisp the skin until core reaches 75°C"],
+                ["Rest", "Rest for 10 minutes"]
             ]
         },
 
         {
-            id: "burnt_ends", name: "Pork Belly Burnt Ends", category: "Varken",
-            meat: "Buikspek", dome: 120, target: 93, duration: "5 uur",
+            id: "burnt_ends", name: "Pork Belly Burnt Ends", category: "Pork",
+            meat: "Pork belly", dome: 120, target: 93, duration: "5 hours",
             baseServings: 6, primaryIngredientId: "i1",
             ingredients: [
-                { id: "i1", name: "Buikspek (zonder zwoerd)", amount: 2, unit: "kg" },
+                { id: "i1", name: "Pork belly (without rind)", amount: 2, unit: "kg" },
                 { id: "i2", name: "BBQ rub", amount: 3, unit: "tbsp" },
-                { id: "i3", name: "Honing", amount: 3, unit: "tbsp" },
-                { id: "i4", name: "BBQ saus", amount: 200, unit: "ml" },
-                { id: "i5", name: "Boter", amount: 50, unit: "g" }
+                { id: "i3", name: "Honey", amount: 3, unit: "tbsp" },
+                { id: "i4", name: "BBQ sauce", amount: 200, unit: "ml" },
+                { id: "i5", name: "Butter", amount: 50, unit: "g" }
             ],
             setup: [
-                "Buikspek in blokjes van 3 cm snijden",
-                "Indirecte opstelling met deflectorplaten",
-                "Kersenhout toevoegen voor rook",
-                "Dome stabiliseren op 120°C"
+                "Cut the pork belly into 3 cm cubes",
+                "Indirect setup with deflector plates",
+                "Add cherry wood for smoke",
+                "Stabilize the dome at 120°C"
             ],
             phases: [
-                ["Roken", "120°C tot kern 75°C"],
-                ["Braiseren", "In pan met boter/honing tot 93°C"],
-                ["Glaceren", "15 min met saus laten inkoken"]
+                ["Smoke", "120°C until core reaches 75°C"],
+                ["Braise", "In a pan with butter and honey until 93°C"],
+                ["Glaze", "Reduce with sauce for 15 minutes"]
             ]
         },
 
         {
-            id: "short_ribs", name: "Beef Short Ribs", category: "Rund",
-            meat: "Runder short ribs", dome: 120, target: 95, duration: "7 uur",
+            id: "short_ribs", name: "Beef Short Ribs", category: "Beef",
+            meat: "Beef short ribs", dome: 120, target: 95, duration: "7 hours",
             baseServings: 4, primaryIngredientId: "i1",
             ingredients: [
                 { id: "i1", name: "Short ribs", amount: 2, unit: "kg" },
-                { id: "i2", name: "Grof zeezout", amount: 2, unit: "tbsp" },
-                { id: "i3", name: "Grof gemalen peper", amount: 2, unit: "tbsp" },
-                { id: "i4", name: "Rundvleesbouillon (spritz)", amount: 200, unit: "ml" }
+                { id: "i2", name: "Coarse sea salt", amount: 2, unit: "tbsp" },
+                { id: "i3", name: "Coarse black pepper", amount: 2, unit: "tbsp" },
+                { id: "i4", name: "Beef stock (spritz)", amount: 200, unit: "ml" }
             ],
             setup: [
-                "Indirecte opstelling met deflectorplaten en drippan",
-                "Vliesje aan onderzijde verwijderen",
-                "Eikenhout toevoegen voor stevige rooksmaak",
-                "Dome stabiliseren op 120°C"
+                "Indirect setup with deflector plates and drip pan",
+                "Remove the membrane on the underside",
+                "Add oak for a full smoke flavor",
+                "Stabilize the dome at 120°C"
             ],
             phases: [
-                ["Roken", "120°C tot kern 70°C"],
-                ["Wrap", "Inpakken tot kern 95°C"],
-                ["Rust", "20 min laten rusten"]
+                ["Smoke", "120°C until core reaches 70°C"],
+                ["Wrap", "Wrap until core reaches 95°C"],
+                ["Rest", "Rest for 20 minutes"]
             ]
         },
 
         {
-            id: "tri_tip", name: "Tri-Tip", category: "Rund",
-            meat: "Tri-tip steak", dome: 120, target: 54, duration: "1,5 uur",
+            id: "tri_tip", name: "Tri-Tip", category: "Beef",
+            meat: "Tri-tip steak", dome: 120, target: 54, duration: "1.5 hours",
             baseServings: 4, primaryIngredientId: "i1",
             ingredients: [
                 { id: "i1", name: "Tri-tip", amount: 1, unit: "kg" },
-                { id: "i2", name: "Grof zeezout", amount: 1, unit: "tbsp" },
-                { id: "i3", name: "Knoflookpoeder", amount: 1, unit: "tbsp" },
-                { id: "i4", name: "Grof gemalen peper", amount: 1, unit: "tbsp" }
+                { id: "i2", name: "Coarse sea salt", amount: 1, unit: "tbsp" },
+                { id: "i3", name: "Garlic powder", amount: 1, unit: "tbsp" },
+                { id: "i4", name: "Coarse black pepper", amount: 1, unit: "tbsp" }
             ],
             setup: [
-                "Reverse sear: eerst indirect, daarna direct schroeien",
-                "Deflectorplaten plaatsen voor de rookfase",
-                "Eikenhout toevoegen",
-                "Dome stabiliseren op 120°C"
+                "Reverse sear: first indirect, then direct sear",
+                "Place the deflector plates for the smoke phase",
+                "Add oak wood",
+                "Stabilize the dome at 120°C"
             ],
             phases: [
-                ["Roken", "120°C indirect tot kern 48°C"],
-                ["Schroeien", "260°C direct, 1-2 min per kant"],
-                ["Rust", "10 min laten rusten"]
+                ["Smoke", "120°C indirect until core reaches 48°C"],
+                ["Sear", "260°C direct, 1-2 minutes per side"],
+                ["Rest", "Rest for 10 minutes"]
             ]
         },
 
         {
-            id: "prime_rib", name: "Prime Rib", category: "Rund",
-            meat: "Ribeye rollade", dome: 130, target: 54, duration: "3 uur",
+            id: "prime_rib", name: "Prime Rib", category: "Beef",
+            meat: "Ribeye roast", dome: 130, target: 54, duration: "3 hours",
             baseServings: 6, primaryIngredientId: "i1",
             ingredients: [
-                { id: "i1", name: "Ribeye rollade (bot-in)", amount: 2.5, unit: "kg" },
-                { id: "i2", name: "Grof zeezout", amount: 2, unit: "tbsp" },
-                { id: "i3", name: "Verse rozemarijn", amount: 2, unit: "tbsp" },
-                { id: "i4", name: "Boter (gesmolten)", amount: 50, unit: "g" }
+                { id: "i1", name: "Ribeye roast (bone-in)", amount: 2.5, unit: "kg" },
+                { id: "i2", name: "Coarse sea salt", amount: 2, unit: "tbsp" },
+                { id: "i3", name: "Fresh rosemary", amount: 2, unit: "tbsp" },
+                { id: "i4", name: "Melted butter", amount: 50, unit: "g" }
             ],
             setup: [
-                "Indirecte opstelling met deflectorplaten",
-                "Vlees op kamertemperatuur laten komen",
-                "Eikenhout toevoegen voor milde rook",
-                "Dome stabiliseren op 130°C"
+                "Indirect setup with deflector plates",
+                "Bring the meat to room temperature",
+                "Add oak for mild smoke",
+                "Stabilize the dome at 130°C"
             ],
             phases: [
-                ["Roken", "130°C tot kern 48°C"],
-                ["Schroeien", "260°C direct voor korstje"],
-                ["Rust", "15 min laten rusten"]
+                ["Smoke", "130°C until core reaches 48°C"],
+                ["Sear", "260°C direct for crust"],
+                ["Rest", "Rest for 15 minutes"]
             ]
         },
 
         {
-            id: "leg_of_lamb", name: "Lamsbout", category: "Lam",
-            meat: "Lamsbout", dome: 150, target: 60, duration: "3 uur",
+            id: "leg_of_lamb", name: "Leg of Lamb", category: "Lamb",
+            meat: "Leg of lamb", dome: 150, target: 60, duration: "3 hours",
             baseServings: 6, primaryIngredientId: "i1",
             ingredients: [
-                { id: "i1", name: "Lamsbout (been eruit)", amount: 2, unit: "kg" },
-                { id: "i2", name: "Knoflook (tenen)", amount: 4, unit: null },
-                { id: "i3", name: "Rozemarijn", amount: 3, unit: "tbsp" },
-                { id: "i4", name: "Olijfolie", amount: 3, unit: "tbsp" }
+                { id: "i1", name: "Leg of lamb (bone removed)", amount: 2, unit: "kg" },
+                { id: "i2", name: "Garlic cloves", amount: 4, unit: null },
+                { id: "i3", name: "Rosemary", amount: 3, unit: "tbsp" },
+                { id: "i4", name: "Olive oil", amount: 3, unit: "tbsp" }
             ],
             setup: [
-                "Indirecte opstelling met deflectorplaten",
-                "Vlees insnijden en marineren met knoflook/olie",
-                "Eikenhout toevoegen",
-                "Dome stabiliseren op 150°C"
+                "Indirect setup with deflector plates",
+                "Score the meat and marinate with garlic and oil",
+                "Add oak wood",
+                "Stabilize the dome at 150°C"
             ],
             phases: [
-                ["Grillen", "150°C indirect tot kern 55°C"],
-                ["Schroeien", "Kort direct voor korstje"],
-                ["Rust", "15 min laten rusten"]
+                ["Grill", "150°C indirect until core reaches 55°C"],
+                ["Sear", "Briefly direct for crust"],
+                ["Rest", "Rest for 15 minutes"]
             ]
         },
 
         {
-            id: "lamb_shoulder", name: "Lamsschouder", category: "Lam",
-            meat: "Lamsschouder", dome: 120, target: 92, duration: "6 uur",
+            id: "lamb_shoulder", name: "Lamb Shoulder", category: "Lamb",
+            meat: "Lamb shoulder", dome: 120, target: 92, duration: "6 hours",
             baseServings: 6, primaryIngredientId: "i1",
             ingredients: [
-                { id: "i1", name: "Lamsschouder", amount: 1.8, unit: "kg" },
-                { id: "i2", name: "Komijn (gemalen)", amount: 1, unit: "tbsp" },
-                { id: "i3", name: "Paprikapoeder", amount: 1, unit: "tbsp" },
-                { id: "i4", name: "Olijfolie", amount: 2, unit: "tbsp" }
+                { id: "i1", name: "Lamb shoulder", amount: 1.8, unit: "kg" },
+                { id: "i2", name: "Ground cumin", amount: 1, unit: "tbsp" },
+                { id: "i3", name: "Paprika powder", amount: 1, unit: "tbsp" },
+                { id: "i4", name: "Olive oil", amount: 2, unit: "tbsp" }
             ],
             setup: [
-                "Indirecte opstelling met deflectorplaten",
-                "Vlees insmeren met kruidenmix",
-                "Kersenhout toevoegen",
-                "Dome stabiliseren op 120°C"
+                "Indirect setup with deflector plates",
+                "Coat the meat with the spice mix",
+                "Add cherry wood",
+                "Stabilize the dome at 120°C"
             ],
             phases: [
-                ["Roken", "120°C tot kern 70°C"],
-                ["Wrap", "Inpakken tot kern 92°C"],
-                ["Rust", "20 min laten rusten, dan pulled"]
+                ["Smoke", "120°C until core reaches 70°C"],
+                ["Wrap", "Wrap until core reaches 92°C"],
+                ["Rest", "Rest for 20 minutes, then pull"]
             ]
         },
 
         {
-            id: "smoked_turkey", name: "Gerookte Kalkoen", category: "Gevogelte",
-            meat: "Hele kalkoen", dome: 150, target: 74, duration: "4 uur",
+            id: "smoked_turkey", name: "Smoked Turkey", category: "Poultry",
+            meat: "Whole turkey", dome: 150, target: 74, duration: "4 hours",
             baseServings: 10, primaryIngredientId: "i1",
             ingredients: [
-                { id: "i1", name: "Hele kalkoen", amount: 5, unit: "kg" },
-                { id: "i2", name: "Pekel (zout)", amount: 200, unit: "g" },
-                { id: "i3", name: "Boter (gesmolten)", amount: 100, unit: "g" },
-                { id: "i4", name: "Gevogeltekruiden", amount: 3, unit: "tbsp" }
+                { id: "i1", name: "Whole turkey", amount: 5, unit: "kg" },
+                { id: "i2", name: "Brine (salt)", amount: 200, unit: "g" },
+                { id: "i3", name: "Melted butter", amount: 100, unit: "g" },
+                { id: "i4", name: "Poultry seasoning", amount: 3, unit: "tbsp" }
             ],
             setup: [
-                "Kalkoen 12 uur van tevoren pekelen",
-                "Indirecte opstelling met deflectorplaten en drippan",
-                "Appelhout toevoegen voor rook",
-                "Dome stabiliseren op 150°C"
+                "Brine the turkey 12 hours in advance",
+                "Indirect setup with deflector plates and drip pan",
+                "Add apple wood for smoke",
+                "Stabilize the dome at 150°C"
             ],
             phases: [
-                ["Roken", "150°C tot kern 60°C"],
-                ["Afwerken", "Tot kern 74°C in de borst"],
-                ["Rust", "20 min laten rusten"]
+                ["Smoke", "150°C until core reaches 60°C"],
+                ["Finish", "Until the breast reaches 74°C"],
+                ["Rest", "Rest for 20 minutes"]
             ]
         },
 
         {
-            id: "turkey_breast", name: "Kalkoenfilet", category: "Gevogelte",
-            meat: "Kalkoenfilet", dome: 150, target: 70, duration: "1,5 uur",
+            id: "turkey_breast", name: "Turkey Breast", category: "Poultry",
+            meat: "Turkey breast", dome: 150, target: 70, duration: "1.5 hours",
             baseServings: 4, primaryIngredientId: "i1",
             ingredients: [
-                { id: "i1", name: "Kalkoenfilet", amount: 1.2, unit: "kg" },
-                { id: "i2", name: "Boter (gesmolten)", amount: 2, unit: "tbsp" },
-                { id: "i3", name: "Gevogeltekruiden", amount: 2, unit: "tbsp" }
+                { id: "i1", name: "Turkey breast", amount: 1.2, unit: "kg" },
+                { id: "i2", name: "Melted butter", amount: 2, unit: "tbsp" },
+                { id: "i3", name: "Poultry seasoning", amount: 2, unit: "tbsp" }
             ],
             setup: [
-                "Indirecte opstelling met deflectorplaten",
-                "Filet insmeren met boter en kruiden",
-                "Appelhout toevoegen",
-                "Dome stabiliseren op 150°C"
+                "Indirect setup with deflector plates",
+                "Coat the breast with butter and seasoning",
+                "Add apple wood",
+                "Stabilize the dome at 150°C"
             ],
             phases: [
-                ["Roken", "150°C tot kern 65°C"],
-                ["Afwerken", "Tot kern 70°C"],
-                ["Rust", "10 min laten rusten"]
+                ["Smoke", "150°C until core reaches 65°C"],
+                ["Finish", "Until core reaches 70°C"],
+                ["Rest", "Rest for 10 minutes"]
             ]
         },
 
         {
-            id: "pork_loin", name: "Varkenshaas", category: "Varken",
-            meat: "Varkenshaas", dome: 150, target: 63, duration: "1,5 uur",
+            id: "pork_loin", name: "Pork Loin", category: "Pork",
+            meat: "Pork loin", dome: 150, target: 63, duration: "1.5 hours",
             baseServings: 4, primaryIngredientId: "i1",
             ingredients: [
-                { id: "i1", name: "Varkenshaas", amount: 1.2, unit: "kg" },
-                { id: "i2", name: "Mosterd (als binder)", amount: 1, unit: "tbsp" },
+                { id: "i1", name: "Pork loin", amount: 1.2, unit: "kg" },
+                { id: "i2", name: "Mustard (as binder)", amount: 1, unit: "tbsp" },
                 { id: "i3", name: "BBQ rub", amount: 2, unit: "tbsp" }
             ],
             setup: [
-                "Indirecte opstelling met deflectorplaten",
-                "Vlees insmeren met mosterd en rub",
-                "Appelhout toevoegen",
-                "Dome stabiliseren op 150°C"
+                "Indirect setup with deflector plates",
+                "Coat the meat with mustard and rub",
+                "Add apple wood",
+                "Stabilize the dome at 150°C"
             ],
             phases: [
-                ["Roken", "150°C tot kern 55°C"],
-                ["Schroeien", "Kort direct voor korstje"],
-                ["Rust", "10 min laten rusten"]
+                ["Smoke", "150°C until core reaches 55°C"],
+                ["Sear", "Briefly direct for crust"],
+                ["Rest", "Rest for 10 minutes"]
             ]
         },
 
         {
-            id: "cedar_salmon", name: "Cederhout Zalm", category: "Vis",
-            meat: "Zalmfilet", dome: 120, target: 52, duration: "45 minuten",
+            id: "cedar_salmon", name: "Cedar Salmon", category: "Fish",
+            meat: "Salmon fillet", dome: 120, target: 52, duration: "45 minutes",
             baseServings: 4, primaryIngredientId: "i1",
             ingredients: [
-                { id: "i1", name: "Zalmfilet (met huid)", amount: 800, unit: "g" },
-                { id: "i2", name: "Bruine suiker", amount: 2, unit: "tbsp" },
-                { id: "i3", name: "Grof zeezout", amount: 1, unit: "tbsp" },
-                { id: "i4", name: "Dille", amount: 2, unit: "tbsp" }
+                { id: "i1", name: "Salmon fillet (with skin)", amount: 800, unit: "g" },
+                { id: "i2", name: "Brown sugar", amount: 2, unit: "tbsp" },
+                { id: "i3", name: "Coarse sea salt", amount: 1, unit: "tbsp" },
+                { id: "i4", name: "Dill", amount: 2, unit: "tbsp" }
             ],
             setup: [
-                "Cederhouten plank min. 1 uur laten weken",
-                "Indirecte opstelling met deflectorplaten",
-                "Zalm op de plank leggen, geen extra rookhout nodig",
-                "Dome stabiliseren op 120°C"
+                "Soak the cedar plank for at least 1 hour",
+                "Indirect setup with deflector plates",
+                "Place the salmon on the plank, no extra wood needed",
+                "Stabilize the dome at 120°C"
             ],
             phases: [
-                ["Roken", "120°C tot kern 48°C"],
-                ["Afwerken", "Tot kern 52°C, vlees glazig"]
+                ["Smoke", "120°C until core reaches 48°C"],
+                ["Finish", "Until core reaches 52°C and the flesh looks glossy"]
             ]
         },
 
         {
-            id: "whole_trout", name: "Hele Forel", category: "Vis",
-            meat: "Forel", dome: 130, target: 60, duration: "40 minuten",
+            id: "whole_trout", name: "Whole Trout", category: "Fish",
+            meat: "Trout", dome: 130, target: 60, duration: "40 minutes",
             baseServings: 2, primaryIngredientId: "i1",
             ingredients: [
-                { id: "i1", name: "Hele forel (schoongemaakt)", amount: 500, unit: "g" },
-                { id: "i2", name: "Citroen", amount: 1, unit: null },
-                { id: "i3", name: "Verse dille", amount: 2, unit: "tbsp" },
-                { id: "i4", name: "Olijfolie", amount: 1, unit: "tbsp" }
+                { id: "i1", name: "Whole trout (cleaned)", amount: 500, unit: "g" },
+                { id: "i2", name: "Lemon", amount: 1, unit: null },
+                { id: "i3", name: "Fresh dill", amount: 2, unit: "tbsp" },
+                { id: "i4", name: "Olive oil", amount: 1, unit: "tbsp" }
             ],
             setup: [
-                "Indirecte opstelling met deflectorplaten",
-                "Vis vullen met citroen en dille",
-                "Elzenhout toevoegen voor rook",
-                "Dome stabiliseren op 130°C"
+                "Indirect setup with deflector plates",
+                "Stuff the fish with lemon and dill",
+                "Add alder wood for smoke",
+                "Stabilize the dome at 130°C"
             ],
             phases: [
-                ["Roken", "130°C tot kern 60°C"],
-                ["Serveren", "Direct opdienen"]
+                ["Smoke", "130°C until core reaches 60°C"],
+                ["Serve", "Serve immediately"]
             ]
         },
 
         {
-            id: "pizza", name: "Kamado Pizza", category: "Overig",
-            meat: "Pizza", dome: 300, target: null, duration: "10 minuten",
+            id: "pizza", name: "Kamado Pizza", category: "Other",
+            meat: "Pizza", dome: 300, target: null, duration: "10 minutes",
             baseServings: 2, primaryIngredientId: "i1",
             ingredients: [
-                { id: "i1", name: "Pizzabloem (00)", amount: 250, unit: "g" },
+                { id: "i1", name: "Pizza flour (00)", amount: 250, unit: "g" },
                 { id: "i2", name: "Water", amount: 150, unit: "ml" },
-                { id: "i3", name: "Gist", amount: 1, unit: "tsp" },
-                { id: "i4", name: "Tomatensaus", amount: 100, unit: "ml" },
+                { id: "i3", name: "Yeast", amount: 1, unit: "tsp" },
+                { id: "i4", name: "Tomato sauce", amount: 100, unit: "ml" },
                 { id: "i5", name: "Mozzarella", amount: 150, unit: "g" }
             ],
             setup: [
-                "Pizzasteen minimaal 30 min mee laten opwarmen",
-                "Directe opstelling zonder deflector",
-                "Dome opstoken naar 300°C",
-                "Pizzaschep bebloemen tegen aanplakken"
+                "Warm the pizza stone for at least 30 minutes",
+                "Direct setup without deflector",
+                "Bring the dome up to 300°C",
+                "Dust the pizza peel to prevent sticking"
             ],
             phases: [
-                ["Opwarmen", "Steen op 300°C brengen"],
-                ["Bakken", "8-10 min tot korst goudbruin"]
+                ["Preheat", "Bring the stone to 300°C"],
+                ["Bake", "8-10 min until the crust is golden brown"]
             ]
         },
 
         {
-            id: "mac_and_cheese", name: "Gerookte Mac and Cheese", category: "Overig",
-            meat: "Bijgerecht", dome: 150, target: null, duration: "1 uur",
+            id: "mac_and_cheese", name: "Smoked Mac and Cheese", category: "Other",
+            meat: "Side dish", dome: 150, target: null, duration: "1 hour",
             baseServings: 6, primaryIngredientId: "i1",
             ingredients: [
                 { id: "i1", name: "Macaroni", amount: 500, unit: "g" },
-                { id: "i2", name: "Cheddar (geraspt)", amount: 300, unit: "g" },
-                { id: "i3", name: "Room", amount: 300, unit: "ml" },
-                { id: "i4", name: "Boter", amount: 50, unit: "g" }
+                { id: "i2", name: "Cheddar (grated)", amount: 300, unit: "g" },
+                { id: "i3", name: "Cream", amount: 300, unit: "ml" },
+                { id: "i4", name: "Butter", amount: 50, unit: "g" }
             ],
             setup: [
-                "Indirecte opstelling met deflectorplaten",
-                "Macaroni voorkoken en mengen met saus in gietijzeren pan",
-                "Kersenhout toevoegen voor lichte rook",
-                "Dome stabiliseren op 150°C"
+                "Indirect setup with deflector plates",
+                "Par-cook the macaroni and mix with sauce in a cast-iron pan",
+                "Add cherry wood for light smoke",
+                "Stabilize the dome at 150°C"
             ],
             phases: [
-                ["Roken", "150°C, 45 min tot bubbelend"],
-                ["Afwerken", "15 min extra voor korstje"]
+                ["Smoke", "150°C, 45 minutes until bubbling"],
+                ["Finish", "15 minutes extra for crust"]
             ]
         },
 
         {
-            id: "dutch_oven_chili", name: "Dutch Oven Chili", category: "Overig",
-            meat: "Rundergehakt", dome: 150, target: null, duration: "2,5 uur",
+            id: "dutch_oven_chili", name: "Dutch Oven Chili", category: "Other",
+            meat: "Beef mince", dome: 150, target: null, duration: "2.5 hours",
             baseServings: 6, primaryIngredientId: "i1",
             ingredients: [
-                { id: "i1", name: "Rundergehakt", amount: 1, unit: "kg" },
-                { id: "i2", name: "Kidneybonen (blik)", amount: 400, unit: "g" },
-                { id: "i3", name: "Gepelde tomaten (blik)", amount: 800, unit: "g" },
-                { id: "i4", name: "Ui", amount: 2, unit: null },
-                { id: "i5", name: "Chilipoeder", amount: 2, unit: "tbsp" }
+                { id: "i1", name: "Beef mince", amount: 1, unit: "kg" },
+                { id: "i2", name: "Kidney beans (can)", amount: 400, unit: "g" },
+                { id: "i3", name: "Peeled tomatoes (can)", amount: 800, unit: "g" },
+                { id: "i4", name: "Onion", amount: 2, unit: null },
+                { id: "i5", name: "Chili powder", amount: 2, unit: "tbsp" }
             ],
             setup: [
-                "Indirecte opstelling met deflectorplaten",
-                "Gehakt direct aanbraden in de dutch oven op de kamado",
-                "Eikenhout toevoegen voor rooksmaak",
-                "Dome stabiliseren op 150°C"
+                "Indirect setup with deflector plates",
+                "Brown the mince directly in the Dutch oven on the kamado",
+                "Add oak for smoke flavor",
+                "Stabilize the dome at 150°C"
             ],
             phases: [
-                ["Aanbraden", "Gehakt en ui op smaak brengen"],
-                ["Sudderen", "2 uur met deksel op de kamado"]
+                ["Sear", "Brown the beef and onion"],
+                ["Simmer", "2 hours with the lid on the kamado"]
             ]
         },
 
         {
-            id: "smoked_wings", name: "Gerookte Chicken Wings", category: "Gevogelte",
-            meat: "Kippenvleugels", dome: 130, target: 74, duration: "1,5 uur",
+            id: "smoked_wings", name: "Smoked Chicken Wings", category: "Poultry",
+            meat: "Chicken wings", dome: 130, target: 74, duration: "1.5 hours",
             baseServings: 4, primaryIngredientId: "i1",
             ingredients: [
-                { id: "i1", name: "Kippenvleugels", amount: 1.2, unit: "kg" },
+                { id: "i1", name: "Chicken wings", amount: 1.2, unit: "kg" },
                 { id: "i2", name: "BBQ rub", amount: 3, unit: "tbsp" },
-                { id: "i3", name: "Bakpoeder (voor krokante huid)", amount: 1, unit: "tsp" },
-                { id: "i4", name: "BBQ saus", amount: 100, unit: "ml" }
+                { id: "i3", name: "Baking powder (for crispy skin)", amount: 1, unit: "tsp" },
+                { id: "i4", name: "BBQ sauce", amount: 100, unit: "ml" }
             ],
             setup: [
-                "Indirecte opstelling met deflectorplaten",
-                "Vleugels droogdeppen en met bakpoeder/rub bestuiven",
-                "Appelhout toevoegen",
-                "Dome stabiliseren op 130°C"
+                "Indirect setup with deflector plates",
+                "Pat dry the wings and dust with baking powder and rub",
+                "Add apple wood",
+                "Stabilize the dome at 130°C"
             ],
             phases: [
-                ["Roken", "130°C tot kern 70°C"],
-                ["Krokant maken", "180°C direct tot kern 74°C"]
+                ["Smoke", "130°C until core reaches 70°C"],
+                ["Crisp", "180°C direct until core reaches 74°C"]
             ]
         },
 
         {
-            id: "kielbasa", name: "Gerookte Worst", category: "Varken",
-            meat: "Kielbasa", dome: 110, target: 70, duration: "2 uur",
+            id: "kielbasa", name: "Smoked Sausage", category: "Pork",
+            meat: "Kielbasa", dome: 110, target: 70, duration: "2 hours",
             baseServings: 4, primaryIngredientId: "i1",
             ingredients: [
-                { id: "i1", name: "Verse worst (kielbasa)", amount: 800, unit: "g" },
-                { id: "i2", name: "Mosterd (om te serveren)", amount: 2, unit: "tbsp" }
+                { id: "i1", name: "Fresh sausage (kielbasa)", amount: 800, unit: "g" },
+                { id: "i2", name: "Mustard (for serving)", amount: 2, unit: "tbsp" }
             ],
             setup: [
-                "Indirecte opstelling met deflectorplaten",
-                "Worst op kamerroostertemperatuur laten komen",
-                "Eikenhout toevoegen voor stevige rook",
-                "Dome stabiliseren op 110°C"
+                "Indirect setup with deflector plates",
+                "Bring the sausage to room temperature",
+                "Add oak wood for a fuller smoke",
+                "Stabilize the dome at 110°C"
             ],
             phases: [
-                ["Roken", "110°C tot kern 70°C"],
-                ["Serveren", "Direct opdienen"]
+                ["Smoke", "110°C until core reaches 70°C"],
+                ["Serve", "Serve immediately"]
             ]
         },
 
         {
-            id: "grilled_vegetables", name: "Gegrilde Groenteschotel", category: "Vegetarisch",
-            meat: "Groenten", dome: 200, target: null, duration: "25 minuten",
+            id: "grilled_vegetables", name: "Grilled Vegetable Platter", category: "Vegetarian",
+            meat: "Vegetables", dome: 200, target: null, duration: "25 minutes",
             baseServings: 4, primaryIngredientId: "i1",
             ingredients: [
-                { id: "i1", name: "Gemengde groenten (courgette, paprika, ui)", amount: 800, unit: "g" },
-                { id: "i2", name: "Olijfolie", amount: 3, unit: "tbsp" },
-                { id: "i3", name: "Knoflook (tenen)", amount: 2, unit: null },
-                { id: "i4", name: "Zeezout", amount: 1, unit: "tsp" }
+                { id: "i1", name: "Mixed vegetables (zucchini, peppers, onion)", amount: 800, unit: "g" },
+                { id: "i2", name: "Olive oil", amount: 3, unit: "tbsp" },
+                { id: "i3", name: "Garlic cloves", amount: 2, unit: null },
+                { id: "i4", name: "Sea salt", amount: 1, unit: "tsp" }
             ],
             setup: [
-                "Directe opstelling op de grillplaat of in grillmand",
-                "Groenten in gelijke stukken snijden",
-                "Geen extra rookhout nodig",
-                "Dome stabiliseren op 200°C"
+                "Direct setup on the grill plate or in a grill basket",
+                "Cut the vegetables into even pieces",
+                "No extra wood needed",
+                "Stabilize the dome at 200°C"
             ],
             phases: [
-                ["Grillen", "200°C direct, regelmatig omscheppen"],
-                ["Serveren", "Direct opdienen"]
+                ["Grill", "200°C direct, turning regularly"],
+                ["Serve", "Serve immediately"]
             ]
         },
 
         {
-            id: "smoked_cheese", name: "Gerookte Kaas", category: "Vegetarisch",
-            meat: "Kaas", dome: 25, target: null, duration: "2 uur",
+            id: "smoked_cheese", name: "Smoked Cheese", category: "Vegetarian",
+            meat: "Cheese", dome: 25, target: null, duration: "2 hours",
             baseServings: 4, primaryIngredientId: "i1",
             ingredients: [
-                { id: "i1", name: "Kaas (bv. jong belegen)", amount: 500, unit: "g" }
+                { id: "i1", name: "Cheese (e.g. young cheddar)", amount: 500, unit: "g" }
             ],
             setup: [
-                "Cold smoke generator gebruiken i.p.v. gewone kolen",
-                "Kaas op een rooster boven een lekbak leggen",
-                "Appelhout(snippers) gebruiken voor milde rook",
-                "Dome zo laag mogelijk houden (max. 25°C) zodat kaas niet smelt"
+                "Use a cold smoke generator instead of regular coals",
+                "Place the cheese on a rack above a drip tray",
+                "Use apple wood shavings for gentle smoke",
+                "Keep the dome as low as possible (max. 25°C) so the cheese does not melt"
             ],
             phases: [
-                ["Koud roken", "2 uur bij max. 25°C"],
-                ["Rust", "Minimaal 24 uur laten rijpen in de koelkast"]
+                ["Cold smoke", "2 hours at max. 25°C"],
+                ["Rest", "Allow to mature for at least 24 hours in the refrigerator"]
             ]
         },
 
         {
-            id: "reverse_sear_ribeye", name: "Reverse Sear Ribeye", category: "Rund",
-            meat: "Ribeye steak", dome: 120, target: 54, duration: "1 uur",
+            id: "reverse_sear_ribeye", name: "Reverse Sear Ribeye", category: "Beef",
+            meat: "Ribeye steak", dome: 120, target: 54, duration: "1 hour",
             baseServings: 2, primaryIngredientId: "i1",
             ingredients: [
-                { id: "i1", name: "Ribeye steak (dik)", amount: 800, unit: "g" },
-                { id: "i2", name: "Grof zeezout", amount: 1, unit: "tbsp" },
-                { id: "i3", name: "Grof gemalen peper", amount: 1, unit: "tbsp" },
-                { id: "i4", name: "Boter", amount: 30, unit: "g" }
+                { id: "i1", name: "Ribeye steak (thick)", amount: 800, unit: "g" },
+                { id: "i2", name: "Coarse sea salt", amount: 1, unit: "tbsp" },
+                { id: "i3", name: "Coarse black pepper", amount: 1, unit: "tbsp" },
+                { id: "i4", name: "Butter", amount: 30, unit: "g" }
             ],
             setup: [
-                "Indirecte opstelling met deflectorplaten voor de rookfase",
-                "Deflector verwijderen voor de directe schroeifase",
-                "Eikenhout toevoegen",
-                "Dome stabiliseren op 120°C"
+                "Indirect setup with deflector plates for the smoke phase",
+                "Remove the deflector for the direct sear phase",
+                "Add oak wood",
+                "Stabilize the dome at 120°C"
             ],
             phases: [
-                ["Roken", "120°C indirect tot kern 48°C"],
-                ["Schroeien", "260°C direct, 45-60 sec per kant"],
-                ["Rust", "5 min laten rusten"]
+                ["Smoke", "120°C indirect until core reaches 48°C"],
+                ["Sear", "260°C direct, 45-60 seconds per side"],
+                ["Rest", "Rest for 5 minutes"]
             ]
         }
 

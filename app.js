@@ -242,17 +242,16 @@ function getTitle() {
 
     const titles = {
 
-        
-        dashboard:"Mijn Kamado",
+        dashboard: "My Kamado",
 
-        recipes:"Recepten",
-        
-        recipeDetail: "Recept",
-        
-        history:"Geschiedenis",
-        
-        settings:"Instellingen",
-        
+        recipes: "Recipes",
+
+        recipeDetail: "Recipe",
+
+        history: "History",
+
+        settings: "Settings",
+
         ai: "AI Assistant",
 
     };
