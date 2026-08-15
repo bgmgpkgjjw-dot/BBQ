@@ -421,6 +421,88 @@ render();
 // ====================================================================
 
 let wakeLock = null;
+let safariAudioWakeLock = null;
+
+function supportsWakeLock() {
+    return typeof navigator !== "undefined" && "wakeLock" in navigator;
+}
+
+function supportsSafariAudioWakeLock() {
+    return typeof window !== "undefined" &&
+        ("AudioContext" in window || "webkitAudioContext" in window);
+}
+
+function getWakeLockStatusText() {
+    if (supportsWakeLock()) {
+        return "Wake Lock available";
+    }
+
+    if (supportsSafariAudioWakeLock()) {
+        return "Safari-compatible fallback enabled";
+    }
+
+    return "Wake Lock unavailable in this browser; the phone will sleep normally";
+}
+
+async function requestSafariAudioWakeLock() {
+    if (!supportsSafariAudioWakeLock()) {
+        return;
+    }
+
+    try {
+        const AudioCtor = window.AudioContext || window.webkitAudioContext;
+
+        if (!safariAudioWakeLock) {
+            safariAudioWakeLock = new AudioCtor();
+
+            const oscillator = safariAudioWakeLock.createOscillator();
+            const gainNode = safariAudioWakeLock.createGain();
+
+            oscillator.type = "sine";
+            oscillator.frequency.value = 220;
+            gainNode.gain.value = 0.0001;
+
+            oscillator.connect(gainNode);
+            gainNode.connect(safariAudioWakeLock.destination);
+            oscillator.start();
+
+            safariAudioWakeLock.__bbqOscillator = oscillator;
+            safariAudioWakeLock.__bbqGain = gainNode;
+        }
+
+        if (safariAudioWakeLock.state === "suspended") {
+            await safariAudioWakeLock.resume();
+        }
+
+        console.log("Safari audio wake lock enabled");
+    }
+    catch (error) {
+        console.warn("Safari audio wake lock failed", error);
+    }
+}
+
+async function releaseSafariAudioWakeLock() {
+    try {
+        if (safariAudioWakeLock) {
+            const oscillator = safariAudioWakeLock.__bbqOscillator;
+            if (oscillator) {
+                try {
+                    oscillator.stop();
+                }
+                catch (error) {
+                    console.warn("Safari oscillator stop failed", error);
+                }
+            }
+
+            await safariAudioWakeLock.close();
+            safariAudioWakeLock = null;
+            console.log("Safari audio wake lock released");
+        }
+    }
+    catch (error) {
+        console.error(error);
+    }
+}
 
 async function requestWakeLock() {
 
@@ -428,32 +510,22 @@ async function requestWakeLock() {
         return;
     }
 
-    try {
-
-        if ("wakeLock" in navigator) {
-
+    if (supportsWakeLock()) {
+        try {
             if (wakeLock) {
                 return;
             }
 
-            wakeLock =
-                await navigator.wakeLock.request(
-                    "screen"
-                );
-
-            console.log(
-                "Wake lock enabled"
-            );
+            wakeLock = await navigator.wakeLock.request("screen");
+            console.log("Wake lock enabled");
+            return;
         }
-
+        catch (error) {
+            console.error("Wake lock failed", error);
+        }
     }
-    catch(error) {
 
-        console.error(
-            "Wake lock failed",
-            error
-        );
-    }
+    await requestSafariAudioWakeLock();
 }
 
 async function releaseWakeLock() {
@@ -461,21 +533,17 @@ async function releaseWakeLock() {
     try {
 
         if (wakeLock) {
-
             await wakeLock.release();
-
             wakeLock = null;
-
-            console.log(
-                "Wake lock released"
-            );
+            console.log("Wake lock released");
         }
 
     }
-    catch(error) {
-
+    catch (error) {
         console.error(error);
     }
+
+    await releaseSafariAudioWakeLock();
 }
 
 async function syncWakeLockState() {

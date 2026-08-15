@@ -384,6 +384,14 @@ function settingsView() {
 
     </label>
 
+    <p style='color:var(--muted); margin-top:8px;'>
+        ${
+            typeof navigator !== "undefined" && "wakeLock" in navigator
+                ? "Wake Lock is supported in this browser."
+                : "Safari/Bluefy fallback is active; the app will try to keep the screen awake using a silent audio workaround."
+        }
+    </p>
+
     </div>
 
     `;
