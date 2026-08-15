@@ -410,6 +410,7 @@ function deleteCook(sessionId) {
 
     saveSessions();
 
+    appState.selectedHistory = null;
     appState.screen = "history";
 
     render();

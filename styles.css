@@ -950,6 +950,61 @@ select:focus {
    border-color: var(--accent);
 }
 
+/* Custom toggle checkbox styling */
+.toggle-label {
+   display: flex;
+   align-items: center;
+   gap: 12px;
+   cursor: pointer;
+   user-select: none;
+   padding: 8px 0;
+}
+
+.toggle-checkbox {
+   display: none;
+}
+
+.toggle-slider {
+   display: block;
+   width: 44px;
+   height: 26px;
+   background-color: #333;
+   border-radius: 13px;
+   border: 1px solid var(--border);
+   position: relative;
+   transition: all 0.3s ease;
+   flex-shrink: 0;
+}
+
+.toggle-slider::before {
+   content: '';
+   display: block;
+   width: 20px;
+   height: 20px;
+   background-color: #888;
+   border-radius: 50%;
+   position: absolute;
+   top: 2px;
+   left: 2px;
+   transition: all 0.3s ease;
+}
+
+.toggle-checkbox:checked + .toggle-slider {
+   background-color: var(--accent);
+   border-color: var(--accent);
+}
+
+.toggle-checkbox:checked + .toggle-slider::before {
+   background-color: #fff;
+   left: 22px;
+}
+
+.toggle-label-text {
+   color: var(--text);
+   font-size: 16px;
+   font-weight: 500;
+}
+
 /* ==========================================================
    LOADING SCREEN
    ========================================================== */

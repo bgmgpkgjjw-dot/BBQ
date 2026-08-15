@@ -413,10 +413,11 @@ function settingsView() {
         Display
     </h3>
 
-    <label>
+    <label class="toggle-label">
 
         <input
             type="checkbox"
+            class="toggle-checkbox"
             ${
                 appState.settings.keepScreenAwake
                     ? "checked"
@@ -431,7 +432,8 @@ function settingsView() {
             "
         >
 
-        Keep screen awake during active cook
+        <span class="toggle-slider"></span>
+        <span class="toggle-label-text">Keep screen awake during active cook</span>
 
     </label>
 
