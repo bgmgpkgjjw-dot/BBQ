@@ -282,11 +282,14 @@ function recipeListView() {
         ? appState.ai.savedRecipes.map(
             (recipe, index) => `
 
-                <div class="card">
+                <div
+                    class="recipe saved-ai-recipe"
+                    onclick="openSavedAiRecipe(${index})"
+                >
 
-                    <h3>
+                    <h2>
                         ${recipe.title}
-                    </h3>
+                    </h2>
 
                     <p>
                         ${recipe.description}
@@ -296,23 +299,23 @@ function recipeListView() {
 
                         <button
                             class="button"
-                            onclick="openSavedAiRecipe(${index})"
+                            onclick="event.stopPropagation(); openSavedAiRecipe(${index})"
                         >
-                            📖 Open
+                            Open
                         </button>
 
                         <button
                             class="button"
-                            onclick="startSavedAiCook(${index})"
+                            onclick="event.stopPropagation(); startSavedAiCook(${index})"
                         >
-                            🔥 Start
+                            Start
                         </button>
 
                         <button
                             class="button secondary"
-                            onclick="deleteSavedAiRecipe(${index})"
+                            onclick="event.stopPropagation(); deleteSavedAiRecipe(${index})"
                         >
-                            🗑 Delete
+                            Delete
                         </button>
 
                     </div>
