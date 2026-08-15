@@ -385,7 +385,7 @@ function settingsView() {
         </label>
 
         <select
-            class="theme-select"
+            class="button theme-select"
             onchange="setTheme(this.value)"
         >
             ${Object.entries(THEME_PRESETS).map(([key, preset]) => `

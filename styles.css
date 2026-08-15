@@ -577,33 +577,31 @@ body {
     box-sizing: border-box;
 }
 
-.ai-action-row select {
-
-    background: var(--accent);
-
+.ai-select,
+.theme-select {
+    background: var(--gradient-button);
     color: white;
-
-    border: none;
-
-    border-radius: 12px;
-
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 999px;
     font-size: 15px;
-
-    font-weight: 600;
-
+    font-weight: 700;
     text-align: center;
-
     text-align-last: center;
-
-    padding: 0 12px;
-
+    padding: 0 16px;
     cursor: pointer;
-
+    box-shadow: 0 10px 16px rgba(0, 0, 0, 0.16);
     appearance: none;
-
     -webkit-appearance: none;
-
     -moz-appearance: none;
+}
+
+.ai-action-row select {
+    margin-top: 0;
+}
+
+.theme-select {
+    width: 100%;
+    margin-top: 10px;
 }
 
 /* ==========================================================
