@@ -294,17 +294,23 @@ const appState = {
 
         domeDeviation: 8,
 
+        approachingThreshold: 5,
+
         history: []
 
     },
 
     // ======================================================
-    // APP INSTELLINGEN
+    // APP SETTINGS
     // ======================================================
 
      settings: {
 
         notifications: true,
+
+        notificationSound: true,
+
+        notificationHaptics: true,
 
         temperatureUnit: "C",
 

@@ -36,6 +36,21 @@ function getProbeStatus(probe) {
     return "warming";
 }
 
+function getApproachingStatus(probe) {
+    const target = getProbeTarget(probe);
+    const temp = probe.temperature;
+
+    if (!target || temp === null) return null;
+
+    const threshold = appState.alerts.approachingThreshold;
+
+    if (temp >= target - threshold && temp < target) {
+        return "approaching";
+    }
+
+    return null;
+}
+
 function updateLiveUi() {
     const status = document.querySelector("[data-live-status]");
 
@@ -91,6 +106,9 @@ function renderProbeCard(probe) {
                 ${isDome ? "Kamado Dome" : probe.name}
             </span>
 
+            ${getApproachingStatus(probe) === "approaching" ? `
+                <span class="alert-badge">Approaching</span>
+            ` : ""}
 
             <span class="probe-id">
                 P${probe.id}

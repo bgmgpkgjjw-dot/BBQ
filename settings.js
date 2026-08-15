@@ -353,6 +353,36 @@ function settingsView() {
     <div class="card">
     <h2>Alerts</h2>
 
+    <div style="margin-bottom: 16px;">
+        <label class="toggle-label">
+            <input
+                type="checkbox"
+                class="toggle-checkbox"
+                ${appState.settings.notificationSound ? "checked" : ""}
+                onchange="appState.settings.notificationSound = this.checked; saveAppState(); render();"
+            >
+            <span class="toggle-slider"></span>
+            <span class="toggle-label-text">Alert sounds</span>
+        </label>
+    </div>
+
+    <div style="margin-bottom: 16px;">
+        <label class="toggle-label">
+            <input
+                type="checkbox"
+                class="toggle-checkbox"
+                ${appState.settings.notificationHaptics ? "checked" : ""}
+                onchange="appState.settings.notificationHaptics = this.checked; saveAppState(); render();"
+            >
+            <span class="toggle-slider"></span>
+            <span class="toggle-label-text">Vibration feedback</span>
+        </label>
+    </div>
+
+    <hr style="margin: 16px 0; border: none; border-top: 1px solid var(--border);">
+
+    <h3>Recent Alerts</h3>
+
     ${appState.alerts.history.length
             ? appState.alerts.history
                 .slice(0, 10)
@@ -364,7 +394,7 @@ function settingsView() {
                 `)
                 .join("")
             : `
-                <p>No alerts</p>
+                <p style="color: var(--muted);">No alerts</p>
             `
         }
     </div>

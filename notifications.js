@@ -37,6 +37,14 @@ function sendNotification(
         tag,
         requireInteraction: true
     });
+
+    if (appState.settings.notificationSound) {
+        playAlertSound();
+    }
+
+    if (appState.settings.notificationHaptics) {
+        triggerVibration();
+    }
 }
 
 function shouldTriggerAlert(
@@ -87,7 +95,9 @@ function checkAlerts() {
         );
 
     checkMeatTarget(meat);
+    checkApproachingMeatTarget(meat);
     checkDomeDeviation(dome);
+    checkApproachingDomeTarget(dome);
     checkBluetoothAlert();
     checkBatteryAlert();
     checkProbeHealth();
@@ -267,6 +277,111 @@ function checkBatteryAlert(){
             "Low battery",
             `Thermometer battery is ${battery}%`,
             "battery-low"
+        );
+    }
+}
+
+function playAlertSound() {
+    try {
+        const audioContext = 
+            new (window.AudioContext || window.webkitAudioContext)();
+        
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = 800;
+        oscillator.type = "sine";
+        
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(
+            0.01, 
+            audioContext.currentTime + 0.3
+        );
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.3);
+    } catch (e) {
+        console.log("Audio not available");
+    }
+}
+
+function triggerVibration() {
+    if (navigator.vibrate) {
+        navigator.vibrate([100, 50, 100]);
+    }
+}
+
+function checkApproachingMeatTarget(meat) {
+    if (
+        !meat ||
+        meat.temperature == null
+    ) {
+        return;
+    }
+
+    const target = appState.cook.meatTarget;
+
+    if (!target) {
+        return;
+    }
+
+    const threshold = 
+        appState.alerts.approachingThreshold;
+
+    const key = "meat-approaching";
+
+    if (
+        meat.temperature >= target - threshold &&
+        meat.temperature < target &&
+        !alertState.fired.has(key)
+    ) {
+        alertState.fired.add(key);
+
+        triggerVibration();
+
+        sendNotification(
+            "Core approaching target",
+            `${meat.name} at ${Math.round(meat.temperature)}°C, target is ${target}°C`,
+            key
+        );
+    }
+}
+
+function checkApproachingDomeTarget(dome) {
+    if (
+        !dome ||
+        dome.temperature == null
+    ) {
+        return;
+    }
+
+    const target = appState.cook.domeTarget;
+
+    if (!target) {
+        return;
+    }
+
+    const threshold = 
+        appState.alerts.approachingThreshold;
+
+    const key = "dome-approaching";
+
+    if (
+        dome.temperature >= target - threshold &&
+        dome.temperature < target &&
+        !alertState.fired.has(key)
+    ) {
+        alertState.fired.add(key);
+
+        triggerVibration();
+
+        sendNotification(
+            "Dome approaching target",
+            `${Math.round(dome.temperature)}°C, target is ${target}°C`,
+            key
         );
     }
 }
