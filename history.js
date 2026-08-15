@@ -20,7 +20,7 @@ function historyView() {
         <div class="card">
 
             <h2>
-            📈 Geschiedenis
+            Geschiedenis
             </h2>
 
             <p style="color:var(--muted)">
@@ -41,7 +41,7 @@ function historyView() {
     <div class="card">
 
         <h2>
-        📈 Cook geschiedenis
+        Cook geschiedenis
         </h2>
 
     </div>
@@ -97,19 +97,19 @@ function renderHistoryCard(session) {
 
 
         <p>
-        📅 ${date}
+        ${date}
         </p>
 
 
 
         <p>
-        ⏱ ${session.duration || "—"}
+        ${session.duration || "—"}
         </p>
 
 
 
         <p>
-        🌡 ${samples} temperatuurmetingen
+        ${samples} temperatuurmetingen
         </p>
 
 
@@ -229,13 +229,13 @@ function historyDetailView() {
             <button
                 class="button secondary"
                 onclick="renameCook('${session.id}')">
-                ✏️ Naam wijzigen
+                Naam wijzigen
             </button>
 
             <button
                 class="button danger"
                 onclick="deleteCook('${session.id}')">
-                🗑 Verwijder cook
+                Verwijder cook
             </button>
         </div>
 
@@ -470,7 +470,7 @@ function renderHistoryDetailChart() {
                 datasets: [
 
                     {
-                        label: "🔥 Dome",
+                        label: "Dome",
 
                         data: samples.map(
                             s => s.dome
@@ -488,7 +488,7 @@ function renderHistoryDetailChart() {
                     },
 
                     {
-                        label: "🥩 Kern",
+                        label: "Kern",
 
                         data: samples.map(
                             s => s.meat

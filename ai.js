@@ -262,14 +262,14 @@ function renderAiRecipe(recipe, index) {
             </h2>
 
             <p>
-                🌡 ${recipe.dome_temperature ??
+                ${recipe.dome_temperature ??
         recipe.temperature ??
         "--"
         }
                 ·
-                ⏱ ${recipe.duration}
+                ${recipe.duration}
                 ·
-                ⭐ ${recipe.difficulty}
+                ${recipe.difficulty}
             </p>
 
             <br>
@@ -292,21 +292,21 @@ function renderAiRecipe(recipe, index) {
                     class="button"
                     onclick="saveAiRecipe(${index})"
                 >
-                    💾 Save
+                    Save
                 </button>
 
                 <button
                     class="button"
                     onclick="openAiRecipe(${index})"
                 >
-                    📖 Open
+                    Open
                 </button>
 
                 <button
                     class="button"
                     onclick="startAiCook(${index})"
                 >
-                    🔥 Start
+                    Start
                 </button>
 
             </div>

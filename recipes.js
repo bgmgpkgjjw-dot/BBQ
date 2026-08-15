@@ -261,7 +261,7 @@ function recipeListView() {
                 render();
             "
         >
-            AI recipe assistant
+            AI assistant
         </button>
 
         <br><br>
@@ -275,34 +275,38 @@ function recipeListView() {
 
         <br><br>
 
-        <h2>Saved AI Recipes</h2>
+        <h2>Saved AI recipes</h2>
 
         ${appState.ai.savedRecipes.length
 
-        ? appState.ai.savedRecipes.map(
-            (recipe, index) => `
+        ? `
+            <div class="recipe-list saved-ai-list">
+                ${appState.ai.savedRecipes.map(
+                    (recipe, index) => `
 
-                <div
-                    class="recipe saved-ai-recipe"
-                    onclick="openSavedAiRecipe(${index})"
-                >
+                        <div
+                            class="recipe saved-ai-recipe"
+                            onclick="openSavedAiRecipe(${index})"
+                        >
 
-                    <h2>
-                        ${recipe.title}
-                    </h2>
+                            <h2>
+                                ${recipe.title}
+                            </h2>
 
-                    <p>
-                        ${recipe.dome_temperature ?? recipe.temperature ?? "--"}
-                        ·
-                        ${recipe.target_temperature ? `${recipe.target_temperature}°C target` : "No target"}
-                        ·
-                        ${recipe.duration || "--"}
-                    </p>
+                            <p>
+                                ${recipe.dome_temperature ?? recipe.temperature ?? "--"}
+                                ·
+                                ${recipe.target_temperature ? `${recipe.target_temperature}°C target` : "No target"}
+                                ·
+                                ${recipe.duration || "--"}
+                            </p>
 
-                </div>
+                        </div>
 
-            `
-        ).join("")
+                    `
+                ).join("")}
+            </div>
+        `
 
     : `
 
@@ -315,7 +319,7 @@ function recipeListView() {
 
         <br>
 
-    <h2>Standard Recipes</h2>
+    <h2>Recipe library</h2>
 
         <div class="recipe-list">
 

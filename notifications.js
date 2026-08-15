@@ -117,7 +117,7 @@ function checkProbeHealth(){
             ){
 
                 sendNotification(
-                    "⚠ Probe Offline",
+                    "Probe offline",
                     `${probe.name} stopped updating`,
                     `probe-${probe.id}`
                 );
@@ -237,7 +237,7 @@ function checkBluetoothAlert() {
     ) {
 
         sendNotification(
-            "⚠ Bluetooth disconnected",
+            "Bluetooth disconnected",
             "Thermometer connection lost."
         );
     }
@@ -264,7 +264,7 @@ function checkBatteryAlert(){
     ){
 
         sendNotification(
-            "🔋 Low Battery",
+            "Low battery",
             `Thermometer battery is ${battery}%`,
             "battery-low"
         );
