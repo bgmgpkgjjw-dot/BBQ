@@ -601,6 +601,8 @@ body {
     -moz-appearance: none;
 }
 
+.ai-action-row .button,
+.ai-action-row .ai-select,
 .ai-action-row select {
     margin-top: 0;
 }
