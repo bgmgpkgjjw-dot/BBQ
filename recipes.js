@@ -261,7 +261,7 @@ function recipeListView() {
                 render();
             "
         >
-            🧠 AI Recipe Assistant
+            AI recipe assistant
         </button>
 
         <br><br>
@@ -270,7 +270,7 @@ function recipeListView() {
             class="button"
             onclick="startManualCook()"
         >
-            🔥 Start handmatige cook
+            Start cook
         </button>
 
         <br><br>

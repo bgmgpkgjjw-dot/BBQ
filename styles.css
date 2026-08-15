@@ -4,19 +4,19 @@
    ========================================================== */
 
 :root {
-   --bg: #0B0906;
-   --surface: #15120F;
-   --card: #211C16;
+   --bg: #101111;
+   --surface: #171A1B;
+   --card: #1D2123;
 
-   --text: #F2EBDD;
-   --muted: #918678;
+   --text: #F3F4F1;
+   --muted: #9AA1A2;
 
-   --accent: #C1272D;
-   --accent-light: #FF6B1A;
+   --accent: #C78A3B;
+   --accent-light: #E2AE5A;
 
-   --green: #4CAF50;
-   --yellow: #FFC107;
-   --danger: #E53935;
+   --green: #5C8B65;
+   --yellow: #D4A64E;
+   --danger: #C96A5D;
 
    --border: rgba(255, 255, 255, .08);
    --radius: 18px;

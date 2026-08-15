@@ -41,8 +41,8 @@ function updateLiveUi() {
 
     if (status) {
         status.textContent = appState.bluetooth.connected
-            ? `🟢 ${appState.bluetooth.device || "Bluetooth"}`
-            : "🔴 Niet verbonden";
+            ? `${appState.bluetooth.device || "Bluetooth"} connected`
+            : "Not connected";
     }
 
     document.querySelectorAll("[data-probe-temperature]").forEach(el => {
@@ -144,8 +144,8 @@ function renderProbeCard(probe) {
         <div class="thermometer-box">
 
 
-            <div class="thermometer-icon">
-                🌡️
+            <div class="thermometer-icon" aria-hidden="true">
+                
             </div>
 
 
@@ -172,9 +172,9 @@ function renderProbeCard(probe) {
 
             ${target
             ?
-            `Doel ${target}°C`
+            `Target ${target}°C`
             :
-            "Geen doel"
+            "No target"
         }
 
         </div>
@@ -245,11 +245,11 @@ function renderCookPanel() {
       <div class="card cook-card">
 
         <h3>
-        🔥 Actieve cook
+        Active cook
         </h3>
 
         <p style="color:var(--muted)">
-        Geen actieve cook
+        No active cook
         </p>
 
       </div>
@@ -275,23 +275,23 @@ function renderCookPanel() {
 
     return `
     <div class="card cook-card">
-      <h3>🔥 Actieve cook</h3>
+      <h3>Active cook</h3>
       <h2>${appState.cook.name}</h2>
 
-      <div class="cook-status">🟢 Running</div>
+      <div class="cook-status">Running</div>
 
       <div class="cook-grid">
         <div>
-          <span>Fase</span>
+          <span>Phase</span>
           <strong>${appState.cook.phase + 1}/${Math.max(phases.length, 1)}</strong>
         </div>
         <div>
-          <span>Tijd</span>
+          <span>Time</span>
           <strong data-cook-time>${formatElapsedTime()}</strong>
         </div>
 
         <div>
-        <span>Dome doel</span>
+        <span>Dome target</span>
 
         <input
             type="number"
@@ -305,7 +305,7 @@ function renderCookPanel() {
         </div>
 
         <div>
-        <span>Kern doel</span>
+        <span>Core target</span>
 
         <input
             type="number"
@@ -327,7 +327,7 @@ function renderCookPanel() {
         </h3>
 
         <p>
-            🔥 Dome:
+            Dome:
             ${currentPhase.domeTarget != null
                 ? `${currentPhase.domeTarget}°C`
                 : "--"
@@ -335,7 +335,7 @@ function renderCookPanel() {
         </p>
 
         <p>
-            🥩 Meat:
+            Core:
             ${currentPhase.meatTarget != null
                 ? `${currentPhase.meatTarget}°C`
                 : "--"
@@ -358,21 +358,21 @@ function renderCookPanel() {
                     : ""
             }
         >
-            ← Previous Phase
+            Previous
         </button>
 
         <button
             class="button"
             onclick="completePhase()"
         >
-            ✓ Next Phase
+            Next
         </button>
 
         <button
             class="button secondary"
             onclick="stopCook()"
         >
-            Finish Cook
+            End cook
         </button>
 
     </div>
@@ -397,8 +397,8 @@ function dashboardView() {
         >
             ${
                 appState.bluetooth.connected
-                    ? "🟢 Verbonden"
-                    : "🔴 Niet verbonden"
+                    ? "Connected"
+                    : "Not connected"
             }
         </div>
 
@@ -431,14 +431,14 @@ function dashboardView() {
                         class="button"
                         onclick="navigate('recipes')"
                     >
-                        Kies een recept
+                        Choose recipe
                     </button>
 
                     <button
                         class="button"
                         onclick="startManualCook()"
                     >
-                        Start nieuwe cook
+                        Start cook
                     </button>
 
                 `

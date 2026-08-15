@@ -153,7 +153,7 @@ function checkMeatTarget(meat) {
         alertState.fired.add(key);
 
         sendNotification(
-            "🥩 Target reached",
+            "Target reached",
             `${meat.name} reached ${Math.round(meat.temperature)}°C`,
             key
         );
@@ -194,7 +194,7 @@ function checkDomeDeviation(
         ) {
 
             sendNotification(
-                "🔥 Dome too hot",
+                "Dome too hot",
                 `${Math.round(dome.temperature)}°C`
             );
         }
@@ -213,7 +213,7 @@ function checkDomeDeviation(
         ) {
 
             sendNotification(
-                "❄ Dome too cold",
+                "Dome too cold",
                 `${Math.round(dome.temperature)}°C`
             );
         }

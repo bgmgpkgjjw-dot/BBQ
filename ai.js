@@ -472,11 +472,11 @@ function aiRecipeDetailView() {
                                     </span>
 
                                     <strong>
-                                        🔥 ${phase.dome_temperature}°C
+                                        ${phase.dome_temperature}°C
                                         ${phase.target_temperature
-                        ? ` · 🥩 ${phase.target_temperature}°C`
-                        : ""
-                    }
+                                            ? ` · ${phase.target_temperature}°C`
+                                            : ""
+                                        }
                                     </strong>
 
                                 </div>
@@ -527,12 +527,11 @@ function aiRecipeDetailView() {
             class="button"
             onclick="startAiCookFromSelectedRecipe()"
         >
-            🔥 Start Cook
+            Start cook
         </button>
 
     `;
 }
-
 
 function startAiCookFromSelectedRecipe() {
 
