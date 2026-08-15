@@ -1,10 +1,30 @@
 {
   "name": "Hermanos Grill Companion",
   "short_name": "BBQ",
-  "description": "A companion app for grill planning and recipes",
+  "description": "A companion app for premium kamado grilling and sessions",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0B0906",
-  "theme_color": "#0B0906"
+  "theme_color": "#0B0906",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ]
 }
