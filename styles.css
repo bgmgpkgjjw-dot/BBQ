@@ -4,29 +4,28 @@
    ========================================================== */
 
 :root {
-   --bg: #101111;
-   --surface: #171A1B;
+   --bg: #0F1112;
+   --surface: #171B1C;
    --card: #1D2123;
 
-   --text: #F3F4F1;
-   --muted: #9AA1A2;
+   --text: #F5F4F0;
+   --muted: #9DA5A5;
 
-   --accent: #C78A3B;
-   --accent-light: #E2AE5A;
+   --accent: #C88B3D;
+   --accent-light: #E2B36C;
 
-   --green: #5C8B65;
-   --yellow: #D4A64E;
-   --danger: #C96A5D;
+   --green: #5E8467;
+   --yellow: #D7A955;
+   --danger: #C8675F;
 
    --border: rgba(255, 255, 255, .08);
    --radius: 18px;
-   --shadow: 0 15px 35px rgba(0, 0, 0, .45);
+   --shadow: 0 12px 28px rgba(0, 0, 0, .28);
 
-   /* consolidated repeated gradients */
    --gradient-progress: linear-gradient(90deg, var(--accent), var(--accent-light));
-   --gradient-card-surface: linear-gradient(145deg, #262019, #1B1713);
-   --gradient-cook: linear-gradient(160deg, #281E15, #18130F);
-   --gradient-button: linear-gradient(135deg, var(--accent), #9E1B20);
+   --gradient-card-surface: linear-gradient(180deg, #23282A, #191D1F);
+   --gradient-cook: linear-gradient(180deg, #201C18, #171511);
+   --gradient-button: linear-gradient(135deg, #C68B35, #9E6628);
 }
 
 /* ==========================================================
@@ -135,7 +134,7 @@ body {
    padding: 15px;
    margin-bottom: 12px;
    border: 1px solid var(--border);
-   box-shadow: 0 8px 20px rgba(0, 0, 0, .18);
+   box-shadow: 0 10px 22px rgba(0, 0, 0, .18);
 }
 
 .card h2 {
@@ -416,7 +415,7 @@ body {
 .button {
    height: 48px;
    width: 100%;
-   border: none;
+   border: 1px solid rgba(255,255,255,0.06);
    border-radius: 999px;
    background: var(--gradient-button);
    color: white;
@@ -424,18 +423,20 @@ body {
    font-weight: 750;
    margin-top: 10px;
    cursor: pointer;
-   transition: transform .15s ease, opacity .15s ease;
+   box-shadow: 0 10px 16px rgba(0, 0, 0, 0.16);
+   transition: transform .15s ease, opacity .15s ease, box-shadow .15s ease;
 }
 
 .button:active {
    transform: scale(.98);
-   opacity: .85;
+   opacity: .92;
 }
 
 .button.secondary {
-   background: transparent;
+   background: rgba(255,255,255,0.02);
    border: 1px solid var(--border);
    color: var(--text);
+   box-shadow: none;
 }
 
 /* ==========================================================

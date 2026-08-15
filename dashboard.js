@@ -261,7 +261,7 @@ function renderCookPanel() {
 
     const currentPhase =
         phases[appState.cook.phase] || {
-            name: "Voorbereiden",
+            name: "Preparing",
             domeTarget: null,
             meatTarget: null
         };
@@ -413,7 +413,7 @@ function dashboardView() {
 
                     : `
                         <div class="card">
-                            Geen actieve probes
+                            No active probes
                         </div>
                     `
             }
@@ -457,7 +457,7 @@ function startManualCook() {
         syncWakeLockState();
     }
 
-    appState.cook.name = "Nieuwe cook";
+    appState.cook.name = "New cook";
 
     appState.cook.domeTarget = 110;
 

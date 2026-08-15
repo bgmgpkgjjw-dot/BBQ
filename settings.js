@@ -190,9 +190,8 @@ function settingsView() {
 
         <p style="color:var(--muted); font-size:13px; margin-bottom:14px">
 
-            Tot 6 probes. Zet een probe aan en kies de rol
-            (dome / vlees / ambient). Inactieve probes worden
-            niet getoond op het dashboard.
+            Up to 6 probes. Enable a probe and assign its role
+            (dome / meat / ambient). Inactive probes are hidden from the dashboard.
 
         </p>
 
@@ -244,7 +243,7 @@ function settingsView() {
 
         <p style="color:var(--muted); font-size:13px; margin-bottom:12px">
 
-            Verbind met een apparaat via Web Bluetooth in Bluefy. Dit is een eerste stap voor thermometer-verbindingen.
+            Connect to a device through Web Bluetooth in Bluefy. This is the first step for thermometer connectivity.
 
         </p>
 
@@ -253,7 +252,7 @@ function settingsView() {
         </div>
 
         <div class="bluetooth-meta">
-            Apparaat: ${appState.bluetooth.device || "Geen apparaat geselecteerd"}
+            Device: ${appState.bluetooth.device || "No device selected"}
         </div>
 
         ${appState.bluetooth.battery !== null ? `<div class="bluetooth-meta">Battery: ${appState.bluetooth.battery}%</div>` : ""}
@@ -262,11 +261,11 @@ function settingsView() {
 
         <div class="button-row">
             <button class="button" onclick="connectBluetoothDevice()">
-                ${appState.bluetooth.connected ? "Herconnecteren" : "Verbinden"}
+                ${appState.bluetooth.connected ? "Reconnect" : "Connect"}
             </button>
 
             <button class="button secondary" onclick="disconnectBluetoothDevice()" ${appState.bluetooth.connected ? "" : "disabled"}>
-                Ontkoppelen
+                Disconnect
             </button>
         </div>
 
@@ -279,7 +278,7 @@ function settingsView() {
         </h2>
 
         <p style="color:var(--muted); font-size:13px; margin-bottom:12px">
-            Configureer hier een lokale Sensecap M1 endpoint voor thermometers die via Wi-Fi naar de PWA sturen.
+            Configure a local Sensecap M1 endpoint for thermometers that send readings to the PWA over Wi‑Fi.
         </p>
 
         <label>
