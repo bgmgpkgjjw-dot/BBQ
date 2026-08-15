@@ -292,7 +292,11 @@ function recipeListView() {
                     </h2>
 
                     <p>
-                        ${recipe.description}
+                        ${recipe.dome_temperature ?? recipe.temperature ?? "--"}
+                        ·
+                        ${recipe.target_temperature ? `${recipe.target_temperature}°C target` : "No target"}
+                        ·
+                        ${recipe.duration || "--"}
                     </p>
 
                     <div class="recipe-actions">
