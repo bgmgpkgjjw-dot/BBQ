@@ -10,6 +10,9 @@
 
 function render() {
 
+    if (typeof syncWakeLockState === "function") {
+        syncWakeLockState();
+    }
 
     const app =
         document.getElementById("app");
@@ -421,9 +424,17 @@ let wakeLock = null;
 
 async function requestWakeLock() {
 
+    if (!appState?.cook?.active || !appState?.settings?.keepScreenAwake) {
+        return;
+    }
+
     try {
 
         if ("wakeLock" in navigator) {
+
+            if (wakeLock) {
+                return;
+            }
 
             wakeLock =
                 await navigator.wakeLock.request(
@@ -466,3 +477,26 @@ async function releaseWakeLock() {
         console.error(error);
     }
 }
+
+async function syncWakeLockState() {
+
+    if (!appState) {
+        return;
+    }
+
+    if (
+        appState.cook?.active &&
+        appState.settings?.keepScreenAwake
+    ) {
+        await requestWakeLock();
+        return;
+    }
+
+    await releaseWakeLock();
+}
+
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+        syncWakeLockState();
+    }
+});

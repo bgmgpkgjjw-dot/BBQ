@@ -374,6 +374,9 @@ function settingsView() {
             onchange="
                 appState.settings.keepScreenAwake=this.checked;
                 saveAppState();
+                if (typeof syncWakeLockState === 'function') {
+                    syncWakeLockState();
+                }
             "
         >
 

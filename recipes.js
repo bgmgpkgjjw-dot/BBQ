@@ -199,6 +199,11 @@ function loadRecipeIntoCook(recipeId) {
     }
 
     appState.cook.active = true;
+
+    if (typeof syncWakeLockState === "function") {
+        syncWakeLockState();
+    }
+
     appState.cook.name = recipe.name;
     appState.cook.domeTarget = recipe.dome;
     appState.cook.meatTarget = recipe.target;

@@ -453,6 +453,10 @@ function startManualCook() {
 
     appState.cook.active = true;
 
+    if (typeof syncWakeLockState === "function") {
+        syncWakeLockState();
+    }
+
     appState.cook.name = "Nieuwe cook";
 
     appState.cook.domeTarget = 110;
@@ -567,6 +571,11 @@ function stopCook() {
     finishCookSession();
 
     appState.cook.active = false;
+
+    if (typeof syncWakeLockState === "function") {
+        syncWakeLockState();
+    }
+
     appState.cook.name = "";
     appState.cook.recipe = null;
 

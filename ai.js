@@ -553,6 +553,10 @@ function startAiCookFromSelectedRecipe() {
 
     appState.cook.active = true;
 
+    if (typeof syncWakeLockState === "function") {
+        syncWakeLockState();
+    }
+
     appState.cook.phases =
         (recipe.phases || []).map(
             phase => ({
@@ -617,6 +621,10 @@ function startAiCook(index) {
         parseInt(recipe.target_temperature);
 
     appState.cook.active = true;
+
+    if (typeof syncWakeLockState === "function") {
+        syncWakeLockState();
+    }
 
     appState.cook.name =
         recipe.title;
