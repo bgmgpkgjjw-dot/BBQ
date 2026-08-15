@@ -251,15 +251,17 @@ const appState = {
     // APP INSTELLINGEN
     // ======================================================
 
-    settings: {
+     settings: {
 
         notifications: true,
 
         temperatureUnit: "C",
 
-        firstRun: false
+        firstRun: false,
 
-    }
+        keepScreenAwake: true
+
+    },
 
 
 };

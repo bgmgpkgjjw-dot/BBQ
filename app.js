@@ -413,3 +413,56 @@ if (
 
 render();
 
+// ====================================================================
+// WAKE LOCK
+// ====================================================================
+
+let wakeLock = null;
+
+async function requestWakeLock() {
+
+    try {
+
+        if ("wakeLock" in navigator) {
+
+            wakeLock =
+                await navigator.wakeLock.request(
+                    "screen"
+                );
+
+            console.log(
+                "Wake lock enabled"
+            );
+        }
+
+    }
+    catch(error) {
+
+        console.error(
+            "Wake lock failed",
+            error
+        );
+    }
+}
+
+async function releaseWakeLock() {
+
+    try {
+
+        if (wakeLock) {
+
+            await wakeLock.release();
+
+            wakeLock = null;
+
+            console.log(
+                "Wake lock released"
+            );
+        }
+
+    }
+    catch(error) {
+
+        console.error(error);
+    }
+}

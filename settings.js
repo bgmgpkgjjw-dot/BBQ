@@ -356,6 +356,34 @@ function settingsView() {
 
     </div>
 
+    <div class="card">
+
+    <h3>
+        Display
+    </h3>
+
+    <label>
+
+        <input
+            type="checkbox"
+            ${
+                appState.settings.keepScreenAwake
+                    ? "checked"
+                    : ""
+            }
+            onchange="
+                appState.settings.keepScreenAwake=this.checked;
+                saveAppState();
+            "
+        >
+
+        Keep screen awake during active cook
+
+    </label>
+
+    </div>
+
     `;
 
+    
 }
