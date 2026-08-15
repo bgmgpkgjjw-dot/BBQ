@@ -612,8 +612,6 @@ function updateDomeTarget(value) {
     if (typeof saveAppState === "function") {
         saveAppState();
     }
-
-    render();
 }
 
 function updateMeatTarget(value) {
@@ -634,8 +632,6 @@ function updateMeatTarget(value) {
     if (typeof saveAppState === "function") {
         saveAppState();
     }
-
-    render();
 }
 
 setInterval(() => {

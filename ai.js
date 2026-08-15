@@ -744,6 +744,7 @@ function deleteSavedAiRecipe(index) {
         saveAppState();
     }
 
+    appState.screen = "ai";
     render();
 }
 
