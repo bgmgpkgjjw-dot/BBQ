@@ -243,10 +243,10 @@ function aiAssistantView() {
         </div>
         `
             :
-            appState.ai.results.map(
+            (appState.ai.results || []).map(
                 (recipe, index) =>
                     renderAiRecipe(recipe, index)
-            )
+            ).join("")
         }
     `;
 }
