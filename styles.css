@@ -418,6 +418,9 @@ body {
    ========================================================== */
 
 .button {
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
    height: 48px;
    width: 100%;
    border: 1px solid rgba(255,255,255,0.06);
@@ -579,6 +582,9 @@ body {
 
 .ai-select,
 .theme-select {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: var(--gradient-button);
     color: white;
     border: 1px solid rgba(255,255,255,0.08);
