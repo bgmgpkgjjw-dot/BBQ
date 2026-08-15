@@ -414,6 +414,10 @@ if (
     initializeNotifications();
 }
 
+if (typeof applyTheme === "function") {
+    applyTheme(appState.theme?.preset || "default");
+}
+
 render();
 
 // ====================================================================

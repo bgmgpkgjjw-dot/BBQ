@@ -6,6 +6,45 @@
    ========================================================== */
 
 
+const THEME_PRESETS = {
+    default: {
+        brand: "Default",
+        accent: "#C88B3D",
+        accentLight: "#E2B36C",
+        buttonStart: "#C68B35",
+        buttonEnd: "#9E6628",
+        progressStart: "#C88B3D",
+        progressEnd: "#E2B36C"
+    },
+    "kamado-joe": {
+        brand: "Kamado Joe",
+        accent: "#C1272D",
+        accentLight: "#E06063",
+        buttonStart: "#C1272D",
+        buttonEnd: "#8A1D24",
+        progressStart: "#C1272D",
+        progressEnd: "#E06063"
+    },
+    "big-green-egg": {
+        brand: "Big Green Egg",
+        accent: "#1F6F43",
+        accentLight: "#5DAA7C",
+        buttonStart: "#1F6F43",
+        buttonEnd: "#134C2F",
+        progressStart: "#1F6F43",
+        progressEnd: "#5DAA7C"
+    },
+    monolith: {
+        brand: "Monolith",
+        accent: "#1A1A1A",
+        accentLight: "#5A5A5A",
+        buttonStart: "#111111",
+        buttonEnd: "#2A2A2A",
+        progressStart: "#111111",
+        progressEnd: "#5A5A5A"
+    }
+};
+
 const appState = {
 
 
@@ -51,9 +90,21 @@ const appState = {
     // Thema / merk
     theme: {
 
-        brand: "Kamado Joe",
+        preset: "default",
 
-        accent: "#C1272D"
+        brand: "Default",
+
+        accent: "#C88B3D",
+
+        accentLight: "#E2B36C",
+
+        buttonStart: "#C68B35",
+
+        buttonEnd: "#9E6628",
+
+        progressStart: "#C88B3D",
+
+        progressEnd: "#E2B36C"
 
     },
 

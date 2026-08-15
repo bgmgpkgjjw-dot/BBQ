@@ -92,6 +92,39 @@ function setBluetoothStatus(status, error = "") {
 
 }
 
+function applyTheme(presetKey = appState.theme?.preset || "default") {
+
+    const preset = THEME_PRESETS[presetKey] || THEME_PRESETS.default;
+
+    appState.theme = {
+        ...appState.theme,
+        ...preset,
+        preset: presetKey
+    };
+
+    const root = document.documentElement;
+
+    if (root) {
+        root.style.setProperty("--accent", preset.accent);
+        root.style.setProperty("--accent-light", preset.accentLight);
+        root.style.setProperty("--gradient-button", `linear-gradient(135deg, ${preset.buttonStart}, ${preset.buttonEnd})`);
+        root.style.setProperty("--gradient-progress", `linear-gradient(90deg, ${preset.progressStart}, ${preset.progressEnd})`);
+    }
+
+    if (typeof saveAppState === "function") {
+        saveAppState();
+    }
+}
+
+function setTheme(presetKey) {
+    if (!presetKey || !THEME_PRESETS[presetKey]) {
+        return;
+    }
+
+    applyTheme(presetKey);
+    render();
+}
+
 
 function parseTemperaturePayload(payload) {
 
@@ -343,9 +376,28 @@ function settingsView() {
 
         <h2>
 
-            ${appState.theme.brand}
+            Brand theme
 
         </h2>
+
+        <label>
+            App appearance
+        </label>
+
+        <select
+            class="theme-select"
+            onchange="setTheme(this.value)"
+        >
+            ${Object.entries(THEME_PRESETS).map(([key, preset]) => `
+                <option value="${key}" ${appState.theme.preset === key ? "selected" : ""}>
+                    ${preset.brand}
+                </option>
+            `).join("")}
+        </select>
+
+        <p style="color:var(--muted); margin-top:12px;">
+            Current theme: ${appState.theme.brand}
+        </p>
 
         <p style="color:var(--muted)">
 
