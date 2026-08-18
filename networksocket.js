@@ -83,7 +83,6 @@ function processNetworkPayload(payload) {
             "dome": 120,
             "probe1": 72,
             "probe2": 54,
-            "battery": 84
         }
     */
 
@@ -135,16 +134,6 @@ function processNetworkPayload(payload) {
                 updated = true;
                 console.log("Network: Probe 2 temperature", temp, "°C (raw:", raw, ")");
             }
-        }
-    }
-
-    // Update battery status
-    if (payload.battery !== undefined && payload.battery !== null) {
-        const battery = Number(payload.battery);
-        if (!Number.isNaN(battery)) {
-            appState.bluetooth.battery = battery;
-            updated = true;
-            console.log("Network: Battery", battery, "%");
         }
     }
 

@@ -185,7 +185,6 @@ function connectBluetoothDevice() {
         appState.bluetooth.connected = false;
         appState.bluetooth.device = null;
         appState.bluetooth.deviceRef = null;
-        appState.bluetooth.battery = null;
         appState.bluetooth.error = err?.message || "Bluetooth connection failed.";
         appState.bluetooth.status = "Connection failed";
         render();
@@ -205,7 +204,6 @@ function disconnectBluetoothDevice() {
     appState.bluetooth.connected = false;
     appState.bluetooth.device = null;
     appState.bluetooth.deviceRef = null;
-    appState.bluetooth.battery = null;
     appState.bluetooth.status = "Disconnected";
     appState.bluetooth.error = "";
 
@@ -292,8 +290,6 @@ function settingsView() {
         <div class="bluetooth-meta">
             Device: ${appState.bluetooth.device || "No device selected"}
         </div>
-
-        ${appState.bluetooth.battery !== null ? `<div class="bluetooth-meta">Battery: ${appState.bluetooth.battery}%</div>` : ""}
 
         ${appState.bluetooth.error ? `<p class="bluetooth-error">${appState.bluetooth.error}</p>` : ""}
 

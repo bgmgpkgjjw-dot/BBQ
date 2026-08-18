@@ -99,7 +99,6 @@ function checkAlerts() {
     checkDomeDeviation(dome);
     checkApproachingDomeTarget(dome);
     checkBluetoothAlert();
-    checkBatteryAlert();
     checkProbeHealth();
 }
 
@@ -249,34 +248,6 @@ function checkBluetoothAlert() {
         sendNotification(
             "Bluetooth disconnected",
             "Thermometer connection lost."
-        );
-    }
-}
-
-function checkBatteryAlert(){
-
-    const battery =
-        appState.bluetooth.battery;
-
-    if(
-        battery === null ||
-        battery === undefined
-    ){
-        return;
-    }
-
-    if(
-        battery <= 15 &&
-        shouldTriggerAlert(
-            "battery-low",
-            60
-        )
-    ){
-
-        sendNotification(
-            "Low battery",
-            `Thermometer battery is ${battery}%`,
-            "battery-low"
         );
     }
 }

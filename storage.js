@@ -325,7 +325,6 @@ function serializeAppState() {
 
         bluetooth: {
             device: appState.bluetooth.device,
-            battery: appState.bluetooth.battery,
             lastUpdatedAt:
                 appState.bluetooth.lastUpdatedAt
         }
@@ -405,9 +404,6 @@ function loadAppState() {
         }
 
         if (saved.bluetooth) {
-            appState.bluetooth.battery =
-                saved.bluetooth.battery ?? null;
-
             appState.bluetooth.device =
                 saved.bluetooth.device ?? null;
 

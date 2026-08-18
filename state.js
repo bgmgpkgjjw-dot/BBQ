@@ -69,8 +69,6 @@ const appState = {
 
         deviceRef: null,
 
-        battery: null,
-
         status: "Not connected",
 
         error: "",

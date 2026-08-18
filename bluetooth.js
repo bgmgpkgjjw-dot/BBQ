@@ -303,9 +303,7 @@ async function connectBluetooth(){
 
                     "0000fff0-0000-1000-8000-00805f9b34fb",
 
-                    "0000ffe0-0000-1000-8000-00805f9b34fb",
-
-                    "battery_service"
+                    "0000ffe0-0000-1000-8000-00805f9b34fb"
 
                 ]
 

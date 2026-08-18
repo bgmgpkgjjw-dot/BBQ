@@ -1,0 +1,15 @@
+[Unit]
+Description=Hermanos Grill Companion PWA
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=william
+WorkingDirectory=/home/william/grill-server/BBQ
+ExecStart=/usr/bin/python3 -m http.server 3000 --bind 0.0.0.0
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

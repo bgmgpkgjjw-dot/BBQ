@@ -1,0 +1,16 @@
+[Unit]
+Description=Hermanos Bluetooth gateway
+Wants=network-online.target
+After=bluetooth.service network-online.target
+
+[Service]
+Type=simple
+User=william
+WorkingDirectory=/home/william/btgateway
+ExecStart=/home/william/btgateway/venv/bin/python3 /home/william/btgateway/server.py
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

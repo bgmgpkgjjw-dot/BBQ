@@ -2,9 +2,8 @@
    Hermanos Grill Companion
    simulator.js
 
-   This file is intentionally empty now. The app no longer
-   simulates temperatures or battery values and relies on
-   real Bluetooth data only.
+    This file is intentionally empty now. The app relies on
+    real Bluetooth data only.
    ========================================================== */
 
 function startSimulator() {
