@@ -82,6 +82,11 @@ function initNetworkSocket(serverAddress) {
             reconnectAttempts = 0;
             saveAppState();
             render();
+
+            // Fill any gap in the active cook's history recorded while this device was disconnected.
+            if (typeof backfillActiveSessionFromPi === "function") {
+                backfillActiveSessionFromPi();
+            }
         };
 
         networkSocket.onmessage = (event) => {

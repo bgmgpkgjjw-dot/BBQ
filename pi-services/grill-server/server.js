@@ -1,8 +1,55 @@
 const { WebSocketServer } = require("ws");
 const WebSocket = require("ws");
+const Database = require("better-sqlite3");
+const fs = require("fs");
+const path = require("path");
 
 const port = Number(process.env.BBQ_GRILL_PORT || 8080);
 const apiToken = process.env.BBQ_API_TOKEN || null;
+const dataDirectory = process.env.BBQ_DATA_DIR || "/home/william/bbq-data";
+const RETENTION_MS = 30 * 24 * 60 * 60 * 1000; // keep 30 days of raw readings
+
+fs.mkdirSync(dataDirectory, { recursive: true });
+const db = new Database(path.join(dataDirectory, "bbq.db"));
+db.pragma("journal_mode = WAL");
+db.pragma("busy_timeout = 5000");
+db.exec(`
+    CREATE TABLE IF NOT EXISTS temperature_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        timestamp INTEGER NOT NULL,
+        dome INTEGER,
+        probe1 INTEGER,
+        probe2 INTEGER
+    );
+    CREATE INDEX IF NOT EXISTS idx_temperature_log_timestamp ON temperature_log (timestamp);
+`);
+const insertReading = db.prepare(
+    "INSERT INTO temperature_log (timestamp, dome, probe1, probe2) VALUES (?, ?, ?, ?)"
+);
+const pruneOldReadings = db.prepare("DELETE FROM temperature_log WHERE timestamp < ?");
+
+function recordReading(data) {
+    try {
+        insertReading.run(
+            Date.now(),
+            data.dome ?? null,
+            data.probe1 ?? null,
+            data.probe2 ?? null
+        );
+    } catch (error) {
+        console.error("Unable to record temperature reading", error);
+    }
+}
+
+function prune() {
+    try {
+        pruneOldReadings.run(Date.now() - RETENTION_MS);
+    } catch (error) {
+        console.error("Unable to prune old temperature readings", error);
+    }
+}
+prune();
+setInterval(prune, 24 * 60 * 60 * 1000);
 
 const wss = new WebSocketServer({ port });
 let latestData = {
@@ -27,6 +74,7 @@ function connectToBtgateway() {
         try {
             const data = JSON.parse(event.data);
             latestData = data;
+            recordReading(data);
             console.log("Received from btgateway:", data);
         } catch (e) {
             console.error("Invalid JSON from btgateway:", e);

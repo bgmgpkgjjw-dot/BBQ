@@ -45,6 +45,14 @@ function getCookStorageUrl() {
     return `${protocol}//${address}:${COOK_STORAGE_PORT}/api/cook-sessions`;
 }
 
+function getTemperatureLogUrl() {
+    const cookStorageUrl = getCookStorageUrl();
+    if (!cookStorageUrl) {
+        return null;
+    }
+    return cookStorageUrl.replace("/api/cook-sessions", "/api/temperature-log");
+}
+
 function getCookStorageHeaders(extra = {}) {
     const headers = { "X-BBQ-Device-Id": getDeviceId(), ...extra };
     const apiToken = appState.network?.apiToken;
@@ -52,6 +60,68 @@ function getCookStorageHeaders(extra = {}) {
         headers["X-BBQ-Token"] = apiToken;
     }
     return headers;
+}
+
+function mergeBackfilledReadings(session, readings) {
+    if (!Array.isArray(session.temperatureHistory)) {
+        session.temperatureHistory = [];
+    }
+
+    const existingTimestamps = new Set(session.temperatureHistory.map(sample => sample.timestamp));
+
+    readings
+        .filter(reading => !existingTimestamps.has(reading.timestamp))
+        .sort((a, b) => a.timestamp - b.timestamp)
+        .forEach(reading => {
+            const dome = reading.dome != null ? reading.dome / 10 : null;
+            const meat = reading.probe1 != null ? reading.probe1 / 10 : null;
+            const prepared = prepareHistoricalTemperature(session, dome, meat, reading.timestamp);
+
+            if (shouldRecordHistoricalSample(session, prepared, reading.timestamp)) {
+                const sample = { timestamp: reading.timestamp, dome: prepared.dome, meat: prepared.meat };
+                if (prepared.domeRaw !== undefined) {
+                    sample.domeRaw = prepared.domeRaw;
+                    sample.domeEvent = prepared.domeEvent;
+                }
+                session.temperatureHistory.push(sample);
+            }
+        });
+
+    session.temperatureHistory.sort((a, b) => a.timestamp - b.timestamp);
+}
+
+async function backfillActiveSessionFromPi() {
+    const session = getCurrentSession();
+    if (!session || session.finishedAt) {
+        return;
+    }
+
+    const url = getTemperatureLogUrl();
+    if (!url) {
+        return;
+    }
+
+    try {
+        const since = encodeURIComponent(session.startedAt);
+        const response = await fetch(`${url}?since=${since}`, {
+            headers: getCookStorageHeaders()
+        });
+
+        if (!response.ok) {
+            throw new Error(`Pi storage returned ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (!Array.isArray(data.readings) || !data.readings.length) {
+            return;
+        }
+
+        mergeBackfilledReadings(session, data.readings);
+        saveSessions();
+        render();
+    } catch (error) {
+        console.warn("Unable to backfill temperature history from Pi", error);
+    }
 }
 
 function getHistoryRuntime(session) {

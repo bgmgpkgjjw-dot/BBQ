@@ -31,6 +31,18 @@ try {
     }
 }
 
+// Shared with grill-server, which writes into this table independent of any connected PWA client.
+db.exec(`
+    CREATE TABLE IF NOT EXISTS temperature_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        timestamp INTEGER NOT NULL,
+        dome INTEGER,
+        probe1 INTEGER,
+        probe2 INTEGER
+    );
+    CREATE INDEX IF NOT EXISTS idx_temperature_log_timestamp ON temperature_log (timestamp);
+`);
+
 // One-time import from the old JSON file so existing history isn't lost.
 if (!dbAlreadyExisted && fs.existsSync(legacyJsonFile)) {
     try {
@@ -71,6 +83,15 @@ function readSessions() {
     return selectAllStatement.all().map(row => JSON.parse(row.data));
 }
 
+const selectReadingsStatement = db.prepare(
+    "SELECT timestamp, dome, probe1, probe2 FROM temperature_log " +
+    "WHERE timestamp >= ? AND timestamp <= ? ORDER BY timestamp ASC"
+);
+
+function readTemperatureLog(sinceMs, untilMs) {
+    return selectReadingsStatement.all(sinceMs, untilMs);
+}
+
 function isAuthorized(request) {
     if (!apiToken) {
         return true;
@@ -94,13 +115,34 @@ const server = http.createServer((request, response) => {
         return;
     }
 
-    if (request.url !== "/api/cook-sessions") {
-        sendJson(response, 404, { error: "Not found" });
-        return;
-    }
+    const requestUrl = new URL(request.url, "http://localhost");
 
     if (!isAuthorized(request)) {
         sendJson(response, 401, { error: "Unauthorized" });
+        return;
+    }
+
+    if (requestUrl.pathname === "/api/temperature-log") {
+        if (request.method !== "GET") {
+            sendJson(response, 405, { error: "Method not allowed" });
+            return;
+        }
+
+        const since = Date.parse(requestUrl.searchParams.get("since"));
+        const until = Date.parse(requestUrl.searchParams.get("until"));
+        if (Number.isNaN(since)) {
+            sendJson(response, 400, { error: "since must be a valid date" });
+            return;
+        }
+
+        sendJson(response, 200, {
+            readings: readTemperatureLog(since, Number.isNaN(until) ? Date.now() : until)
+        });
+        return;
+    }
+
+    if (requestUrl.pathname !== "/api/cook-sessions") {
+        sendJson(response, 404, { error: "Not found" });
         return;
     }
 
