@@ -44,7 +44,15 @@ async function requestNotificationPermission() {
     }
 }
 
-function sendNotification(
+async function getNotificationRegistration() {
+    if (!("serviceWorker" in navigator)) {
+        return null;
+    }
+
+    return navigator.serviceWorker.ready;
+}
+
+async function sendNotification(
     title,
     body,
     tag = "general"
@@ -64,11 +72,25 @@ function sendNotification(
     }
 
     try {
-        new Notification(title, {
-            body,
-            tag,
-            requireInteraction: true
-        });
+        const registration = await getNotificationRegistration();
+
+        if (registration) {
+            await registration.showNotification(title, {
+                body,
+                tag,
+                renotify: true,
+                requireInteraction: true,
+                icon: "./icons/icon-192.png",
+                badge: "./icons/icon-192.png",
+                data: { url: "./index.html" }
+            });
+        } else {
+            new Notification(title, {
+                body,
+                tag,
+                requireInteraction: true
+            });
+        }
     }
     catch (error) {
         console.warn("Notification could not be shown", error);

@@ -8,6 +8,17 @@
 
 const STORAGE_KEY = "hermanos_grill_sessions_v1";
 const APP_STATE_KEY = "hermanos_grill_app_state_v1";
+const COOK_STORAGE_PORT = 8090;
+
+function getCookStorageUrl() {
+    const address = appState.network?.serverAddress;
+    if (!address) {
+        return null;
+    }
+
+    const protocol = window.location.protocol === "https:" ? "https:" : "http:";
+    return `${protocol}//${address}:${COOK_STORAGE_PORT}/api/cook-sessions`;
+}
 
 
 /* ==========================================================
@@ -61,6 +72,8 @@ function saveSessions() {
 
         );
 
+        syncSessionsToPi();
+
     }
     catch (error) {
 
@@ -71,6 +84,68 @@ function saveSessions() {
 
     }
 
+}
+
+async function syncSessionsToPi() {
+    const url = getCookStorageUrl();
+    if (!url) {
+        return;
+    }
+
+    try {
+        const response = await fetch(url, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessions: appState.sessions })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Pi storage returned ${response.status}`);
+        }
+    }
+    catch (error) {
+        console.warn("Pi cook backup unavailable; local copy retained", error);
+    }
+}
+
+async function syncSessionsFromPi() {
+    const url = getCookStorageUrl();
+    if (!url) {
+        return;
+    }
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Pi storage returned ${response.status}`);
+        }
+
+        const remote = await response.json();
+        if (!Array.isArray(remote.sessions)) {
+            return;
+        }
+
+        const merged = new Map(
+            appState.sessions.map(session => [session.id, session])
+        );
+
+        remote.sessions.forEach(session => {
+            const local = merged.get(session.id);
+            if (!local || new Date(session.updatedAt || session.finishedAt || session.startedAt) >
+                new Date(local.updatedAt || local.finishedAt || local.startedAt)) {
+                merged.set(session.id, session);
+            }
+        });
+
+        appState.sessions = Array.from(merged.values())
+            .sort((left, right) => new Date(right.startedAt) - new Date(left.startedAt));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState.sessions));
+        render();
+        await syncSessionsToPi();
+    }
+    catch (error) {
+        console.warn("Pi cook backup unavailable; local copy retained", error);
+    }
 }
 
 
@@ -449,6 +524,7 @@ function scheduleStateSave() {
 initializeStorage();
 loadAppState();
 restoreActiveCook();
+syncSessionsFromPi();
 
 // Initialize network socket if enabled
 if (appState.network && appState.network.enabled && appState.network.serverAddress) {

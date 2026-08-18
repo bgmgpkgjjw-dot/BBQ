@@ -1,0 +1,17 @@
+[Unit]
+Description=Hermanos BBQ cook history storage
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=william
+WorkingDirectory=/home/william/grill-server/BBQ
+Environment=BBQ_STORAGE_PORT=8090
+Environment=BBQ_DATA_DIR=/home/william/bbq-data
+ExecStart=/usr/bin/node /home/william/grill-server/BBQ/cook-storage-server.js
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

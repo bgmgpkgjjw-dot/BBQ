@@ -344,7 +344,16 @@ function settingsView() {
             <button class="button" onclick="setNetworkSocketEnabled(!appState.network.enabled, appState.network.serverAddress)">
                 ${appState.network.enabled ? "Disconnect" : "Connect"}
             </button>
+
+            <button class="button secondary" onclick="syncSessionsFromPi();">
+                Back up cooks
+            </button>
         </div>
+
+        <p style="color:var(--muted); font-size:13px; margin-top:12px">
+            Cook history is cached on this device and backed up to the Pi at port 8090.
+            Configure that service to store its data directory on the mounted micro-SD card.
+        </p>
 
     </div>
 
@@ -370,6 +379,10 @@ function settingsView() {
         >
             Enable notifications
         </button>
+
+        <p style="color:var(--muted); font-size:13px; margin-top:8px">
+            On iPhone, install this app to the Home Screen and enable notifications from that installed app.
+        </p>
     </div>
 
     <div style="margin-bottom: 16px;">

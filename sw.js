@@ -29,6 +29,19 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+      const existingClient = windowClients.find(client => 'focus' in client);
+      if (existingClient) {
+        return existingClient.focus();
+      }
+      return clients.openWindow(event.notification.data?.url || './index.html');
+    })
+  );
+});
+
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 

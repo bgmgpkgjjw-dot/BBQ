@@ -378,8 +378,12 @@ if (
 
 
                 .then(
-                    registration =>
-                        registration.update()
+                    registration => {
+                        registration.update();
+                        if (typeof initializeNotifications === "function") {
+                            initializeNotifications();
+                        }
+                    }
                 )
 
 
@@ -405,13 +409,6 @@ if (
 
 
 // start app
-
-if (
-    typeof initializeNotifications ===
-    "function"
-) {
-    initializeNotifications();
-}
 
 if (typeof applyTheme === "function") {
     applyTheme(appState.theme?.preset || "default");
