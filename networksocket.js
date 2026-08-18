@@ -20,7 +20,7 @@ function initNetworkSocket(serverAddress) {
     }
 
     try {
-        const wsUrl = `wss://${serverAddress}:8080`;
+        const wsUrl = `ws://${serverAddress}:8080`;
         console.log(`Network socket: connecting to ${wsUrl}`);
 
         networkSocket = new WebSocket(wsUrl);
