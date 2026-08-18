@@ -1,0 +1,13 @@
+{
+  "name": "bbq-pi-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Raspberry Pi backend services for the Hermanos BBQ PWA",
+  "main": "cook-storage-server.js",
+  "scripts": {
+    "start:storage": "node cook-storage-server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.3.0"
+  }
+}

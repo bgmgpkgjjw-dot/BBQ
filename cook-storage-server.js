@@ -1,28 +1,65 @@
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
+const Database = require("better-sqlite3");
 
 const port = Number(process.env.BBQ_STORAGE_PORT || 8090);
 const dataDirectory = process.env.BBQ_DATA_DIR || "/home/william/bbq-data";
-const dataFile = path.join(dataDirectory, "cook-sessions.json");
+const dbFile = path.join(dataDirectory, "bbq.db");
+const legacyJsonFile = path.join(dataDirectory, "cook-sessions.json");
 
-function readSessions() {
+fs.mkdirSync(dataDirectory, { recursive: true });
+
+const dbAlreadyExisted = fs.existsSync(dbFile);
+const db = new Database(dbFile);
+db.pragma("journal_mode = WAL");
+db.exec(`
+    CREATE TABLE IF NOT EXISTS cook_sessions (
+        id TEXT PRIMARY KEY,
+        data TEXT NOT NULL,
+        updated_at TEXT
+    );
+    CREATE INDEX IF NOT EXISTS idx_cook_sessions_updated_at ON cook_sessions (updated_at);
+`);
+
+// One-time import from the old JSON file so existing history isn't lost.
+if (!dbAlreadyExisted && fs.existsSync(legacyJsonFile)) {
     try {
-        const data = JSON.parse(fs.readFileSync(dataFile, "utf8"));
-        return Array.isArray(data.sessions) ? data.sessions : [];
+        const legacyData = JSON.parse(fs.readFileSync(legacyJsonFile, "utf8"));
+        const legacySessions = Array.isArray(legacyData.sessions) ? legacyData.sessions : [];
+        const importSession = db.prepare(
+            "INSERT OR REPLACE INTO cook_sessions (id, data, updated_at) VALUES (?, ?, ?)"
+        );
+        const importAll = db.transaction(sessions => {
+            for (const session of sessions) {
+                if (session && session.id) {
+                    const updatedAt = session.updatedAt || session.finishedAt || session.startedAt || null;
+                    importSession.run(session.id, JSON.stringify(session), updatedAt);
+                }
+            }
+        });
+        importAll(legacySessions);
+        fs.renameSync(legacyJsonFile, `${legacyJsonFile}.migrated`);
+        console.log(`Migrated ${legacySessions.length} cook session(s) from ${legacyJsonFile} into SQLite`);
     } catch (error) {
-        if (error.code !== "ENOENT") {
-            console.error("Unable to read cook backup", error);
-        }
-        return [];
+        console.error("Unable to migrate legacy cook-sessions.json", error);
     }
 }
 
-function writeSessions(sessions) {
-    fs.mkdirSync(dataDirectory, { recursive: true });
-    const temporaryFile = `${dataFile}.tmp`;
-    fs.writeFileSync(temporaryFile, JSON.stringify({ sessions }, null, 2));
-    fs.renameSync(temporaryFile, dataFile);
+const selectAllStatement = db.prepare("SELECT data FROM cook_sessions ORDER BY rowid");
+const upsertStatement = db.prepare(
+    "INSERT INTO cook_sessions (id, data, updated_at) VALUES (?, ?, ?) " +
+    "ON CONFLICT(id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at"
+);
+const upsertMany = db.transaction(sessions => {
+    for (const session of sessions) {
+        const updatedAt = session.updatedAt || session.finishedAt || session.startedAt || null;
+        upsertStatement.run(session.id, JSON.stringify(session), updatedAt);
+    }
+});
+
+function readSessions() {
+    return selectAllStatement.all().map(row => JSON.parse(row.data));
 }
 
 function sendJson(response, status, body) {
@@ -72,14 +109,9 @@ const server = http.createServer((request, response) => {
                 return;
             }
 
-            const sessions = new Map(readSessions().map(session => [session.id, session]));
-            payload.sessions.forEach(session => {
-                if (session && session.id) {
-                    sessions.set(session.id, session);
-                }
-            });
-            writeSessions(Array.from(sessions.values()));
-            sendJson(response, 200, { sessions: Array.from(sessions.values()) });
+            const validSessions = payload.sessions.filter(session => session && session.id);
+            upsertMany(validSessions);
+            sendJson(response, 200, { sessions: readSessions() });
         } catch (error) {
             console.error("Unable to save cook backup", error);
             sendJson(response, 400, { error: "Invalid cook backup" });
@@ -88,5 +120,5 @@ const server = http.createServer((request, response) => {
 });
 
 server.listen(port, "0.0.0.0", () => {
-    console.log(`Cook storage listening on port ${port}; data directory: ${dataDirectory}`);
+    console.log(`Cook storage listening on port ${port}; database: ${dbFile}`);
 });
