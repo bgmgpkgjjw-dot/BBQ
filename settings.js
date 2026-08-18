@@ -330,6 +330,14 @@ function settingsView() {
             Status: ${appState.network.status}
         </div>
 
+        <div class="bluetooth-meta">
+            Health: ${typeof getNetworkHealth === "function" ? getNetworkHealth() : appState.network.status}
+        </div>
+
+        <div class="bluetooth-meta">
+            ${typeof getNetworkLastPacketText === "function" ? getNetworkLastPacketText() : "No temperature packet received yet"}
+        </div>
+
         ${appState.network.error ? `<p class="bluetooth-error">${appState.network.error}</p>` : ""}
 
         <div class="button-row">

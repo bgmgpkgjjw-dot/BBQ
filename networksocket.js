@@ -12,6 +12,41 @@ let reconnectTimer = null;
 let reconnectAttempts = 0;
 const MAX_RECONNECT_ATTEMPTS = 10;
 const RECONNECT_INTERVAL = 3000; // 3 seconds
+const NETWORK_PACKET_STALE_MS = 5000;
+
+function getNetworkHealth() {
+    if (!appState.network.enabled) {
+        return "Disabled";
+    }
+
+    if (!appState.network.connected) {
+        return appState.network.status || "Disconnected";
+    }
+
+    if (!appState.network.lastUpdatedAt) {
+        return "Connected, waiting for data";
+    }
+
+    const lastPacketTime = Date.parse(appState.network.lastUpdatedAt);
+    if (Number.isNaN(lastPacketTime) || Date.now() - lastPacketTime > NETWORK_PACKET_STALE_MS) {
+        return "Stale data";
+    }
+
+    return "Receiving data";
+}
+
+function getNetworkLastPacketText() {
+    if (!appState.network.lastUpdatedAt) {
+        return "No temperature packet received yet";
+    }
+
+    const lastPacketTime = Date.parse(appState.network.lastUpdatedAt);
+    if (Number.isNaN(lastPacketTime)) {
+        return "Last packet time unavailable";
+    }
+
+    return `Last packet: ${new Date(lastPacketTime).toLocaleTimeString()}`;
+}
 
 function initNetworkSocket(serverAddress) {
     if (!serverAddress) {
@@ -151,6 +186,7 @@ function processNetworkPayload(payload) {
     appState.network.lastPayload = JSON.stringify(payload);
     saveAppState();
     updateLiveUi();
+    render();
 }
 
 function attemptReconnect(serverAddress) {
@@ -207,3 +243,5 @@ function setNetworkSocketEnabled(enabled, serverAddress) {
 window.initNetworkSocket = initNetworkSocket;
 window.closeNetworkSocket = closeNetworkSocket;
 window.setNetworkSocketEnabled = setNetworkSocketEnabled;
+window.getNetworkHealth = getNetworkHealth;
+window.getNetworkLastPacketText = getNetworkLastPacketText;
