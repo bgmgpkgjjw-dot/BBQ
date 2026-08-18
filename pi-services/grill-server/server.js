@@ -52,12 +52,12 @@ prune();
 setInterval(prune, 24 * 60 * 60 * 1000);
 
 const wss = new WebSocketServer({ port });
-// Placeholder until real data arrives from btgateway; 0 is treated as "no reading" client-side
-// (unlike a plausible-looking fake temperature), so nothing misleading gets shown.
+// Placeholder until real data arrives from btgateway; null explicitly signals "no reading yet"
+// so the client clears any stale display instead of showing a fake/frozen temperature.
 let latestData = {
-    dome: 0,
-    probe1: 0,
-    probe2: 0,
+    dome: null,
+    probe1: null,
+    probe2: null,
 };
 
 console.log(`Grill server starting on port ${port}${apiToken ? " (token required)" : " (no token configured)"}`);

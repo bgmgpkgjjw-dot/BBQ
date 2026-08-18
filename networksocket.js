@@ -143,7 +143,14 @@ function processNetworkPayload(payload) {
 
     // Map dome temperature to Probe 1
     // Network format: raw value (like Bluetooth), divide by 10 to get Celsius
-    if (payload.dome !== undefined && payload.dome !== null) {
+    if (payload.dome === null) {
+        const probe = appState.probes.find(p => p.id === 1);
+        if (probe) {
+            probe.temperature = null;
+            probe.online = false;
+            updated = true;
+        }
+    } else if (payload.dome !== undefined) {
         const probe = appState.probes.find(p => p.id === 1);
         if (probe) {
             const raw = Number(payload.dome);
@@ -159,7 +166,14 @@ function processNetworkPayload(payload) {
     }
 
     // Map probe1 temperature to Probe 2 (Meat)
-    if (payload.probe1 !== undefined && payload.probe1 !== null) {
+    if (payload.probe1 === null) {
+        const probe = appState.probes.find(p => p.id === 2);
+        if (probe) {
+            probe.temperature = null;
+            probe.online = false;
+            updated = true;
+        }
+    } else if (payload.probe1 !== undefined) {
         const probe = appState.probes.find(p => p.id === 2);
         if (probe) {
             const raw = Number(payload.probe1);
@@ -175,7 +189,14 @@ function processNetworkPayload(payload) {
     }
 
     // Map probe2 temperature to Probe 3
-    if (payload.probe2 !== undefined && payload.probe2 !== null) {
+    if (payload.probe2 === null) {
+        const probe = appState.probes.find(p => p.id === 3);
+        if (probe) {
+            probe.temperature = null;
+            probe.online = false;
+            updated = true;
+        }
+    } else if (payload.probe2 !== undefined) {
         const probe = appState.probes.find(p => p.id === 3);
         if (probe) {
             const raw = Number(payload.probe2);
