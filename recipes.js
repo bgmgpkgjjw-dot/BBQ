@@ -631,12 +631,12 @@ ${recipe.phases.map(
 <div class="ingredient-row">
 
 <span>
-${phase[0]}
+${phase.name}
 </span>
 
 
 <strong>
-${phase[1]}
+${phase.description || `${phase.domeTarget ?? "—"}°C dome${phase.meatTarget != null ? ` · ${phase.meatTarget}°C core` : ""}`}
 </strong>
 
 </div>
