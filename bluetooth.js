@@ -248,6 +248,10 @@ function handleBluetoothNotification(event){
 
     }
 
+    if (typeof checkAlerts === "function") {
+        checkAlerts();
+    }
+
 
 
 
@@ -375,18 +379,6 @@ async function connectBluetooth(){
                 "characteristicvaluechanged",
                 handleBluetoothNotification
             );
-
-            if(
-            typeof checkAlerts ===
-            "function"
-            ){
-            checkAlerts();
-            }
-
-
-
-
-
 
         console.log(
             "Notifications started"

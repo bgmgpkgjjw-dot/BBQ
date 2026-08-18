@@ -356,6 +356,27 @@ function settingsView() {
             <input
                 type="checkbox"
                 class="toggle-checkbox"
+                ${appState.settings.notifications ? "checked" : ""}
+                onchange="appState.settings.notifications = this.checked; saveAppState(); render();"
+            >
+            <span class="toggle-slider"></span>
+            <span class="toggle-label-text">Browser notifications</span>
+        </label>
+
+        <button
+            class="button secondary"
+            type="button"
+            onclick="requestNotificationPermission()"
+        >
+            Enable notifications
+        </button>
+    </div>
+
+    <div style="margin-bottom: 16px;">
+        <label class="toggle-label">
+            <input
+                type="checkbox"
+                class="toggle-checkbox"
                 ${appState.settings.notificationSound ? "checked" : ""}
                 onchange="appState.settings.notificationSound = this.checked; saveAppState(); render();"
             >

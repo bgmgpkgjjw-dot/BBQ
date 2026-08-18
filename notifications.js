@@ -17,8 +17,30 @@ function initializeNotifications() {
         return;
     }
 
-    if (Notification.permission === "default") {
-        Notification.requestPermission();
+    console.log("Notification permission:", Notification.permission);
+}
+
+async function requestNotificationPermission() {
+    if (!("Notification" in window)) {
+        appState.settings.notifications = false;
+        saveAppState();
+        render();
+        return false;
+    }
+
+    try {
+        const permission = await Notification.requestPermission();
+        appState.settings.notifications = permission === "granted";
+        saveAppState();
+        render();
+        return permission === "granted";
+    }
+    catch (error) {
+        console.warn("Notification permission request failed", error);
+        appState.settings.notifications = false;
+        saveAppState();
+        render();
+        return false;
     }
 }
 
@@ -28,15 +50,30 @@ function sendNotification(
     tag = "general"
 ) {
 
+    if (!appState.settings.notifications) {
+        return;
+    }
+
+    if (!("Notification" in window) || Notification.permission !== "granted") {
+        console.warn("Notification skipped: permission is not granted");
+        return;
+    }
+
     if (typeof recordAlert === "function") {
         recordAlert(tag, body);
     }
 
-    new Notification(title, {
-        body,
-        tag,
-        requireInteraction: true
-    });
+    try {
+        new Notification(title, {
+            body,
+            tag,
+            requireInteraction: true
+        });
+    }
+    catch (error) {
+        console.warn("Notification could not be shown", error);
+        return;
+    }
 
     if (appState.settings.notificationSound) {
         playAlertSound();
@@ -232,6 +269,10 @@ function checkDomeDeviation(
 
 function checkBluetoothAlert() {
 
+    if (appState.network.enabled) {
+        return;
+    }
+
     if (
         appState.bluetooth.connected
     ) {
@@ -311,8 +352,6 @@ function checkApproachingMeatTarget(meat) {
     ) {
         alertState.fired.add(key);
 
-        triggerVibration();
-
         sendNotification(
             "Core approaching target",
             `${meat.name} at ${Math.round(meat.temperature)}°C, target is ${target}°C`,
@@ -346,8 +385,6 @@ function checkApproachingDomeTarget(dome) {
         !alertState.fired.has(key)
     ) {
         alertState.fired.add(key);
-
-        triggerVibration();
 
         sendNotification(
             "Dome approaching target",

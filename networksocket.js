@@ -197,6 +197,11 @@ function processNetworkPayload(payload) {
     appState.network.lastUpdatedAt = new Date().toISOString();
     appState.network.lastPayload = JSON.stringify(payload);
     saveAppState();
+
+    if (typeof checkAlerts === "function") {
+        checkAlerts();
+    }
+
     updateLiveUi();
 }
 
