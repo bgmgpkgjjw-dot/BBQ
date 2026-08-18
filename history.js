@@ -419,6 +419,56 @@ function deleteCook(sessionId) {
 
 let historyDetailChart = null;
 
+function downsampleTemperatureSamples(samples, maxPoints = 600) {
+    if (samples.length <= maxPoints) {
+        return samples;
+    }
+
+    const firstTimestamp = samples[0].timestamp;
+    const lastTimestamp = samples.at(-1).timestamp;
+    const bucketDuration = Math.max(
+        1,
+        (lastTimestamp - firstTimestamp) / maxPoints
+    );
+    const buckets = new Map();
+
+    samples.forEach(sample => {
+        const bucket = Math.min(
+            maxPoints - 1,
+            Math.floor((sample.timestamp - firstTimestamp) / bucketDuration)
+        );
+
+        if (!buckets.has(bucket)) {
+            buckets.set(bucket, []);
+        }
+
+        buckets.get(bucket).push(sample);
+    });
+
+    return Array.from(buckets.values()).map(bucket => {
+        const numericDome = bucket.map(sample => sample.dome).filter(Number.isFinite);
+        const numericMeat = bucket.map(sample => sample.meat).filter(Number.isFinite);
+        const first = bucket[0];
+
+        return {
+            timestamp: bucket[Math.floor(bucket.length / 2)].timestamp,
+            dome: numericDome.length
+                ? numericDome.reduce((sum, value) => sum + value, 0) / numericDome.length
+                : null,
+            meat: numericMeat.length
+                ? numericMeat.reduce((sum, value) => sum + value, 0) / numericMeat.length
+                : null,
+            domeMin: numericDome.length ? Math.min(...numericDome) : null,
+            domeMax: numericDome.length ? Math.max(...numericDome) : null,
+            meatMin: numericMeat.length ? Math.min(...numericMeat) : null,
+            meatMax: numericMeat.length ? Math.max(...numericMeat) : null,
+            domeEvent: bucket.some(sample => sample.domeEvent === "opening")
+                ? "opening"
+                : first.domeEvent
+        };
+    });
+}
+
 function renderHistoryDetailChart() {
 
     const session =
@@ -437,8 +487,9 @@ function renderHistoryDetailChart() {
         return;
     }
 
-    const samples =
-        session.temperatureHistory || [];
+    const samples = downsampleTemperatureSamples(
+        session.temperatureHistory || []
+    );
 
     if (!samples.length) {
         return;

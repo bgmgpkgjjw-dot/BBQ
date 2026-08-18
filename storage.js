@@ -9,6 +9,16 @@
 const STORAGE_KEY = "hermanos_grill_sessions_v1";
 const APP_STATE_KEY = "hermanos_grill_app_state_v1";
 const COOK_STORAGE_PORT = 8090;
+const HISTORY_SAMPLE_INTERVALS = [
+    { afterMs: 0, intervalMs: 10 * 1000 },
+    { afterMs: 15 * 60 * 1000, intervalMs: 30 * 1000 },
+    { afterMs: 2 * 60 * 60 * 1000, intervalMs: 60 * 1000 },
+    { afterMs: 8 * 60 * 60 * 1000, intervalMs: 5 * 60 * 1000 }
+];
+const DOME_OPENING_DROP = 15;
+const DOME_OPENING_RECOVERY = 8;
+const DOME_OPENING_MAX_DURATION = 10 * 60 * 1000;
+const historyRuntime = new Map();
 
 function getCookStorageUrl() {
     const address = appState.network?.serverAddress;
@@ -18,6 +28,100 @@ function getCookStorageUrl() {
 
     const protocol = window.location.protocol === "https:" ? "https:" : "http:";
     return `${protocol}//${address}:${COOK_STORAGE_PORT}/api/cook-sessions`;
+}
+
+function getHistoryRuntime(session) {
+    if (!historyRuntime.has(session.id)) {
+        historyRuntime.set(session.id, {
+            lastRawDome: null,
+            stableDome: null,
+            transientUntil: 0,
+            domeOpening: false
+        });
+    }
+
+    return historyRuntime.get(session.id);
+}
+
+function getHistorySampleInterval(session, timestamp) {
+    const startedAt = Date.parse(session.startedAt);
+    const elapsed = Number.isNaN(startedAt)
+        ? 0
+        : Math.max(0, timestamp - startedAt);
+
+    return HISTORY_SAMPLE_INTERVALS.reduce(
+        (interval, candidate) => elapsed >= candidate.afterMs
+            ? candidate.intervalMs
+            : interval,
+        HISTORY_SAMPLE_INTERVALS[0].intervalMs
+    );
+}
+
+function isSignificantTemperatureChange(previous, current) {
+    if (!previous || current == null) {
+        return false;
+    }
+
+    return (
+        previous.dome != null &&
+        current.dome != null &&
+        Math.abs(current.dome - previous.dome) >= 3
+    ) || (
+        previous.meat != null &&
+        current.meat != null &&
+        Math.abs(current.meat - previous.meat) >= 0.5
+    );
+}
+
+function prepareHistoricalTemperature(session, dome, meat, timestamp) {
+    const runtime = getHistoryRuntime(session);
+    const previousRawDome = runtime.lastRawDome;
+    const previousStableDome = runtime.stableDome ?? dome;
+
+    if (
+        previousRawDome != null &&
+        dome != null &&
+        previousRawDome - dome >= DOME_OPENING_DROP
+    ) {
+        runtime.domeOpening = true;
+        runtime.transientUntil = timestamp + DOME_OPENING_MAX_DURATION;
+        runtime.stableDome = previousStableDome;
+    }
+
+    runtime.lastRawDome = dome;
+
+    if (runtime.domeOpening) {
+        const recovered = dome != null &&
+            Math.abs(dome - (runtime.stableDome ?? dome)) <= DOME_OPENING_RECOVERY;
+
+        if (recovered || timestamp >= runtime.transientUntil) {
+            runtime.domeOpening = false;
+            runtime.transientUntil = 0;
+            runtime.stableDome = dome;
+        }
+    } else if (dome != null) {
+        runtime.stableDome = dome;
+    }
+
+    return {
+        dome: runtime.domeOpening ? runtime.stableDome : dome,
+        meat,
+        domeRaw: runtime.domeOpening ? dome : undefined,
+        domeEvent: runtime.domeOpening ? "opening" : undefined
+    };
+}
+
+function shouldRecordHistoricalSample(session, sample, timestamp) {
+    const previous = session.temperatureHistory.at(-1);
+    if (!previous) {
+        return true;
+    }
+
+    const interval = getHistorySampleInterval(session, timestamp);
+    const intervalElapsed = timestamp - previous.timestamp >= interval;
+    const significantChange = isSignificantTemperatureChange(previous, sample);
+
+    return intervalElapsed || significantChange;
 }
 
 
@@ -286,19 +390,27 @@ function recordTemperatureHistory() {
         return;
     }
 
-    session.temperatureHistory.push({
-        timestamp: Date.now(),
+    const timestamp = Date.now();
+    const dome = appState.probes.find(p => p.type === "dome")?.temperature ?? null;
+    const meat = appState.probes.find(p => p.type === "meat")?.temperature ?? null;
+    const prepared = prepareHistoricalTemperature(session, dome, meat, timestamp);
 
-        dome:
-            appState.probes.find(
-                p => p.type === "dome"
-            )?.temperature ?? null,
+    if (!shouldRecordHistoricalSample(session, prepared, timestamp)) {
+        return;
+    }
 
-        meat:
-            appState.probes.find(
-                p => p.type === "meat"
-            )?.temperature ?? null
-    });
+    const sample = {
+        timestamp,
+        dome: prepared.dome,
+        meat: prepared.meat
+    };
+
+    if (prepared.domeRaw !== undefined) {
+        sample.domeRaw = prepared.domeRaw;
+        sample.domeEvent = prepared.domeEvent;
+    }
+
+    session.temperatureHistory.push(sample);
 
     /*
         Save every 20 measurements
