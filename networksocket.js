@@ -12,7 +12,7 @@ let reconnectTimer = null;
 let reconnectAttempts = 0;
 const MAX_RECONNECT_ATTEMPTS = 10;
 const RECONNECT_INTERVAL = 3000; // 3 seconds
-const NETWORK_PACKET_STALE_MS = 5000;
+const NETWORK_PACKET_STALE_MS = 10000;
 
 function getNetworkHealth() {
     if (!appState.network.enabled) {
