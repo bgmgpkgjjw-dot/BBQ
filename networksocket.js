@@ -90,16 +90,18 @@ function processNetworkPayload(payload) {
     let updated = false;
 
     // Map dome temperature to Probe 1
+    // Network format: raw value (like Bluetooth), divide by 10 to get Celsius
     if (payload.dome !== undefined && payload.dome !== null) {
         const probe = appState.probes.find(p => p.id === 1);
         if (probe) {
-            const temp = Number(payload.dome);
-            if (!Number.isNaN(temp)) {
+            const raw = Number(payload.dome);
+            if (!Number.isNaN(raw) && raw !== 0xFFFF && raw !== 0) {
+                const temp = raw / 10;
                 probe.temperature = temp;
                 probe.lastSeen = Date.now();
                 probe.online = true;
                 updated = true;
-                console.log("Network: Dome temperature", temp, "°C");
+                console.log("Network: Dome temperature", temp, "°C (raw:", raw, ")");
             }
         }
     }
@@ -108,13 +110,14 @@ function processNetworkPayload(payload) {
     if (payload.probe1 !== undefined && payload.probe1 !== null) {
         const probe = appState.probes.find(p => p.id === 2);
         if (probe) {
-            const temp = Number(payload.probe1);
-            if (!Number.isNaN(temp)) {
+            const raw = Number(payload.probe1);
+            if (!Number.isNaN(raw) && raw !== 0xFFFF && raw !== 0) {
+                const temp = raw / 10;
                 probe.temperature = temp;
                 probe.lastSeen = Date.now();
                 probe.online = true;
                 updated = true;
-                console.log("Network: Probe 1 (Meat) temperature", temp, "°C");
+                console.log("Network: Probe 1 (Meat) temperature", temp, "°C (raw:", raw, ")");
             }
         }
     }
@@ -123,13 +126,14 @@ function processNetworkPayload(payload) {
     if (payload.probe2 !== undefined && payload.probe2 !== null) {
         const probe = appState.probes.find(p => p.id === 3);
         if (probe) {
-            const temp = Number(payload.probe2);
-            if (!Number.isNaN(temp)) {
+            const raw = Number(payload.probe2);
+            if (!Number.isNaN(raw) && raw !== 0xFFFF && raw !== 0) {
+                const temp = raw / 10;
                 probe.temperature = temp;
                 probe.lastSeen = Date.now();
                 probe.online = true;
                 updated = true;
-                console.log("Network: Probe 2 temperature", temp, "°C");
+                console.log("Network: Probe 2 temperature", temp, "°C (raw:", raw, ")");
             }
         }
     }
