@@ -203,6 +203,14 @@ function historyDetailView() {
             :
             "—";
 
+    const latestSample = samples.at(-1) || {};
+    const latestDome = Number.isFinite(latestSample.dome)
+        ? `${Math.round(latestSample.dome)}°C`
+        : "—";
+    const latestMeat = Number.isFinite(latestSample.meat)
+        ? `${Math.round(latestSample.meat)}°C`
+        : "—";
+
     setTimeout( () => renderHistoryDetailChart(), 50 );
 
     return `
@@ -284,17 +292,19 @@ function historyDetailView() {
         ${samples.length}
         </p>
 
+        <div class="history-metrics">
+            <div class="history-metric dome-metric">
+                <span class="history-metric-label">Dome now</span>
+                <strong>${latestDome}</strong>
+                <small>Peak ${maxDome}°C</small>
+            </div>
 
-        <p>
-        Max dome:
-        ${maxDome}°C
-        </p>
-
-
-        <p>
-        Max core temperature:
-        ${maxMeat}°C
-        </p>
+            <div class="history-metric core-metric">
+                <span class="history-metric-label">Core now</span>
+                <strong>${latestMeat}</strong>
+                <small>Peak ${maxMeat}°C</small>
+            </div>
+        </div>
 
 
     </div>
@@ -304,9 +314,16 @@ function historyDetailView() {
     <div class="card">
 
 
-        <h3>
-        Temperature trend
-        </h3>
+        <div class="chart-heading">
+            <div>
+                <h3>Temperature trend</h3>
+                <p class="chart-subtitle">Dome and food core temperature over time</p>
+            </div>
+            <div class="chart-legend" aria-label="Chart legend">
+                <span><i class="legend-swatch dome-swatch"></i>Dome</span>
+                <span><i class="legend-swatch core-swatch"></i>Core</span>
+            </div>
+        </div>
 
         <div class="chart-container">
             <canvas
@@ -499,6 +516,39 @@ function renderHistoryDetailChart() {
         historyDetailChart.destroy();
     }
 
+    const domeColor = "#E5A93D";
+    const coreColor = "#4DB6A5";
+    const domeTarget = appState.selectedHistory.domeTarget;
+    const coreTarget = appState.selectedHistory.meatTarget;
+
+    const targetDataset = (label, value, color) => value == null
+        ? []
+        : [{
+            label,
+            data: samples.map(() => value),
+            borderColor: color,
+            borderDash: [6, 5],
+            borderWidth: 1,
+            pointRadius: 0,
+            fill: false,
+            tension: 0
+        }];
+
+    const openingDataset = samples.some(sample => sample.domeEvent === "opening")
+        ? [{
+            label: "Dome opening",
+            data: samples.map(sample => sample.domeEvent === "opening" ? sample.dome : null),
+            borderColor: "#F2D28A",
+            backgroundColor: "#F2D28A",
+            pointBorderColor: "#241D15",
+            pointBorderWidth: 2,
+            pointRadius: samples.map(sample => sample.domeEvent === "opening" ? 4 : 0),
+            pointHoverRadius: 6,
+            showLine: false,
+            spanGaps: false
+        }]
+        : [];
+
     historyDetailChart =
         new Chart(canvas, {
 
@@ -522,42 +572,50 @@ function renderHistoryDetailChart() {
                 datasets: [
 
                     {
-                        label: "Dome",
+                        label: "Dome temperature",
 
                         data: samples.map(
                             s => s.dome
                         ),
 
-                        borderColor:
-                            "#ff6b1a",
+                        borderColor: domeColor,
 
-                        backgroundColor:
-                            "rgba(255,107,26,.15)",
+                        backgroundColor: "rgba(229,169,61,.08)",
 
-                        tension: .3,
+                        borderWidth: 3,
 
-                        pointRadius: 0
+                        tension: .25,
+
+                        pointRadius: 0,
+
+                        pointHoverRadius: 5
                     },
 
                     {
-                        label: "Kern",
+                        label: "Core temperature",
 
                         data: samples.map(
                             s => s.meat
                         ),
 
-                        borderColor:
-                            "#c1272d",
+                        borderColor: coreColor,
 
-                        backgroundColor:
-                            "rgba(193,39,45,.15)",
+                        backgroundColor: "rgba(77,182,165,.08)",
 
-                        tension: .3,
+                        borderWidth: 3,
 
-                        pointRadius: 0
+                        tension: .25,
+
+                        pointRadius: 0,
+
+                        pointHoverRadius: 5
                     }
 
-                ]
+                ].concat(
+                    targetDataset("Dome target", domeTarget, domeColor),
+                    targetDataset("Core target", coreTarget, coreColor),
+                    openingDataset
+                )
             },
 
             options: {
@@ -575,7 +633,23 @@ function renderHistoryDetailChart() {
 
                     legend: {
                         labels: {
-                            color: "#F2EBDD"
+                            color: "#F2EBDD",
+                            filter: item => ![
+                                "Dome target",
+                                "Core target",
+                                "Dome opening"
+                            ].includes(item.text)
+                        }
+                    },
+
+                    tooltip: {
+                        callbacks: {
+                            label: context => {
+                                const value = context.parsed.y;
+                                return value == null
+                                    ? context.dataset.label
+                                    : `${context.dataset.label}: ${Math.round(value)}°C`;
+                            }
                         }
                     }
                 },
@@ -583,6 +657,9 @@ function renderHistoryDetailChart() {
                 scales: {
 
                     x: {
+                        grid: {
+                            color: "rgba(242,235,221,.06)"
+                        },
                         ticks: {
                             color: "#918678",
                             maxTicksLimit: 10
@@ -590,6 +667,9 @@ function renderHistoryDetailChart() {
                     },
 
                     y: {
+                        grid: {
+                            color: "rgba(242,235,221,.08)"
+                        },
                         ticks: {
                             color: "#918678"
                         },
