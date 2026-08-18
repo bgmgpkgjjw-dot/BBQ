@@ -543,20 +543,7 @@ function completePhase() {
     ) {
 
         appState.cook.phase++;
-
-        const phase =
-            appState.cook.phases[
-            appState.cook.phase
-            ];
-
-        if (phase) {
-
-            appState.cook.domeTarget =
-                phase.domeTarget;
-
-            appState.cook.meatTarget =
-                phase.meatTarget;
-        }
+        applyCurrentPhaseTargets();
     }
 
     appState.cook.lastPhaseChange =
@@ -582,6 +569,8 @@ function previousPhase() {
                 phase =>
                     phase !== appState.cook.phase
             );
+
+                applyCurrentPhaseTargets();
     }
 
     appState.cook.lastPhaseChange =

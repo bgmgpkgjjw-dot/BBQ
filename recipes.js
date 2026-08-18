@@ -180,6 +180,51 @@ function formatAmount(item) {
 
 }
 
+function phaseTemperature(value, pattern) {
+    const match = String(value || "").match(pattern);
+    return match ? Number(match[1]) : null;
+}
+
+function normalizeRecipePhases(recipe) {
+    const phases = recipe?.phases || [];
+    const defaultDome = Number(recipe?.dome);
+    const defaultCore = Number(recipe?.target);
+
+    return phases.map((phase, index) => {
+        const isTuple = Array.isArray(phase);
+        const description = isTuple ? phase[1] : phase.description;
+        const name = isTuple ? phase[0] : phase.name;
+        const domeTarget = isTuple
+            ? phaseTemperature(description, /(\d+(?:\.\d+)?)\s*°?C/i)
+            : Number(phase.domeTarget ?? phase.dome_temperature);
+        const meatTarget = isTuple
+            ? phaseTemperature(description, /(?:core|target|reach(?:es)?|until)[^\d]*(\d+(?:\.\d+)?)\s*°?C/i)
+            : Number(phase.meatTarget ?? phase.target_temperature);
+
+        return {
+            name: name || `Phase ${index + 1}`,
+            description: description || "",
+            domeTarget: Number.isFinite(domeTarget)
+                ? domeTarget
+                : (Number.isFinite(defaultDome) ? defaultDome : null),
+            meatTarget: Number.isFinite(meatTarget)
+                ? meatTarget
+                : null,
+            completed: Boolean(phase.completed)
+        };
+    });
+}
+
+function applyCurrentPhaseTargets() {
+    const phase = appState.cook.phases?.[appState.cook.phase];
+    if (!phase) {
+        return;
+    }
+
+    appState.cook.domeTarget = phase.domeTarget ?? null;
+    appState.cook.meatTarget = phase.meatTarget ?? null;
+}
+
 
 
 /* ==========================================================
@@ -205,13 +250,15 @@ function loadRecipeIntoCook(recipeId) {
     }
 
     appState.cook.name = recipe.name;
+    appState.cook.recipe = recipe.name;
     appState.cook.domeTarget = recipe.dome;
     appState.cook.meatTarget = recipe.target;
     appState.cook.duration = recipe.duration;
 
     appState.cook.phase = 0;
-    appState.cook.phases = recipe.phases || [];
+    appState.cook.phases = normalizeRecipePhases(recipe);
     appState.cook.completedPhases = [];
+    applyCurrentPhaseTargets();
 
     appState.cook.servings = scaledServings(recipe);
     appState.cook.ingredients = scaledIngredients(recipe);

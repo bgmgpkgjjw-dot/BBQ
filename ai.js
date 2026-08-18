@@ -588,29 +588,11 @@ function startAiCookFromSelectedRecipe() {
         syncWakeLockState();
     }
 
-    appState.cook.phases =
-        (recipe.phases || []).map(
-            phase => ({
-
-                name:
-                    phase.name,
-
-                domeTarget:
-                    Number(
-                        phase.dome_temperature
-                    ),
-
-                meatTarget:
-                    phase.target_temperature != null
-                        ? Number(
-                            phase.target_temperature
-                        )
-                        : null,
-
-                completed:
-                    false
-            })
-        );
+    appState.cook.phases = normalizeRecipePhases({
+        dome,
+        target,
+        phases: recipe.phases
+    });
 
     appState.cook.name =
         recipe.title;
@@ -620,6 +602,9 @@ function startAiCookFromSelectedRecipe() {
 
     appState.cook.meatTarget =
         target;
+
+    appState.cook.phase = 0;
+    applyCurrentPhaseTargets();
 
     appState.cook.startedAt =
         new Date().toISOString();
@@ -678,32 +663,16 @@ function startAiCook(index) {
 
     appState.cook.phase = 0;
 
-    appState.cook.phases =
-        (recipe.phases || []).map(
-            phase => ({
-
-                name:
-                    phase.name,
-
-                domeTarget:
-                    Number(
-                        phase.dome_temperature
-                    ),
-
-                meatTarget:
-                    phase.target_temperature != null
-                        ? Number(
-                            phase.target_temperature
-                        )
-                        : null,
-
-                completed:
-                    false
-            })
-        );
+    appState.cook.phases = normalizeRecipePhases({
+        dome: domeTarget,
+        target: meatTarget,
+        phases: recipe.phases
+    });
 
     appState.cook.startedAt =
         new Date().toISOString();
+
+    applyCurrentPhaseTargets();
 
     startCookSession();
 
