@@ -49,15 +49,15 @@ function getNetworkLastPacketText() {
 }
 
 function updateNetworkHealthUi() {
-    const health = document.querySelector("[data-network-health]");
-    if (!health) {
+    const status = document.querySelector("[data-live-status]");
+    if (!status) {
         return;
     }
 
     const networkHealth = getNetworkHealth();
     const isLive = networkHealth === "Receiving data";
-    health.textContent = isLive ? "Live" : "Connection stale";
-    health.className = `network-health ${isLive ? "live" : "stale"}`;
+    status.textContent = isLive ? "Live" : "Connection stale";
+    status.className = `status ${isLive ? "live" : "stale"}`;
 }
 
 function initNetworkSocket(serverAddress) {
@@ -198,7 +198,6 @@ function processNetworkPayload(payload) {
     appState.network.lastPayload = JSON.stringify(payload);
     saveAppState();
     updateLiveUi();
-    render();
 }
 
 function attemptReconnect(serverAddress) {

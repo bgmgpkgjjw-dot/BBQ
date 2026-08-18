@@ -166,18 +166,11 @@ body {
    margin-bottom: 12px;
 }
 
-.network-health {
-   font-size: 12px;
-   font-weight: 700;
-   margin-top: -8px;
-   margin-bottom: 12px;
-}
-
-.network-health.live {
+.status.live {
    color: var(--green);
 }
 
-.network-health.stale {
+.status.stale {
    color: var(--danger);
 }
 

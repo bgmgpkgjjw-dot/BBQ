@@ -55,9 +55,18 @@ function updateLiveUi() {
     const status = document.querySelector("[data-live-status]");
 
     if (status) {
-        status.textContent = appState.bluetooth.connected
-            ? `${appState.bluetooth.device || "Bluetooth"} connected`
-            : "Not connected";
+        if (appState.network.enabled && typeof getNetworkHealth === "function") {
+            const networkHealth = getNetworkHealth();
+            status.textContent = networkHealth === "Receiving data"
+                ? "Live"
+                : "Connection stale";
+            status.className = `status ${networkHealth === "Receiving data" ? "live" : "stale"}`;
+        } else {
+            status.textContent = appState.bluetooth.connected
+                ? `${appState.bluetooth.device || "Bluetooth"} connected`
+                : "Not connected";
+            status.className = "status";
+        }
     }
 
     document.querySelectorAll("[data-probe-temperature]").forEach(el => {
@@ -410,21 +419,17 @@ function dashboardView() {
     return `
 
         <div
-            class="status"
+            class="status ${appState.network.enabled ? "stale" : ""}"
             data-live-status
         >
             ${
-                appState.bluetooth.connected
+                appState.network.enabled
+                    ? "Connection stale"
+                    : appState.bluetooth.connected
                     ? "Connected"
                     : "Not connected"
             }
         </div>
-
-        ${appState.network.enabled ? `
-            <div class="network-health stale" data-network-health>
-                Connection stale
-            </div>
-        ` : ""}
 
         <div class="probe-container">
 
