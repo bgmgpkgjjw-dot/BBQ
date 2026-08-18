@@ -312,52 +312,6 @@ function settingsView() {
     <div class="card">
 
         <h2>
-            Sensecap Wi-Fi
-        </h2>
-
-        <p style="color:var(--muted); font-size:13px; margin-bottom:12px">
-            Configure a local Sensecap M1 endpoint for thermometers that send readings to the PWA over Wi‑Fi.
-        </p>
-
-        <label>
-            Endpoint URL
-        </label>
-
-        <input
-            type="text"
-            value="${appState.sensecap.endpoint}"
-            oninput="setSensecapEndpoint(this.value)"
-            placeholder="http://192.168.x.x/api/temperature"
-        >
-
-        <label>
-            Poll interval (seconden)
-        </label>
-
-        <input
-            type="number"
-            min="5"
-            value="${appState.sensecap.pollingIntervalSeconds}"
-            onchange="setSensecapPollingInterval(this.value)"
-        >
-
-        <div class="bluetooth-status">
-            Status: ${appState.sensecap.status}
-        </div>
-
-        ${appState.sensecap.error ? `<p class="bluetooth-error">${appState.sensecap.error}</p>` : ""}
-
-        <div class="button-row">
-            <button class="button" onclick="setSensecapEnabled(!appState.sensecap.enabled)">
-                ${appState.sensecap.enabled ? "Stop" : "Start"}
-            </button>
-        </div>
-
-    </div>
-
-    <div class="card">
-
-        <h2>
             Network Socket (Grill Server)
         </h2>
 

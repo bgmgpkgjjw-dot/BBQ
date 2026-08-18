@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bbq-pwa-v2';
+const CACHE_NAME = 'bbq-pwa-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -10,7 +10,7 @@ const ASSETS = [
   './settings.js',
   './simulator.js',
   './state.js',
-  './sensecap.js'
+  './networksocket.js'
 ];
 
 self.addEventListener('install', event => {

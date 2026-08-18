@@ -120,16 +120,6 @@ const appState = {
         savedRecipes: []
     },
 
-    sensecap: {
-        enabled: false,
-        endpoint: "",
-        pollingIntervalSeconds: 15,
-        status: "Disabled",
-        lastUpdatedAt: null,
-        error: "",
-        sensorMapping: {}
-    },
-
     network: {
         enabled: false,
         serverAddress: "192.168.68.127",
