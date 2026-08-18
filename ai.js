@@ -1,6 +1,3 @@
-const OPENROUTER_API_KEY =
-    "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";
-
 const AI_CATEGORIES = [
 
     "Anything",
@@ -23,79 +20,19 @@ async function generateOpenRouterRecipes() {
 
     try {
 
-        const prompt = `
-
-            You are a professional Kamado BBQ chef. Generate exactly 3 recipes using the ingredients and style below.
-
-            RECIPE MIX (strict):
-            - 2 of the 3 recipes must be classic, well-known, low-effort Kamado dishes — the kind of recipes that show up constantly on Big Green Egg, Kamado Joe, and Smokey Goodness content (e.g. pulled pork, ribs, chicken thighs, smoked salmon, pizza, burgers). Simple ingredient lists, minimal steps, no unusual techniques.
-            - 1 of the 3 recipes may be more "surprising" — a twist on a classic or a less common cut/method — but it must still be realistic for a home Kamado grill with normal supermarket ingredients. No fusion cuisine, no molecular techniques, no hard-to-find ingredients.
-
-            LABOR CONSTRAINT:
-            - Prefer recipes with 5-8 steps and default difficulty "Easy" or "Medium." Avoid multi-day brines/marinades or techniques requiring special equipment unless the recipe style explicitly calls for it.
-
-            TEMPERATURE RULES:
-            - "dome_temperature" = required dome/cooking temperature in Celsius, always filled in (e.g. "180°C"). Never leave blank.
-            - "target_temperature" = required internal meat temperature in Celsius, or null if not applicable.
-
-            PHASES:
-            - Include multiple phases only when the recipe naturally has them (e.g. pulled pork: Smoke → Wrap → Finish; brisket: Smoke → Wrap → Rest; ribs: Smoke → Wrap → Sauce).
-            - Simple recipes (burgers, veg, fish) should have a single phase.
-
-            Available ingredients: ${appState.ai.ingredients}
-            Recipe style: ${appState.ai.category}
-
-            Return ONLY valid JSON, no commentary, in this exact format:
-
-            [
-            {
-                "title": "",
-                "description": "",
-                "dome_temperature": "180°C",
-                "target_temperature": "72°C",
-                "duration": "45 minutes",
-                "difficulty": "Easy",
-                "phases": [
-                { "name": "Smoke", "dome_temperature": 120, "target_temperature": 75 },
-                { "name": "Wrap", "dome_temperature": 130, "target_temperature": 92 }
-                ],
-                "ingredients": [],
-                "steps": []
-            }
-            ]
-
-            `;
+        const cookStorageUrl = typeof getCookStorageUrl === "function" ? getCookStorageUrl() : null;
+        if (!cookStorageUrl) {
+            throw new Error("Configure the Pi's server address in Settings first.");
+        }
 
         const response = await fetch(
-            "https://openrouter.ai/api/v1/chat/completions",
+            cookStorageUrl.replace("/api/cook-sessions", "/api/ai/recipes"),
             {
                 method: "POST",
-
-                headers: {
-                    "Authorization":
-                        `Bearer ${OPENROUTER_API_KEY}`,
-
-                    "Content-Type":
-                        "application/json",
-
-                    "HTTP-Referer":
-                        window.location.origin,
-
-                    "X-Title":
-                        "Hermanos Grill Companion"
-                },
-
+                headers: getCookStorageHeaders({ "Content-Type": "application/json" }),
                 body: JSON.stringify({
-
-                    model: "openrouter/free",
-
-                    messages: [
-                        {
-                            role: "user",
-                            content: prompt
-                        }
-                    ]
-
+                    ingredients: appState.ai.ingredients,
+                    category: appState.ai.category
                 })
             }
         );
@@ -107,40 +44,13 @@ async function generateOpenRouterRecipes() {
             response.status
         );
 
-        console.log(
-            "OpenRouter Response:",
-            data
-        );
-
         if (!response.ok) {
             throw new Error(
-                JSON.stringify(data)
+                data?.error || JSON.stringify(data)
             );
         }
 
-        let text =
-            data?.choices?.[0]
-                ?.message?.content;
-
-        if (!text) {
-
-            throw new Error(
-                JSON.stringify(data)
-            );
-        }
-
-        text = text.replace(
-            /```json|```/g,
-            ""
-        );
-
-        console.log(
-            "AI TEXT:",
-            text
-        );
-
-        appState.ai.results =
-            JSON.parse(text);
+        appState.ai.results = data.recipes;
 
     }
     catch (error) {
