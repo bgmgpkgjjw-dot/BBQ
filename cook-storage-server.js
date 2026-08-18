@@ -179,7 +179,7 @@ function sendJson(response, status, body) {
     response.writeHead(status, {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, PUT, POST, OPTIONS",
+        "Access-Control-Allow-Methods": "GET, PUT, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, X-BBQ-Token, X-BBQ-Device-Id"
     });
     response.end(JSON.stringify(body));
