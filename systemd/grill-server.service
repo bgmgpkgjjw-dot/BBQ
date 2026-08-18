@@ -7,8 +7,9 @@ Requires=btgateway.service
 [Service]
 Type=simple
 User=william
-WorkingDirectory=/home/william/grill-server
-ExecStart=/usr/bin/node /home/william/grill-server/server.js
+WorkingDirectory=/home/william/grill-server/BBQ/pi-services/grill-server
+EnvironmentFile=/etc/bbq/bbq.env
+ExecStart=/usr/bin/node /home/william/grill-server/BBQ/pi-services/grill-server/server.js
 Restart=always
 RestartSec=5
 

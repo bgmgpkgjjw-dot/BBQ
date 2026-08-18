@@ -9,6 +9,7 @@ User=william
 WorkingDirectory=/home/william/grill-server/BBQ
 Environment=BBQ_STORAGE_PORT=8090
 Environment=BBQ_DATA_DIR=/home/william/bbq-data
+EnvironmentFile=/etc/bbq/bbq.env
 ExecStart=/usr/bin/node /home/william/grill-server/BBQ/cook-storage-server.js
 Restart=always
 RestartSec=5

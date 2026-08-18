@@ -121,6 +121,7 @@ const appState = {
     network: {
         enabled: false,
         serverAddress: "192.168.68.127",
+        apiToken: "",
         connected: false,
         status: "Disabled",
         error: "",

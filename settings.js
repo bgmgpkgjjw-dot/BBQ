@@ -97,6 +97,11 @@ function setNetworkServerAddress(address) {
     saveAppState();
 }
 
+function setNetworkApiToken(token) {
+    appState.network.apiToken = token.trim();
+    saveAppState();
+}
+
 function applyTheme(presetKey = appState.theme?.preset || "default") {
 
     const preset = THEME_PRESETS[presetKey] || THEME_PRESETS.default;
@@ -324,6 +329,17 @@ function settingsView() {
             value="${appState.network.serverAddress}"
             oninput="setNetworkServerAddress(this.value)"
             placeholder="192.168.68.127 or raspberrypi.local"
+        >
+
+        <label>
+            API Token
+        </label>
+
+        <input
+            type="password"
+            value="${appState.network.apiToken || ""}"
+            oninput="setNetworkApiToken(this.value)"
+            placeholder="Shared token configured on the Pi"
         >
 
         <div class="bluetooth-status">

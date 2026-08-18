@@ -7,6 +7,7 @@ const port = Number(process.env.BBQ_STORAGE_PORT || 8090);
 const dataDirectory = process.env.BBQ_DATA_DIR || "/home/william/bbq-data";
 const dbFile = path.join(dataDirectory, "bbq.db");
 const legacyJsonFile = path.join(dataDirectory, "cook-sessions.json");
+const apiToken = process.env.BBQ_API_TOKEN || null;
 
 fs.mkdirSync(dataDirectory, { recursive: true });
 
@@ -21,6 +22,14 @@ db.exec(`
     );
     CREATE INDEX IF NOT EXISTS idx_cook_sessions_updated_at ON cook_sessions (updated_at);
 `);
+
+try {
+    db.exec("ALTER TABLE cook_sessions ADD COLUMN device_id TEXT");
+} catch (error) {
+    if (!/duplicate column/i.test(error.message)) {
+        throw error;
+    }
+}
 
 // One-time import from the old JSON file so existing history isn't lost.
 if (!dbAlreadyExisted && fs.existsSync(legacyJsonFile)) {
@@ -48,13 +57,13 @@ if (!dbAlreadyExisted && fs.existsSync(legacyJsonFile)) {
 
 const selectAllStatement = db.prepare("SELECT data FROM cook_sessions ORDER BY rowid");
 const upsertStatement = db.prepare(
-    "INSERT INTO cook_sessions (id, data, updated_at) VALUES (?, ?, ?) " +
-    "ON CONFLICT(id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at"
+    "INSERT INTO cook_sessions (id, data, updated_at, device_id) VALUES (?, ?, ?, ?) " +
+    "ON CONFLICT(id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at, device_id = excluded.device_id"
 );
-const upsertMany = db.transaction(sessions => {
+const upsertMany = db.transaction((sessions, deviceId) => {
     for (const session of sessions) {
         const updatedAt = session.updatedAt || session.finishedAt || session.startedAt || null;
-        upsertStatement.run(session.id, JSON.stringify(session), updatedAt);
+        upsertStatement.run(session.id, JSON.stringify(session), updatedAt, deviceId || null);
     }
 });
 
@@ -62,12 +71,19 @@ function readSessions() {
     return selectAllStatement.all().map(row => JSON.parse(row.data));
 }
 
+function isAuthorized(request) {
+    if (!apiToken) {
+        return true;
+    }
+    return request.headers["x-bbq-token"] === apiToken;
+}
+
 function sendJson(response, status, body) {
     response.writeHead(status, {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, PUT, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type"
+        "Access-Control-Allow-Headers": "Content-Type, X-BBQ-Token, X-BBQ-Device-Id"
     });
     response.end(JSON.stringify(body));
 }
@@ -80,6 +96,11 @@ const server = http.createServer((request, response) => {
 
     if (request.url !== "/api/cook-sessions") {
         sendJson(response, 404, { error: "Not found" });
+        return;
+    }
+
+    if (!isAuthorized(request)) {
+        sendJson(response, 401, { error: "Unauthorized" });
         return;
     }
 
@@ -110,7 +131,8 @@ const server = http.createServer((request, response) => {
             }
 
             const validSessions = payload.sessions.filter(session => session && session.id);
-            upsertMany(validSessions);
+            const deviceId = request.headers["x-bbq-device-id"] || null;
+            upsertMany(validSessions, deviceId);
             sendJson(response, 200, { sessions: readSessions() });
         } catch (error) {
             console.error("Unable to save cook backup", error);

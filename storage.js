@@ -19,6 +19,21 @@ const DOME_OPENING_DROP = 15;
 const DOME_OPENING_RECOVERY = 8;
 const DOME_OPENING_MAX_DURATION = 10 * 60 * 1000;
 const historyRuntime = new Map();
+const DEVICE_ID_KEY = "hermanos_device_id";
+
+function getDeviceId() {
+    try {
+        let deviceId = localStorage.getItem(DEVICE_ID_KEY);
+        if (!deviceId) {
+            deviceId = (crypto.randomUUID && crypto.randomUUID()) ||
+                `device-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+            localStorage.setItem(DEVICE_ID_KEY, deviceId);
+        }
+        return deviceId;
+    } catch (error) {
+        return "unknown-device";
+    }
+}
 
 function getCookStorageUrl() {
     const address = appState.network?.serverAddress;
@@ -28,6 +43,15 @@ function getCookStorageUrl() {
 
     const protocol = window.location.protocol === "https:" ? "https:" : "http:";
     return `${protocol}//${address}:${COOK_STORAGE_PORT}/api/cook-sessions`;
+}
+
+function getCookStorageHeaders(extra = {}) {
+    const headers = { "X-BBQ-Device-Id": getDeviceId(), ...extra };
+    const apiToken = appState.network?.apiToken;
+    if (apiToken) {
+        headers["X-BBQ-Token"] = apiToken;
+    }
+    return headers;
 }
 
 function getHistoryRuntime(session) {
@@ -199,7 +223,7 @@ async function syncSessionsToPi() {
     try {
         const response = await fetch(url, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: getCookStorageHeaders({ "Content-Type": "application/json" }),
             body: JSON.stringify({ sessions: appState.sessions })
         });
 
@@ -219,7 +243,7 @@ async function syncSessionsFromPi() {
     }
 
     try {
-        const response = await fetch(url);
+        const response = await fetch(url, { headers: getCookStorageHeaders() });
         if (!response.ok) {
             throw new Error(`Pi storage returned ${response.status}`);
         }
@@ -509,6 +533,7 @@ function serializeAppState() {
         settings: appState.settings,
         theme: appState.theme,
         ai: appState.ai,
+        network: appState.network,
 
         bluetooth: {
             device: appState.bluetooth.device,

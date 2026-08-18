@@ -1,0 +1,13 @@
+{
+  "name": "bbq-grill-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WebSocket relay broadcasting live grill temperatures to PWA clients",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
