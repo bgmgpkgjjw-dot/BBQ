@@ -405,6 +405,10 @@ function loadAppState() {
             appState.sensecap = saved.sensecap;
         }
 
+        if(saved.network){
+            appState.network = saved.network;
+        }
+
         if (saved.bluetooth) {
             appState.bluetooth.battery =
                 saved.bluetooth.battery ?? null;
@@ -454,6 +458,17 @@ function scheduleStateSave() {
 initializeStorage();
 loadAppState();
 restoreActiveCook();
+
+// Initialize network socket if enabled
+if (appState.network && appState.network.enabled && appState.network.serverAddress) {
+    setTimeout(() => {
+        if (typeof initNetworkSocket === 'function') {
+            initNetworkSocket(appState.network.serverAddress);
+            appState.network.enabled = true;
+            saveAppState();
+        }
+    }, 500);
+}
 
 function restoreActiveCook() {
 

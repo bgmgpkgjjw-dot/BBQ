@@ -130,6 +130,17 @@ const appState = {
         sensorMapping: {}
     },
 
+    network: {
+        enabled: false,
+        serverAddress: "192.168.68.127",
+        connected: false,
+        status: "Disabled",
+        error: "",
+        lastUpdatedAt: null,
+        lastConnectedAt: null,
+        lastPayload: ""
+    },
+
     // ======================================================
     // ACTIEVE COOK
     // ======================================================

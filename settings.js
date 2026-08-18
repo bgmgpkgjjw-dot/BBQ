@@ -92,6 +92,11 @@ function setBluetoothStatus(status, error = "") {
 
 }
 
+function setNetworkServerAddress(address) {
+    appState.network.serverAddress = address.trim();
+    saveAppState();
+}
+
 function applyTheme(presetKey = appState.theme?.preset || "default") {
 
     const preset = THEME_PRESETS[presetKey] || THEME_PRESETS.default;
@@ -345,6 +350,41 @@ function settingsView() {
         <div class="button-row">
             <button class="button" onclick="setSensecapEnabled(!appState.sensecap.enabled)">
                 ${appState.sensecap.enabled ? "Stop" : "Start"}
+            </button>
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <h2>
+            Network Socket (Grill Server)
+        </h2>
+
+        <p style="color:var(--muted); font-size:13px; margin-bottom:12px">
+            Connect to WebSocket server on Raspberry Pi for real-time temperature updates. Provide the Pi's IP address or hostname.
+        </p>
+
+        <label>
+            Server Address
+        </label>
+
+        <input
+            type="text"
+            value="${appState.network.serverAddress}"
+            oninput="setNetworkServerAddress(this.value)"
+            placeholder="192.168.68.127 or raspberrypi.local"
+        >
+
+        <div class="bluetooth-status">
+            Status: ${appState.network.status}
+        </div>
+
+        ${appState.network.error ? `<p class="bluetooth-error">${appState.network.error}</p>` : ""}
+
+        <div class="button-row">
+            <button class="button" onclick="setNetworkSocketEnabled(!appState.network.enabled, appState.network.serverAddress)">
+                ${appState.network.enabled ? "Disconnect" : "Connect"}
             </button>
         </div>
 
