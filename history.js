@@ -186,7 +186,7 @@ function historyDetailView() {
                 ...samples.map(
                     x => x.dome || 0
                 )
-            )
+            ).toFixed(1)
             :
             "—";
 
@@ -199,16 +199,16 @@ function historyDetailView() {
                 ...samples.map(
                     x => x.meat || 0
                 )
-            )
+            ).toFixed(1)
             :
             "—";
 
     const latestSample = samples.at(-1) || {};
     const latestDome = Number.isFinite(latestSample.dome)
-        ? `${Math.round(latestSample.dome)}°C`
+        ? `${latestSample.dome.toFixed(1)}°C`
         : "—";
     const latestMeat = Number.isFinite(latestSample.meat)
-        ? `${Math.round(latestSample.meat)}°C`
+        ? `${latestSample.meat.toFixed(1)}°C`
         : "—";
 
     setTimeout( () => renderHistoryDetailChart(), 50 );
@@ -648,7 +648,7 @@ function renderHistoryDetailChart() {
                                 const value = context.parsed.y;
                                 return value == null
                                     ? context.dataset.label
-                                    : `${context.dataset.label}: ${Math.round(value)}°C`;
+                                    : `${context.dataset.label}: ${Number(value).toFixed(1)}°C`;
                             }
                         }
                     }

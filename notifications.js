@@ -222,7 +222,7 @@ function checkMeatTarget(meat) {
 
         sendNotification(
             "Target reached",
-            `${meat.name} reached ${Math.round(meat.temperature)}°C`,
+            `${meat.name} reached ${meat.temperature.toFixed(1)}°C`,
             key
         );
     }
@@ -263,7 +263,7 @@ function checkDomeDeviation(
 
             sendNotification(
                 "Dome too hot",
-                `${Math.round(dome.temperature)}°C`
+                `${dome.temperature.toFixed(1)}°C`
             );
         }
     }
@@ -282,7 +282,7 @@ function checkDomeDeviation(
 
             sendNotification(
                 "Dome too cold",
-                `${Math.round(dome.temperature)}°C`
+                `${dome.temperature.toFixed(1)}°C`
             );
         }
     }
@@ -376,7 +376,7 @@ function checkApproachingMeatTarget(meat) {
 
         sendNotification(
             "Core approaching target",
-            `${meat.name} at ${Math.round(meat.temperature)}°C, target is ${target}°C`,
+            `${meat.name} at ${meat.temperature.toFixed(1)}°C, target is ${target}°C`,
             key
         );
     }
@@ -410,7 +410,7 @@ function checkApproachingDomeTarget(dome) {
 
         sendNotification(
             "Dome approaching target",
-            `${Math.round(dome.temperature)}°C, target is ${target}°C`,
+            `${dome.temperature.toFixed(1)}°C, target is ${target}°C`,
             key
         );
     }

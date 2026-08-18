@@ -7,7 +7,7 @@ function formatTemperatureValue(value) {
     if (value === null || value === undefined || Number.isNaN(Number(value))) {
         return "—";
     }
-    return `${Math.round(Number(value))}°`;
+    return `${Number(value).toFixed(1)}°`;
 }
 
 function getProbeTarget(probe) {
