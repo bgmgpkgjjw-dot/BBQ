@@ -166,6 +166,21 @@ body {
    margin-bottom: 12px;
 }
 
+.network-health {
+   font-size: 12px;
+   font-weight: 700;
+   margin-top: -8px;
+   margin-bottom: 12px;
+}
+
+.network-health.live {
+   color: var(--green);
+}
+
+.network-health.stale {
+   color: var(--danger);
+}
+
 /* ==========================================================
    COOK HEADER
    ========================================================== */

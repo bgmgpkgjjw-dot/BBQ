@@ -420,6 +420,12 @@ function dashboardView() {
             }
         </div>
 
+        ${appState.network.enabled ? `
+            <div class="network-health stale" data-network-health>
+                Connection stale
+            </div>
+        ` : ""}
+
         <div class="probe-container">
 
             ${

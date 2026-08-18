@@ -48,6 +48,18 @@ function getNetworkLastPacketText() {
     return `Last packet: ${new Date(lastPacketTime).toLocaleTimeString()}`;
 }
 
+function updateNetworkHealthUi() {
+    const health = document.querySelector("[data-network-health]");
+    if (!health) {
+        return;
+    }
+
+    const networkHealth = getNetworkHealth();
+    const isLive = networkHealth === "Receiving data";
+    health.textContent = isLive ? "Live" : "Connection stale";
+    health.className = `network-health ${isLive ? "live" : "stale"}`;
+}
+
 function initNetworkSocket(serverAddress) {
     if (!serverAddress) {
         console.warn("Network socket: no server address provided");
@@ -245,3 +257,5 @@ window.closeNetworkSocket = closeNetworkSocket;
 window.setNetworkSocketEnabled = setNetworkSocketEnabled;
 window.getNetworkHealth = getNetworkHealth;
 window.getNetworkLastPacketText = getNetworkLastPacketText;
+
+setInterval(updateNetworkHealthUi, 1000);
