@@ -34,6 +34,21 @@ const server = (tlsOptions ? https : http).createServer(tlsOptions || {}, (reque
     }
 
     const requestUrl = new URL(request.url, "http://localhost");
+
+    // Serve the cert itself with the MIME type Safari/iOS needs to trigger its
+    // "Install Profile" flow, so the cert can be trusted directly from a tapped link.
+    if (requestUrl.pathname === "/bbq-cert.cer" && tlsCertPath) {
+        fs.readFile(tlsCertPath, (error, data) => {
+            if (error) {
+                response.writeHead(404).end("Not found");
+                return;
+            }
+            response.writeHead(200, { "Content-Type": "application/x-x509-ca-cert" });
+            response.end(data);
+        });
+        return;
+    }
+
     let relativePath = decodeURIComponent(requestUrl.pathname);
     if (relativePath === "/") {
         relativePath = "/index.html";
