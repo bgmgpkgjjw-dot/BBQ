@@ -1,0 +1,10 @@
+{
+  "name": "bbq-web-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static file server for the Hermanos Grill Companion PWA, with optional HTTPS",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

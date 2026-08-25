@@ -6,8 +6,9 @@ After=network-online.target
 [Service]
 Type=simple
 User=william
-WorkingDirectory=/home/william/grill-server/BBQ
-ExecStart=/usr/bin/python3 -m http.server 3000 --bind 0.0.0.0
+WorkingDirectory=/home/william/grill-server/BBQ/pi-services/web-server
+EnvironmentFile=/etc/bbq/bbq.env
+ExecStart=/usr/bin/node /home/william/grill-server/BBQ/pi-services/web-server/server.js
 Restart=always
 RestartSec=5
 

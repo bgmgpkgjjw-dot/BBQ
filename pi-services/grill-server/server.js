@@ -3,11 +3,20 @@ const WebSocket = require("ws");
 const Database = require("better-sqlite3");
 const fs = require("fs");
 const path = require("path");
+const http = require("http");
+const https = require("https");
 
 const port = Number(process.env.BBQ_GRILL_PORT || 8080);
 const apiToken = process.env.BBQ_API_TOKEN || null;
 const dataDirectory = process.env.BBQ_DATA_DIR || "/home/william/bbq-data";
 const RETENTION_MS = 30 * 24 * 60 * 60 * 1000; // keep 30 days of raw readings
+
+// iOS Safari requires HTTPS (wss) for a page loaded over https to open a socket at all.
+const tlsCertPath = process.env.BBQ_TLS_CERT || null;
+const tlsKeyPath = process.env.BBQ_TLS_KEY || null;
+const tlsOptions = tlsCertPath && tlsKeyPath
+    ? { cert: fs.readFileSync(tlsCertPath), key: fs.readFileSync(tlsKeyPath) }
+    : null;
 
 fs.mkdirSync(dataDirectory, { recursive: true });
 const db = new Database(path.join(dataDirectory, "bbq.db"));
@@ -51,7 +60,9 @@ function prune() {
 prune();
 setInterval(prune, 24 * 60 * 60 * 1000);
 
-const wss = new WebSocketServer({ port });
+const httpServer = (tlsOptions ? https : http).createServer(tlsOptions || {});
+httpServer.listen(port, "0.0.0.0");
+const wss = new WebSocketServer({ server: httpServer });
 // Placeholder until real data arrives from btgateway; null explicitly signals "no reading yet"
 // so the client clears any stale display instead of showing a fake/frozen temperature.
 let latestData = {
@@ -130,4 +141,4 @@ wss.on("connection", (ws, request) => {
     ws.on("close", () => console.log("PWA client disconnected"));
 });
 
-console.log(`WebSocket server listening on ws://0.0.0.0:${port}`);
+console.log(`WebSocket server listening on ${tlsOptions ? "wss" : "ws"}://0.0.0.0:${port}`);

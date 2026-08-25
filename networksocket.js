@@ -68,7 +68,8 @@ function initNetworkSocket(serverAddress) {
 
     try {
         const token = appState.network?.apiToken;
-        const wsUrl = `ws://${serverAddress}:8080${token ? `?token=${encodeURIComponent(token)}` : ""}`;
+        const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        const wsUrl = `${wsProtocol}//${serverAddress}:8080${token ? `?token=${encodeURIComponent(token)}` : ""}`;
         console.log(`Network socket: connecting to ${wsUrl.split("?")[0]}`);
 
         networkSocket = new WebSocket(wsUrl);

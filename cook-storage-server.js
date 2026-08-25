@@ -1,4 +1,5 @@
 const http = require("http");
+const https = require("https");
 const fs = require("fs");
 const path = require("path");
 const Database = require("better-sqlite3");
@@ -9,6 +10,14 @@ const dbFile = path.join(dataDirectory, "bbq.db");
 const legacyJsonFile = path.join(dataDirectory, "cook-sessions.json");
 const apiToken = process.env.BBQ_API_TOKEN || null;
 const openRouterApiKey = process.env.OPENROUTER_API_KEY || null;
+
+// iOS Safari requires HTTPS for service workers/notifications; falls back to
+// plain HTTP if no cert is configured (e.g. during local dev).
+const tlsCertPath = process.env.BBQ_TLS_CERT || null;
+const tlsKeyPath = process.env.BBQ_TLS_KEY || null;
+const tlsOptions = tlsCertPath && tlsKeyPath
+    ? { cert: fs.readFileSync(tlsCertPath), key: fs.readFileSync(tlsKeyPath) }
+    : null;
 
 fs.mkdirSync(dataDirectory, { recursive: true });
 
@@ -185,7 +194,7 @@ function sendJson(response, status, body) {
     response.end(JSON.stringify(body));
 }
 
-const server = http.createServer((request, response) => {
+const server = (tlsOptions ? https : http).createServer(tlsOptions || {}, (request, response) => {
     if (request.method === "OPTIONS") {
         sendJson(response, 204, {});
         return;
@@ -287,5 +296,5 @@ const server = http.createServer((request, response) => {
 });
 
 server.listen(port, "0.0.0.0", () => {
-    console.log(`Cook storage listening on port ${port}; database: ${dbFile}`);
+    console.log(`Cook storage listening on ${tlsOptions ? "https" : "http"}://0.0.0.0:${port}; database: ${dbFile}`);
 });
