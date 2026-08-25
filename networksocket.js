@@ -111,6 +111,14 @@ function initNetworkSocket(serverAddress) {
             console.log("Network socket: disconnected");
             appState.network.connected = false;
             appState.network.status = "Disconnected";
+
+            if (!appState.cook.active) {
+                appState.probes.forEach(probe => {
+                    probe.temperature = null;
+                    probe.online = false;
+                });
+            }
+
             saveAppState();
             render();
             attemptReconnect(serverAddress);

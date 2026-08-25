@@ -38,6 +38,12 @@ function onBluetoothDisconnected(){
     appState.bluetooth.error =
         "Bluetooth connection lost.";
 
+    if (!appState.cook.active) {
+        appState.probes.forEach(probe => {
+            probe.temperature = null;
+            probe.online = false;
+        });
+    }
 
     render();
 

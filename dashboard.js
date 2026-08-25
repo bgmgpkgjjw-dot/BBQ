@@ -652,6 +652,35 @@ function updateMeatTarget(value) {
     }
 }
 
+const PROBE_STALE_MS = 10000;
+
+// Outside of an active cook, blank out probes that stopped reporting instead of
+// leaving the last known temperature on screen indefinitely.
+function pruneStaleProbeReadings() {
+
+    if (appState.cook && appState.cook.active) {
+        return false;
+    }
+
+    let changed = false;
+
+    appState.probes.forEach(probe => {
+        if (
+            probe.temperature !== null &&
+            probe.lastSeen &&
+            Date.now() - probe.lastSeen > PROBE_STALE_MS
+        ) {
+            probe.temperature = null;
+            probe.online = false;
+            changed = true;
+        }
+    });
+
+    return changed;
+}
+
+window.pruneStaleProbeReadings = pruneStaleProbeReadings;
+
 setInterval(() => {
 
     if (
@@ -660,6 +689,10 @@ setInterval(() => {
     ) {
 
         updateLiveUi();
+
+    } else if (pruneStaleProbeReadings()) {
+
+        render();
 
     }
 
