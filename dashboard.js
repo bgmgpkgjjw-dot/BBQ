@@ -7,7 +7,8 @@ function formatTemperatureValue(value) {
     if (value === null || value === undefined || Number.isNaN(Number(value))) {
         return "—";
     }
-    return `${Number(value).toFixed(1)}°`;
+    const [whole, decimal] = Number(value).toFixed(1).split(".");
+    return `${whole}<span class="temp-decimal">.${decimal}</span>°`;
 }
 
 function getProbeTarget(probe) {
@@ -76,7 +77,7 @@ function updateLiveUi() {
         const probe = appState.probes.find(p => p.id === id);
 
         if (probe) {
-            el.textContent =
+            el.innerHTML =
                 formatTemperatureValue(probe.temperature);
         }
 
