@@ -59,6 +59,8 @@ let latestData = {
     probe1: null,
     probe2: null,
 };
+let lastReceivedAt = 0;
+const READING_STALE_MS = 10000;
 
 console.log(`Grill server starting on port ${port}${apiToken ? " (token required)" : " (no token configured)"}`);
 
@@ -76,6 +78,7 @@ function connectToBtgateway() {
         try {
             const data = JSON.parse(event.data);
             latestData = data;
+            lastReceivedAt = Date.now();
             recordReading(data);
             console.log("Received from btgateway:", data);
         } catch (e) {
@@ -98,9 +101,16 @@ connectToBtgateway();
 
 // Broadcast to all PWA clients
 setInterval(() => {
+    // Once btgateway has gone quiet (probe off/out of range), stop re-sending the
+    // cached reading as if it were live - broadcast nulls instead.
+    const isStale = Date.now() - lastReceivedAt > READING_STALE_MS;
+    const payload = isStale
+        ? { dome: null, probe1: null, probe2: null }
+        : latestData;
+
     wss.clients.forEach(client => {
         if (client.readyState === 1) {
-            client.send(JSON.stringify(latestData));
+            client.send(JSON.stringify(payload));
         }
     });
 }, 1000);
