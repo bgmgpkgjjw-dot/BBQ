@@ -149,6 +149,20 @@ function openHistorySession(id) {
         return;
     }
 
+    // Self-heal a stale target on the still-active cook (e.g. changed before
+    // the target-sync fix existed), so the chart shows the current target.
+    if (
+        appState.cook?.active &&
+        session.id === appState.currentSessionId
+    ) {
+        session.domeTarget = appState.cook.domeTarget;
+        session.meatTarget = appState.cook.meatTarget;
+
+        if (typeof saveSessions === "function") {
+            saveSessions();
+        }
+    }
+
 
     appState.selectedHistory =
         session;
