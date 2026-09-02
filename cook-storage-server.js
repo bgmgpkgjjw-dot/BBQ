@@ -89,6 +89,13 @@ const upsertMany = db.transaction((sessions, deviceId) => {
     }
 });
 
+const deleteStatement = db.prepare("DELETE FROM cook_sessions WHERE id = ?");
+const deleteMany = db.transaction((ids) => {
+    for (const id of ids) {
+        deleteStatement.run(id);
+    }
+});
+
 function readSessions() {
     return selectAllStatement.all().map(row => JSON.parse(row.data));
 }
@@ -286,6 +293,12 @@ const server = (tlsOptions ? https : http).createServer(tlsOptions || {}, (reque
 
             const validSessions = payload.sessions.filter(session => session && session.id);
             const deviceId = request.headers["x-bbq-device-id"] || null;
+            const deletedIds = Array.isArray(payload.deletedIds)
+                ? payload.deletedIds.filter(id => typeof id === "string" && id)
+                : [];
+            if (deletedIds.length) {
+                deleteMany(deletedIds);
+            }
             upsertMany(validSessions, deviceId);
             sendJson(response, 200, { sessions: readSessions() });
         } catch (error) {

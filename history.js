@@ -555,6 +555,10 @@ function deleteCook(sessionId) {
             s => s.id !== sessionId
         );
 
+    if (typeof addDeletedSessionId === "function") {
+        addDeletedSessionId(sessionId);
+    }
+
     saveSessions();
 
     appState.selectedHistory = null;

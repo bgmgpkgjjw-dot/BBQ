@@ -24,6 +24,26 @@ const MEAT_CHANGE_THRESHOLD = 1.5;
 const DOME_CHANGE_THRESHOLD = 3;
 const historyRuntime = new Map();
 const DEVICE_ID_KEY = "hermanos_device_id";
+const DELETED_SESSIONS_KEY = "hermanos_grill_deleted_sessions_v1";
+
+function getDeletedSessionIds() {
+    try {
+        return JSON.parse(localStorage.getItem(DELETED_SESSIONS_KEY)) || [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function addDeletedSessionId(id) {
+    const ids = new Set(getDeletedSessionIds());
+    ids.add(id);
+    localStorage.setItem(DELETED_SESSIONS_KEY, JSON.stringify(Array.from(ids)));
+}
+
+function clearDeletedSessionIds(ids) {
+    const remaining = getDeletedSessionIds().filter(id => !ids.includes(id));
+    localStorage.setItem(DELETED_SESSIONS_KEY, JSON.stringify(remaining));
+}
 
 function getDeviceId() {
     try {
@@ -391,15 +411,21 @@ async function syncSessionsToPi() {
         return;
     }
 
+    const deletedIds = getDeletedSessionIds();
+
     try {
         const response = await fetch(url, {
             method: "PUT",
             headers: getCookStorageHeaders({ "Content-Type": "application/json" }),
-            body: JSON.stringify({ sessions: appState.sessions })
+            body: JSON.stringify({ sessions: appState.sessions, deletedIds })
         });
 
         if (!response.ok) {
             throw new Error(`Pi storage returned ${response.status}`);
+        }
+
+        if (deletedIds.length) {
+            clearDeletedSessionIds(deletedIds);
         }
     }
     catch (error) {
@@ -424,11 +450,16 @@ async function syncSessionsFromPi() {
             return;
         }
 
+        const deletedIds = new Set(getDeletedSessionIds());
+
         const merged = new Map(
             appState.sessions.map(session => [session.id, session])
         );
 
         remote.sessions.forEach(session => {
+            if (deletedIds.has(session.id)) {
+                return;
+            }
             const local = merged.get(session.id);
             if (!local || new Date(session.updatedAt || session.finishedAt || session.startedAt) >
                 new Date(local.updatedAt || local.finishedAt || local.startedAt)) {
@@ -656,6 +687,8 @@ function deleteCookSession(id) {
             s => s.id !== id
 
         );
+
+    addDeletedSessionId(id);
 
     saveSessions();
 
