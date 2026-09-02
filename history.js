@@ -518,6 +518,22 @@ function renderHistoryDetailChart() {
 
     const domeColor = "#E5A93D";
     const coreColor = "#4DB6A5";
+    const domeTarget = session.domeTarget;
+    const coreTarget = session.meatTarget;
+
+    const targetDataset = (label, value, color) => value == null
+        ? []
+        : [{
+            label,
+            data: samples.map(() => value),
+            borderColor: color,
+            borderDash: [6, 5],
+            borderWidth: 1,
+            pointRadius: 0,
+            fill: false,
+            tension: 0,
+            isTargetLine: true
+        }];
 
     historyDetailChart =
         new Chart(canvas, {
@@ -581,7 +597,10 @@ function renderHistoryDetailChart() {
                         pointHoverRadius: 5
                     }
 
-                ]
+                ].concat(
+                    targetDataset("Dome target", domeTarget, domeColor),
+                    targetDataset("Core target", coreTarget, coreColor)
+                )
             },
 
             options: {
@@ -599,11 +618,13 @@ function renderHistoryDetailChart() {
 
                     legend: {
                         labels: {
-                            color: "#F2EBDD"
+                            color: "#F2EBDD",
+                            filter: item => !item.text.endsWith("target")
                         }
                     },
 
                     tooltip: {
+                        filter: context => !context.dataset.isTargetLine,
                         callbacks: {
                             label: context => {
                                 const value = context.parsed.y;
