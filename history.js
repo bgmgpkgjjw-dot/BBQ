@@ -87,42 +87,55 @@ function renderHistoryCard(session) {
     return `
 
 
-    <div class="card history-card">
+    <div class="history-swipe" data-session-id="${session.id}">
+
+        <div class="history-swipe-delete">
+            <button
+            type="button"
+            aria-label="Delete cook"
+            onclick="deleteCook('${session.id}')">
+                Delete
+            </button>
+        </div>
+
+        <div class="card history-card">
 
 
-        <h2>
-        ${session.name || session.recipe}
-        </h2>
-
-
-
-        <p>
-        ${date}
-        </p>
-
-
-
-        <p>
-        ${session.duration || "—"}
-        </p>
-
-
-
-        <p>
-        ${samples} temperature readings
-        </p>
+            <h2>
+            ${session.name || session.recipe}
+            </h2>
 
 
 
-        <button
-        class="button secondary"
-        onclick="openHistorySession('${session.id}')">
-
-        View details
-
-        </button>
+            <p>
+            ${date}
+            </p>
 
 
+
+            <p>
+            ${session.duration || "—"}
+            </p>
+
+
+
+            <p>
+            ${samples} temperature readings
+            </p>
+
+
+
+            <button
+            class="button secondary"
+            onclick="openHistorySession('${session.id}')">
+
+            View details
+
+            </button>
+
+
+
+        </div>
 
     </div>
 
@@ -132,6 +145,120 @@ function renderHistoryCard(session) {
 
 }
 
+
+const HISTORY_SWIPE_OPEN_DISTANCE = 84;
+let historySwipeState = null;
+let historySwipeOpenCard = null;
+
+function closeHistorySwipeCard(card) {
+    card.style.transition = "transform .2s ease";
+    card.style.transform = "translateX(0)";
+}
+
+function openHistorySwipeCard(card) {
+    card.style.transition = "transform .2s ease";
+    card.style.transform = `translateX(-${HISTORY_SWIPE_OPEN_DISTANCE}px)`;
+}
+
+// Delegated on document (not the cards themselves) since history cards are
+// recreated on every render, which would otherwise drop any bound listeners.
+function initHistorySwipeGestures() {
+
+    document.addEventListener("pointerdown", event => {
+        const wrap = event.target.closest(".history-swipe");
+
+        if (!wrap) {
+            if (historySwipeOpenCard) {
+                closeHistorySwipeCard(historySwipeOpenCard);
+                historySwipeOpenCard = null;
+            }
+            return;
+        }
+
+        // Let the delete button's own click handler fire normally.
+        if (event.target.closest(".history-swipe-delete")) {
+            return;
+        }
+
+        const card = wrap.querySelector(".history-card");
+        if (!card) {
+            return;
+        }
+
+        if (historySwipeOpenCard && historySwipeOpenCard !== card) {
+            closeHistorySwipeCard(historySwipeOpenCard);
+            historySwipeOpenCard = null;
+        }
+
+        historySwipeState = {
+            card,
+            startX: event.clientX,
+            startY: event.clientY,
+            startTranslate: historySwipeOpenCard === card ? -HISTORY_SWIPE_OPEN_DISTANCE : 0,
+            axis: null
+        };
+
+        card.style.transition = "none";
+    });
+
+    document.addEventListener("pointermove", event => {
+        if (!historySwipeState) {
+            return;
+        }
+
+        const deltaX = event.clientX - historySwipeState.startX;
+        const deltaY = event.clientY - historySwipeState.startY;
+
+        if (!historySwipeState.axis) {
+            if (Math.abs(deltaX) < 8 && Math.abs(deltaY) < 8) {
+                return;
+            }
+            historySwipeState.axis = Math.abs(deltaX) > Math.abs(deltaY) ? "x" : "y";
+        }
+
+        if (historySwipeState.axis !== "x") {
+            return;
+        }
+
+        const next = Math.min(
+            0,
+            Math.max(-HISTORY_SWIPE_OPEN_DISTANCE, historySwipeState.startTranslate + deltaX)
+        );
+
+        historySwipeState.card.style.transform = `translateX(${next}px)`;
+    });
+
+    const finishHistorySwipe = event => {
+        if (!historySwipeState) {
+            return;
+        }
+
+        const { card, axis, startX, startTranslate } = historySwipeState;
+        const deltaX = (event.clientX ?? startX) - startX;
+        const finalTranslate = startTranslate + deltaX;
+
+        historySwipeState = null;
+
+        if (axis !== "x") {
+            card.style.transition = "transform .2s ease";
+            card.style.transform = `translateX(${historySwipeOpenCard === card ? -HISTORY_SWIPE_OPEN_DISTANCE : 0}px)`;
+            return;
+        }
+
+        if (finalTranslate <= -HISTORY_SWIPE_OPEN_DISTANCE / 2) {
+            openHistorySwipeCard(card);
+            historySwipeOpenCard = card;
+        } else {
+            closeHistorySwipeCard(card);
+            historySwipeOpenCard = null;
+        }
+    };
+
+    document.addEventListener("pointerup", finishHistorySwipe);
+    document.addEventListener("pointercancel", finishHistorySwipe);
+}
+
+initHistorySwipeGestures();
 
 
 
