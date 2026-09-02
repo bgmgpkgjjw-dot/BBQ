@@ -301,6 +301,8 @@ function renderCookPanel() {
         )
         : 0;
 
+    setTimeout(() => updateActiveCookChart(), 50);
+
     return `
     <div class="card cook-card">
       <h3>Active cook</h3>
@@ -405,6 +407,17 @@ function renderCookPanel() {
 
     </div>
  </div>
+
+    ${
+        (getCurrentSession()?.temperatureHistory?.length || 0) > 1
+            ? `
+                <div class="chart-container">
+                    <canvas id="activeCookChart"></canvas>
+                </div>
+            `
+            : ""
+    }
+
 </div>
   `;
 }
@@ -700,6 +713,123 @@ function pruneStaleProbeReadings() {
 
 window.pruneStaleProbeReadings = pruneStaleProbeReadings;
 
+let activeCookChart = null;
+
+function ensureActiveCookChart() {
+    const canvas = document.getElementById("activeCookChart");
+    if (!canvas) {
+        return null;
+    }
+
+    if (activeCookChart && activeCookChart.canvas === canvas) {
+        return activeCookChart;
+    }
+
+    if (activeCookChart) {
+        activeCookChart.destroy();
+    }
+
+    activeCookChart = new Chart(canvas, {
+        type: "line",
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: "Dome temperature",
+                    data: [],
+                    borderColor: "#E5A93D",
+                    backgroundColor: "rgba(229,169,61,.08)",
+                    borderWidth: 3,
+                    tension: .25,
+                    pointRadius: 0,
+                    pointHoverRadius: 4
+                },
+                {
+                    label: "Core temperature",
+                    data: [],
+                    borderColor: "#4DB6A5",
+                    backgroundColor: "rgba(77,182,165,.08)",
+                    borderWidth: 3,
+                    tension: .25,
+                    pointRadius: 0,
+                    pointHoverRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            interaction: { mode: "index", intersect: false },
+            plugins: {
+                legend: { labels: { color: "#F2EBDD" } },
+                tooltip: {
+                    callbacks: {
+                        label: context => {
+                            const value = context.parsed.y;
+                            return value == null
+                                ? context.dataset.label
+                                : `${context.dataset.label}: ${Number(value).toFixed(1)}°C`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { color: "rgba(242,235,221,.06)" },
+                    ticks: { color: "#918678", maxTicksLimit: 6 }
+                },
+                y: {
+                    grid: { color: "rgba(242,235,221,.08)" },
+                    ticks: { color: "#918678" },
+                    title: { display: true, text: "°C", color: "#918678" }
+                }
+            }
+        }
+    });
+
+    activeCookChart._bbqSampleCount = 0;
+
+    return activeCookChart;
+}
+
+// Appends new samples via chart.update() instead of destroying/recreating the
+// chart, so the live graph doesn't flicker/restart on every tick.
+function updateActiveCookChart() {
+    if (!appState.cook.active) {
+        if (activeCookChart) {
+            activeCookChart.destroy();
+            activeCookChart = null;
+        }
+        return;
+    }
+
+    const session = typeof getCurrentSession === "function" ? getCurrentSession() : null;
+    const history = session?.temperatureHistory || [];
+
+    if (history.length < 2) {
+        return;
+    }
+
+    const chart = ensureActiveCookChart();
+    if (!chart || chart._bbqSampleCount === history.length) {
+        return;
+    }
+
+    const samples = typeof downsampleTemperatureSamples === "function"
+        ? downsampleTemperatureSamples(history, 200)
+        : history;
+
+    chart.data.labels = samples.map(
+        s => new Date(s.timestamp).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })
+    );
+    chart.data.datasets[0].data = samples.map(s => s.dome);
+    chart.data.datasets[1].data = samples.map(s => s.meat);
+    chart.update("none");
+
+    chart._bbqSampleCount = history.length;
+}
+
 setInterval(() => {
 
     if (
@@ -708,6 +838,7 @@ setInterval(() => {
     ) {
 
         updateLiveUi();
+        updateActiveCookChart();
 
     } else if (pruneStaleProbeReadings()) {
 
