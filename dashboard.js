@@ -628,8 +628,17 @@ function updateDomeTarget(value) {
 
     appState.cook.domeTarget = target;
 
+    const session = typeof getCurrentSession === "function" ? getCurrentSession() : null;
+    if (session) {
+        session.domeTarget = target;
+    }
+
     if (typeof saveAppState === "function") {
         saveAppState();
+    }
+
+    if (session && typeof saveSessions === "function") {
+        saveSessions();
     }
 }
 
@@ -648,8 +657,17 @@ function updateMeatTarget(value) {
         appState.cook.meatTarget = target;
     }
 
+    const session = typeof getCurrentSession === "function" ? getCurrentSession() : null;
+    if (session) {
+        session.meatTarget = appState.cook.meatTarget;
+    }
+
     if (typeof saveAppState === "function") {
         saveAppState();
+    }
+
+    if (session && typeof saveSessions === "function") {
+        saveSessions();
     }
 }
 

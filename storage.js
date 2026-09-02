@@ -18,6 +18,10 @@ const HISTORY_SAMPLE_INTERVALS = [
 const DOME_OPENING_DROP = 15;
 const DOME_OPENING_RECOVERY = 8;
 const DOME_OPENING_MAX_DURATION = 10 * 60 * 1000;
+const MEAT_SPIKE_THRESHOLD = 8;
+const MEAT_SPIKE_CONFIRM_TOLERANCE = 3;
+const MEAT_CHANGE_THRESHOLD = 1.5;
+const DOME_CHANGE_THRESHOLD = 3;
 const historyRuntime = new Map();
 const DEVICE_ID_KEY = "hermanos_device_id";
 
@@ -130,7 +134,10 @@ function getHistoryRuntime(session) {
             lastRawDome: null,
             stableDome: null,
             transientUntil: 0,
-            domeOpening: false
+            domeOpening: false,
+            lastRawMeat: null,
+            stableMeat: null,
+            pendingMeatSpike: null
         });
     }
 
@@ -159,11 +166,11 @@ function isSignificantTemperatureChange(previous, current) {
     return (
         previous.dome != null &&
         current.dome != null &&
-        Math.abs(current.dome - previous.dome) >= 3
+        Math.abs(current.dome - previous.dome) >= DOME_CHANGE_THRESHOLD
     ) || (
         previous.meat != null &&
         current.meat != null &&
-        Math.abs(current.meat - previous.meat) >= 0.5
+        Math.abs(current.meat - previous.meat) >= MEAT_CHANGE_THRESHOLD
     );
 }
 
@@ -197,9 +204,34 @@ function prepareHistoricalTemperature(session, dome, meat, timestamp) {
         runtime.stableDome = dome;
     }
 
+    // Reject an implausible one-tick jump (probe dropout/contact loss) unless the
+    // next reading confirms it was a real change, to avoid spiking the graph/history.
+    const previousRawMeat = runtime.lastRawMeat;
+    let meatOut = meat;
+
+    if (meat != null && previousRawMeat != null && Math.abs(meat - previousRawMeat) >= MEAT_SPIKE_THRESHOLD) {
+        const confirmed = runtime.pendingMeatSpike != null &&
+            Math.abs(meat - runtime.pendingMeatSpike) <= MEAT_SPIKE_CONFIRM_TOLERANCE;
+
+        if (confirmed) {
+            runtime.stableMeat = meat;
+            runtime.pendingMeatSpike = null;
+        } else {
+            runtime.pendingMeatSpike = meat;
+            meatOut = runtime.stableMeat ?? meat;
+        }
+    } else if (meat != null) {
+        runtime.stableMeat = meat;
+        runtime.pendingMeatSpike = null;
+    }
+
+    if (meat != null) {
+        runtime.lastRawMeat = meat;
+    }
+
     return {
         dome: runtime.domeOpening ? runtime.stableDome : dome,
-        meat,
+        meat: meatOut,
         domeRaw: runtime.domeOpening ? dome : undefined,
         domeEvent: runtime.domeOpening ? "opening" : undefined
     };

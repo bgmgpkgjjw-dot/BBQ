@@ -223,6 +223,15 @@ function applyCurrentPhaseTargets() {
 
     appState.cook.domeTarget = phase.domeTarget ?? null;
     appState.cook.meatTarget = phase.meatTarget ?? null;
+
+    const session = typeof getCurrentSession === "function" ? getCurrentSession() : null;
+    if (session) {
+        session.domeTarget = appState.cook.domeTarget;
+        session.meatTarget = appState.cook.meatTarget;
+        if (typeof saveSessions === "function") {
+            saveSessions();
+        }
+    }
 }
 
 

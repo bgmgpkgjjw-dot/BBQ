@@ -259,22 +259,6 @@ function historyDetailView() {
         </p>
 
 
-        <p>
-        Dome target:
-        <strong>
-        ${session.domeTarget ?? "—"}°C
-        </strong>
-        </p>
-
-
-        <p>
-        Core target:
-        <strong>
-        ${session.meatTarget ?? "—"}°C
-        </strong>
-        </p>
-
-
     </div>
 
 
@@ -683,4 +667,32 @@ function renderHistoryDetailChart() {
                 }
             }
         });
+
+    setupHistoryChartTooltipDismiss(canvas);
+}
+
+let historyChartTooltipDismissBound = false;
+
+// Chart.js tooltips (mode "index") have no touch equivalent of "mouse left the
+// canvas", so on mobile they stay stuck after a tap unless dismissed manually.
+function setupHistoryChartTooltipDismiss(canvas) {
+    if (historyChartTooltipDismissBound) {
+        return;
+    }
+
+    historyChartTooltipDismissBound = true;
+
+    document.addEventListener("touchstart", event => {
+        const activeCanvas = document.getElementById("historyChart");
+
+        if (
+            historyDetailChart &&
+            activeCanvas &&
+            !activeCanvas.contains(event.target)
+        ) {
+            historyDetailChart.setActiveElements([]);
+            historyDetailChart.tooltip.setActiveElements([], { x: 0, y: 0 });
+            historyDetailChart.update();
+        }
+    });
 }
