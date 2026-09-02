@@ -408,15 +408,9 @@ function renderCookPanel() {
     </div>
  </div>
 
-    ${
-        (getCurrentSession()?.temperatureHistory?.length || 0) > 1
-            ? `
-                <div class="chart-container">
-                    <canvas id="activeCookChart"></canvas>
-                </div>
-            `
-            : ""
-    }
+    <div class="chart-container">
+        <canvas id="activeCookChart"></canvas>
+    </div>
 
 </div>
   `;
