@@ -332,6 +332,11 @@ function closeHistoryDetail() {
 
     appState.selectedHistory = null;
 
+    if (historyDetailChart) {
+        historyDetailChart.destroy();
+        historyDetailChart = null;
+    }
+
     render();
 
 }
@@ -496,42 +501,23 @@ function renderHistoryDetailChart() {
         return;
     }
 
+    // Skip rebuilding when the same session's data hasn't changed since last draw,
+    // so background events (WS ticks, unrelated renders) don't churn the chart.
+    const rawSampleCount = (session.temperatureHistory || []).length;
+    if (
+        historyDetailChart &&
+        historyDetailChart._bbqSessionId === session.id &&
+        historyDetailChart._bbqSampleCount === rawSampleCount
+    ) {
+        return;
+    }
+
     if (historyDetailChart) {
         historyDetailChart.destroy();
     }
 
     const domeColor = "#E5A93D";
     const coreColor = "#4DB6A5";
-    const domeTarget = appState.selectedHistory.domeTarget;
-    const coreTarget = appState.selectedHistory.meatTarget;
-
-    const targetDataset = (label, value, color) => value == null
-        ? []
-        : [{
-            label,
-            data: samples.map(() => value),
-            borderColor: color,
-            borderDash: [6, 5],
-            borderWidth: 1,
-            pointRadius: 0,
-            fill: false,
-            tension: 0
-        }];
-
-    const openingDataset = samples.some(sample => sample.domeEvent === "opening")
-        ? [{
-            label: "Dome opening",
-            data: samples.map(sample => sample.domeEvent === "opening" ? sample.dome : null),
-            borderColor: "#F2D28A",
-            backgroundColor: "#F2D28A",
-            pointBorderColor: "#241D15",
-            pointBorderWidth: 2,
-            pointRadius: samples.map(sample => sample.domeEvent === "opening" ? 4 : 0),
-            pointHoverRadius: 6,
-            showLine: false,
-            spanGaps: false
-        }]
-        : [];
 
     historyDetailChart =
         new Chart(canvas, {
@@ -595,11 +581,7 @@ function renderHistoryDetailChart() {
                         pointHoverRadius: 5
                     }
 
-                ].concat(
-                    targetDataset("Dome target", domeTarget, domeColor),
-                    targetDataset("Core target", coreTarget, coreColor),
-                    openingDataset
-                )
+                ]
             },
 
             options: {
@@ -617,12 +599,7 @@ function renderHistoryDetailChart() {
 
                     legend: {
                         labels: {
-                            color: "#F2EBDD",
-                            filter: item => ![
-                                "Dome target",
-                                "Core target",
-                                "Dome opening"
-                            ].includes(item.text)
+                            color: "#F2EBDD"
                         }
                     },
 
@@ -667,6 +644,9 @@ function renderHistoryDetailChart() {
                 }
             }
         });
+
+    historyDetailChart._bbqSessionId = session.id;
+    historyDetailChart._bbqSampleCount = rawSampleCount;
 
     setupHistoryChartTooltipDismiss(canvas);
 }
