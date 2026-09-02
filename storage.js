@@ -250,6 +250,73 @@ function shouldRecordHistoricalSample(session, sample, timestamp) {
     return intervalElapsed || significantChange;
 }
 
+const TEMPERATURE_HISTORY_REPROCESS_VERSION = 1;
+
+// Re-runs already-recorded samples through the current smoothing/outlier-rejection
+// logic, so cooks recorded before that logic existed (or improved) get cleaned up too.
+function reprocessSessionTemperatureHistory(session) {
+    if (!Array.isArray(session.temperatureHistory) || !session.temperatureHistory.length) {
+        return false;
+    }
+
+    historyRuntime.delete(session.id);
+
+    let changed = false;
+
+    session.temperatureHistory = session.temperatureHistory.map(sample => {
+        const prepared = prepareHistoricalTemperature(
+            session,
+            sample.dome ?? null,
+            sample.meat ?? null,
+            sample.timestamp
+        );
+
+        if (prepared.dome !== sample.dome || prepared.meat !== sample.meat) {
+            changed = true;
+        }
+
+        const next = { ...sample, dome: prepared.dome, meat: prepared.meat };
+
+        if (prepared.domeRaw !== undefined) {
+            next.domeRaw = prepared.domeRaw;
+            next.domeEvent = prepared.domeEvent;
+        } else {
+            delete next.domeRaw;
+            delete next.domeEvent;
+        }
+
+        return next;
+    });
+
+    // Reset runtime so live recording (if this is the active cook) starts fresh
+    // instead of continuing from the reprocessing pass's end state.
+    historyRuntime.delete(session.id);
+
+    return changed;
+}
+
+function reprocessAllSessionsIfNeeded() {
+    if (!Array.isArray(appState.sessions)) {
+        return;
+    }
+
+    let anyChanged = false;
+
+    appState.sessions.forEach(session => {
+        if (session.historyReprocessedVersion === TEMPERATURE_HISTORY_REPROCESS_VERSION) {
+            return;
+        }
+
+        reprocessSessionTemperatureHistory(session);
+        session.historyReprocessedVersion = TEMPERATURE_HISTORY_REPROCESS_VERSION;
+        anyChanged = true;
+    });
+
+    if (anyChanged) {
+        saveSessions();
+    }
+}
+
 
 /* ==========================================================
    INITIALIZE
@@ -280,6 +347,8 @@ function initializeStorage() {
         appState.sessions = [];
 
     }
+
+    reprocessAllSessionsIfNeeded();
 
 }
 
@@ -369,6 +438,7 @@ async function syncSessionsFromPi() {
 
         appState.sessions = Array.from(merged.values())
             .sort((left, right) => new Date(right.startedAt) - new Date(left.startedAt));
+        reprocessAllSessionsIfNeeded();
         localStorage.setItem(STORAGE_KEY, JSON.stringify(appState.sessions));
         render();
         await syncSessionsToPi();
