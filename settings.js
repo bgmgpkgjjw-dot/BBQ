@@ -135,6 +135,33 @@ function setTheme(presetKey) {
     render();
 }
 
+function applyColorScheme(mode = appState.theme?.mode || "dark") {
+    const resolved = mode === "light" ? "light" : "dark";
+
+    appState.theme = {
+        ...appState.theme,
+        mode: resolved
+    };
+
+    document.documentElement.dataset.colorScheme = resolved;
+
+    // manifest.json's theme_color only applies at install time, so the status
+    // bar/address bar color has to be updated here to follow the live toggle.
+    const themeColorMeta = document.getElementById("meta-theme-color");
+    if (themeColorMeta) {
+        themeColorMeta.setAttribute("content", resolved === "light" ? "#F4F1EC" : "#0B0906");
+    }
+
+    if (typeof saveAppState === "function") {
+        saveAppState();
+    }
+}
+
+function setColorScheme(mode) {
+    applyColorScheme(mode);
+    render();
+}
+
 
 function parseTemperaturePayload(payload) {
 
@@ -490,6 +517,24 @@ function settingsView() {
     <h3>
         Display
     </h3>
+
+    <label class="toggle-label">
+
+        <input
+            type="checkbox"
+            class="toggle-checkbox"
+            ${
+                appState.theme?.mode === "light"
+                    ? "checked"
+                    : ""
+            }
+            onchange="setColorScheme(this.checked ? 'light' : 'dark')"
+        >
+
+        <span class="toggle-slider"></span>
+        <span class="toggle-label-text">Light mode</span>
+
+    </label>
 
     <label class="toggle-label">
 

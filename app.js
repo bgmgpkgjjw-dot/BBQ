@@ -414,6 +414,10 @@ if (typeof applyTheme === "function") {
     applyTheme(appState.theme?.preset || "default");
 }
 
+if (typeof applyColorScheme === "function") {
+    applyColorScheme(appState.theme?.mode || "dark");
+}
+
 render();
 
 // ====================================================================

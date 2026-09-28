@@ -90,6 +90,8 @@ const appState = {
 
         preset: "default",
 
+        mode: "dark",
+
         brand: "Default",
 
         accent: "#C88B3D",

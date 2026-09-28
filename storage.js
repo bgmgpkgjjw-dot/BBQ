@@ -22,6 +22,11 @@ const MEAT_SPIKE_THRESHOLD = 8;
 const MEAT_SPIKE_CONFIRM_TOLERANCE = 3;
 const MEAT_CHANGE_THRESHOLD = 1.5;
 const DOME_CHANGE_THRESHOLD = 3;
+// Low-pass filter factor for normal (non-spike) readings: raw sensor jitter of a
+// few degrees was previously passed straight through unfiltered, which combined
+// with the thresholds above to record and display noise as if it were real spikes.
+const DOME_SMOOTHING_ALPHA = 0.3;
+const MEAT_SMOOTHING_ALPHA = 0.3;
 const historyRuntime = new Map();
 const DEVICE_ID_KEY = "hermanos_device_id";
 const DELETED_SESSIONS_KEY = "hermanos_grill_deleted_sessions_v1";
@@ -221,7 +226,11 @@ function prepareHistoricalTemperature(session, dome, meat, timestamp) {
             runtime.stableDome = dome;
         }
     } else if (dome != null) {
-        runtime.stableDome = dome;
+        // Smooth normal jitter with an EMA instead of passing the raw reading
+        // straight through, otherwise every noisy tick looks like a real spike.
+        runtime.stableDome = runtime.stableDome == null
+            ? dome
+            : runtime.stableDome + DOME_SMOOTHING_ALPHA * (dome - runtime.stableDome);
     }
 
     // Reject an implausible one-tick jump (probe dropout/contact loss) unless the
@@ -236,13 +245,18 @@ function prepareHistoricalTemperature(session, dome, meat, timestamp) {
         if (confirmed) {
             runtime.stableMeat = meat;
             runtime.pendingMeatSpike = null;
+            meatOut = meat;
         } else {
             runtime.pendingMeatSpike = meat;
             meatOut = runtime.stableMeat ?? meat;
         }
     } else if (meat != null) {
-        runtime.stableMeat = meat;
+        // Same EMA smoothing as dome, for the same reason.
+        runtime.stableMeat = runtime.stableMeat == null
+            ? meat
+            : runtime.stableMeat + MEAT_SMOOTHING_ALPHA * (meat - runtime.stableMeat);
         runtime.pendingMeatSpike = null;
+        meatOut = runtime.stableMeat;
     }
 
     if (meat != null) {
@@ -250,7 +264,7 @@ function prepareHistoricalTemperature(session, dome, meat, timestamp) {
     }
 
     return {
-        dome: runtime.domeOpening ? runtime.stableDome : dome,
+        dome: runtime.stableDome,
         meat: meatOut,
         domeRaw: runtime.domeOpening ? dome : undefined,
         domeEvent: runtime.domeOpening ? "opening" : undefined
@@ -270,7 +284,7 @@ function shouldRecordHistoricalSample(session, sample, timestamp) {
     return intervalElapsed || significantChange;
 }
 
-const TEMPERATURE_HISTORY_REPROCESS_VERSION = 1;
+const TEMPERATURE_HISTORY_REPROCESS_VERSION = 2;
 
 // Re-runs already-recorded samples through the current smoothing/outlier-rejection
 // logic, so cooks recorded before that logic existed (or improved) get cleaned up too.
@@ -585,6 +599,7 @@ function finishCookSession() {
         );
 
     saveSessions();
+    unsavedTemperatureSamples = 0;
 
     if (
         typeof saveAppState ===
@@ -604,6 +619,8 @@ function finishCookSession() {
 /* ==========================================================
    RECORD TEMPERATURE
 ========================================================== */
+
+let unsavedTemperatureSamples = 0;
 
 function recordTemperatureHistory() {
 
@@ -638,24 +655,42 @@ function recordTemperatureHistory() {
     }
 
     session.temperatureHistory.push(sample);
+    unsavedTemperatureSamples++;
 
     /*
         Save every 20 measurements
         to reduce writes.
     */
-    if (
-        session.temperatureHistory.length % 20 === 0
-    ) {
-
-        saveSessions();
-
-        if (
-            typeof saveAppState === "function"
-        ) {
-            saveAppState();
-        }
-
+    if (unsavedTemperatureSamples >= 20) {
+        flushTemperatureHistory();
     }
+}
+
+// Persists whatever hasn't been batched yet; called on the 20-sample batch and
+// on app close/background so a crash or tab close loses at most one in-flight sample.
+function flushTemperatureHistory() {
+    if (unsavedTemperatureSamples === 0) {
+        return;
+    }
+
+    unsavedTemperatureSamples = 0;
+    saveSessions();
+
+    if (typeof saveAppState === "function") {
+        saveAppState();
+    }
+}
+
+if (typeof document !== "undefined") {
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden") {
+            flushTemperatureHistory();
+        }
+    });
+}
+
+if (typeof window !== "undefined") {
+    window.addEventListener("pagehide", flushTemperatureHistory);
 }
 
 

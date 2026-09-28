@@ -10,9 +10,16 @@
 let networkSocket = null;
 let reconnectTimer = null;
 let reconnectAttempts = 0;
-const MAX_RECONNECT_ATTEMPTS = 10;
-const RECONNECT_INTERVAL = 3000; // 3 seconds
+const RECONNECT_BASE_INTERVAL = 2000; // 2 seconds
+const RECONNECT_MAX_INTERVAL = 30000; // cap backoff at 30 seconds
 const NETWORK_PACKET_STALE_MS = 10000;
+
+// Doubles the wait each attempt (capped), and never permanently gives up -
+// a long Wi-Fi/Pi outage during a multi-hour cook should still recover.
+function getReconnectDelay() {
+    const delay = RECONNECT_BASE_INTERVAL * Math.pow(2, reconnectAttempts);
+    return Math.min(delay, RECONNECT_MAX_INTERVAL);
+}
 
 function getNetworkHealth() {
     if (!appState.network.enabled) {
@@ -242,22 +249,20 @@ function processNetworkPayload(payload) {
 }
 
 function attemptReconnect(serverAddress) {
-    if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-        console.log("Network socket: max reconnect attempts reached");
-        appState.network.status = "Reconnection failed";
-        saveAppState();
-        render();
-        return;
-    }
-
+    const delay = getReconnectDelay();
     reconnectAttempts++;
+
     console.log(
-        `Network socket: reconnect attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}`
+        `Network socket: reconnect attempt ${reconnectAttempts} in ${delay}ms`
     );
+
+    appState.network.status = `Reconnecting (attempt ${reconnectAttempts})`;
+    saveAppState();
+    render();
 
     reconnectTimer = setTimeout(() => {
         initNetworkSocket(serverAddress);
-    }, RECONNECT_INTERVAL);
+    }, delay);
 }
 
 function closeNetworkSocket() {

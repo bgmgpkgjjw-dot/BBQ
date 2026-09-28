@@ -28,6 +28,21 @@
    --gradient-button: linear-gradient(135deg, #C68B35, #9E6628);
 }
 
+html[data-color-scheme="light"] {
+   --bg: #F4F1EC;
+   --surface: #FFFFFF;
+   --card: #FFFFFF;
+
+   --text: #23201B;
+   --muted: #6B6459;
+
+   --border: rgba(0, 0, 0, .1);
+   --shadow: 0 12px 28px rgba(0, 0, 0, .1);
+
+   --gradient-card-surface: linear-gradient(180deg, #FFFFFF, #F2EEE7);
+   --gradient-cook: linear-gradient(180deg, #FBF7F0, #F0EBE1);
+}
+
 /* ==========================================================
    RESET
    ========================================================== */
