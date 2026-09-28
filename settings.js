@@ -561,35 +561,35 @@ function settingsView() {
     return [
         settingsGroup({
             key: "probes",
-            icon: "🌡️",
+            icon: Icons.probe,
             title: "Probes",
             status: `${activeProbeCount} active`,
             body: probesBody
         }),
         settingsGroup({
             key: "bluetooth",
-            icon: "📶",
+            icon: Icons.bluetooth,
             title: "Bluetooth",
             status: appState.bluetooth.connected ? "Connected" : appState.bluetooth.status,
             body: bluetoothBody
         }),
         settingsGroup({
             key: "network",
-            icon: "🌐",
+            icon: Icons.network,
             title: "Network Socket",
             status: appState.network.enabled ? appState.network.status : "Disabled",
             body: networkBody
         }),
         settingsGroup({
             key: "alerts",
-            icon: "🔔",
+            icon: Icons.alerts,
             title: "Alerts & Notifications",
             status: appState.settings.notifications ? "On" : "Off",
             body: alertsBody
         }),
         settingsGroup({
             key: "appearance",
-            icon: "🎨",
+            icon: Icons.appearance,
             title: "Appearance & Display",
             status: appState.theme?.brand,
             body: appearanceBody
