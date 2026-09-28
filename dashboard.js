@@ -60,7 +60,7 @@ function updateLiveUi() {
             const networkHealth = getNetworkHealth();
             status.textContent = networkHealth === "Receiving data"
                 ? "Live"
-                : "Connection stale";
+                : "Not connected";
             status.className = `status ${networkHealth === "Receiving data" ? "live" : "stale"}`;
         } else {
             status.textContent = appState.bluetooth.connected
@@ -383,7 +383,7 @@ function dashboardView() {
         >
             ${
                 appState.network.enabled
-                    ? "Connection stale"
+                    ? "Not connected"
                     : appState.bluetooth.connected
                     ? "Connected"
                     : "Not connected"

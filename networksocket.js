@@ -63,7 +63,7 @@ function updateNetworkHealthUi() {
 
     const networkHealth = getNetworkHealth();
     const isLive = networkHealth === "Receiving data";
-    status.textContent = isLive ? "Live" : "Connection stale";
+    status.textContent = isLive ? "Live" : "Not connected";
     status.className = `status ${isLive ? "live" : "stale"}`;
 }
 
