@@ -140,6 +140,11 @@ function renderProbeCard(probe) {
             <div class="gauge-circle">
 
 
+                <div class="card-icon-badge gauge-icon">
+                    ${Icons.flame}
+                </div>
+
+
                 <div class="gauge-value"
                      data-probe-temperature
                      data-probe-id="${probe.id}">
@@ -172,8 +177,8 @@ function renderProbeCard(probe) {
         <div class="thermometer-box">
 
 
-            <div class="thermometer-icon" aria-hidden="true">
-                
+            <div class="card-icon-badge" aria-hidden="true">
+                ${Icons.probe}
             </div>
 
 
