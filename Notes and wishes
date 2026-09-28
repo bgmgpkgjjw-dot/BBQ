@@ -1,0 +1,13 @@
+# Experiences
+- [FIXED 2026-09-28] BBQ temperature graph not showing data properly. It spiked
+  even though that was not the case in reality - root cause was missing noise
+  smoothing in storage.js, now uses EMA smoothing.
+- Temperature target not updated in history graph (self-heal fix already existed;
+  tell me the exact repro if this still happens)
+- Pop up with all data should disappear again
+- Don't include dome/core target as temperature info card
+- [FIXED 2026-09-28] 5103 measurements after 5,5 hours is cook is too much -
+  same root cause as the graph spikes, now down to ~510 for a 5.5h cook.
+
+# Wishlist
+- Swipe to delete cook
