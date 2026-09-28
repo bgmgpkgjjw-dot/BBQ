@@ -172,6 +172,81 @@ body {
 }
 
 /* ==========================================================
+   SETTINGS ACCORDION
+   ========================================================== */
+
+.settings-group {
+   background: var(--card);
+   border-radius: var(--radius);
+   margin-bottom: 12px;
+   border: 1px solid var(--border);
+   box-shadow: 0 10px 22px rgba(0, 0, 0, .18);
+   overflow: hidden;
+}
+
+.settings-group-summary {
+   list-style: none;
+   display: flex;
+   align-items: center;
+   gap: 10px;
+   padding: 15px;
+   cursor: pointer;
+   user-select: none;
+}
+
+.settings-group-summary::-webkit-details-marker {
+   display: none;
+}
+
+.settings-group-icon {
+   font-size: 18px;
+   line-height: 1;
+}
+
+.settings-group-title {
+   font-size: 16px;
+   font-weight: 800;
+   flex: 1;
+}
+
+.settings-group-status {
+   font-size: 12px;
+   color: var(--muted);
+   max-width: 45%;
+   text-align: right;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   white-space: nowrap;
+}
+
+.settings-group-chevron {
+   font-size: 12px;
+   color: var(--muted);
+   transition: transform .18s ease;
+}
+
+.settings-group[open] .settings-group-chevron {
+   transform: rotate(90deg);
+}
+
+.settings-group-body {
+   padding: 0 15px 15px;
+}
+
+.settings-group-body h3 {
+   font-size: 12px;
+   font-weight: 700;
+   color: var(--muted);
+   text-transform: uppercase;
+   letter-spacing: .12em;
+   margin-bottom: 12px;
+}
+
+.settings-group-body p {
+   font-size: 14px;
+}
+
+/* ==========================================================
    HISTORY SWIPE-TO-DELETE
    ========================================================== */
 

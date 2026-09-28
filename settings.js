@@ -244,18 +244,43 @@ function disconnectBluetoothDevice() {
 }
 
 
+// Full re-renders regenerate this markup from scratch, so which accordion
+// sections are expanded has to be tracked here instead of relying on the
+// browser's own <details> state (otherwise any toggle inside a section, e.g.
+// a checkbox, would snap that section closed again on the next render).
+const settingsSectionState = {
+    probes: true,
+    bluetooth: false,
+    network: false,
+    alerts: false,
+    appearance: false
+};
+
+function setSettingsSectionOpen(key, isOpen) {
+    settingsSectionState[key] = isOpen;
+}
+
+function settingsGroup({ key, icon, title, status, body }) {
+    return `
+    <details class="settings-group" ${settingsSectionState[key] ? "open" : ""} ontoggle="setSettingsSectionOpen('${key}', this.open)">
+        <summary class="settings-group-summary">
+            <span class="settings-group-icon">${icon}</span>
+            <span class="settings-group-title">${title}</span>
+            ${status ? `<span class="settings-group-status">${status}</span>` : ""}
+            <span class="settings-group-chevron">▶</span>
+        </summary>
+        <div class="settings-group-body">
+            ${body}
+        </div>
+    </details>
+    `;
+}
+
 function settingsView() {
 
-    return `
+    const activeProbeCount = appState.probes.filter(p => p.active).length;
 
-    <div class="card">
-
-        <h2>
-
-            Probes
-
-        </h2>
-
+    const probesBody = `
         <p style="color:var(--muted); font-size:13px; margin-bottom:14px">
 
             Up to 6 probes. Enable a probe and assign its role
@@ -297,18 +322,9 @@ function settingsView() {
             `).join("")
 
         }
+    `;
 
-    </div>
-
-
-    <div class="card">
-
-        <h2>
-
-            Bluetooth
-
-        </h2>
-
+    const bluetoothBody = `
         <p style="color:var(--muted); font-size:13px; margin-bottom:12px">
 
             Connect to a device through Web Bluetooth in Bluefy. This is the first step for thermometer connectivity.
@@ -334,15 +350,9 @@ function settingsView() {
                 Disconnect
             </button>
         </div>
+    `;
 
-    </div>
-
-    <div class="card">
-
-        <h2>
-            Network Socket (Grill Server)
-        </h2>
-
+    const networkBody = `
         <p style="color:var(--muted); font-size:13px; margin-bottom:12px">
             Connect to WebSocket server on Raspberry Pi for real-time temperature updates. Provide the Pi's IP address or hostname.
         </p>
@@ -397,68 +407,65 @@ function settingsView() {
             Cook history is cached on this device and backed up to the Pi at port 8090.
             Configure that service to store its data directory on the mounted micro-SD card.
         </p>
+    `;
 
-    </div>
+    const alertsBody = `
+        <div style="margin-bottom: 16px;">
+            <label class="toggle-label">
+                <input
+                    type="checkbox"
+                    class="toggle-checkbox"
+                    ${appState.settings.notifications ? "checked" : ""}
+                    onchange="appState.settings.notifications = this.checked; saveAppState(); render();"
+                >
+                <span class="toggle-slider"></span>
+                <span class="toggle-label-text">Browser notifications</span>
+            </label>
 
-    <div class="card">
-    <h2>Alerts</h2>
-
-    <div style="margin-bottom: 16px;">
-        <label class="toggle-label">
-            <input
-                type="checkbox"
-                class="toggle-checkbox"
-                ${appState.settings.notifications ? "checked" : ""}
-                onchange="appState.settings.notifications = this.checked; saveAppState(); render();"
+            <button
+                class="button secondary"
+                type="button"
+                onclick="requestNotificationPermission()"
             >
-            <span class="toggle-slider"></span>
-            <span class="toggle-label-text">Browser notifications</span>
-        </label>
+                Enable notifications
+            </button>
 
-        <button
-            class="button secondary"
-            type="button"
-            onclick="requestNotificationPermission()"
-        >
-            Enable notifications
-        </button>
+            <p style="color:var(--muted); font-size:13px; margin-top:8px">
+                On iPhone, install this app to the Home Screen and enable notifications from that installed app.
+            </p>
+        </div>
 
-        <p style="color:var(--muted); font-size:13px; margin-top:8px">
-            On iPhone, install this app to the Home Screen and enable notifications from that installed app.
-        </p>
-    </div>
+        <div style="margin-bottom: 16px;">
+            <label class="toggle-label">
+                <input
+                    type="checkbox"
+                    class="toggle-checkbox"
+                    ${appState.settings.notificationSound ? "checked" : ""}
+                    onchange="appState.settings.notificationSound = this.checked; saveAppState(); render();"
+                >
+                <span class="toggle-slider"></span>
+                <span class="toggle-label-text">Alert sounds</span>
+            </label>
+        </div>
 
-    <div style="margin-bottom: 16px;">
-        <label class="toggle-label">
-            <input
-                type="checkbox"
-                class="toggle-checkbox"
-                ${appState.settings.notificationSound ? "checked" : ""}
-                onchange="appState.settings.notificationSound = this.checked; saveAppState(); render();"
-            >
-            <span class="toggle-slider"></span>
-            <span class="toggle-label-text">Alert sounds</span>
-        </label>
-    </div>
+        <div style="margin-bottom: 16px;">
+            <label class="toggle-label">
+                <input
+                    type="checkbox"
+                    class="toggle-checkbox"
+                    ${appState.settings.notificationHaptics ? "checked" : ""}
+                    onchange="appState.settings.notificationHaptics = this.checked; saveAppState(); render();"
+                >
+                <span class="toggle-slider"></span>
+                <span class="toggle-label-text">Vibration feedback</span>
+            </label>
+        </div>
 
-    <div style="margin-bottom: 16px;">
-        <label class="toggle-label">
-            <input
-                type="checkbox"
-                class="toggle-checkbox"
-                ${appState.settings.notificationHaptics ? "checked" : ""}
-                onchange="appState.settings.notificationHaptics = this.checked; saveAppState(); render();"
-            >
-            <span class="toggle-slider"></span>
-            <span class="toggle-label-text">Vibration feedback</span>
-        </label>
-    </div>
+        <hr style="margin: 16px 0; border: none; border-top: 1px solid var(--border);">
 
-    <hr style="margin: 16px 0; border: none; border-top: 1px solid var(--border);">
+        <h3>Recent Alerts</h3>
 
-    <h3>Recent Alerts</h3>
-
-    ${appState.alerts.history.length
+        ${appState.alerts.history.length
             ? appState.alerts.history
                 .slice(0, 10)
                 .map(alert => `
@@ -472,19 +479,9 @@ function settingsView() {
                 <p style="color: var(--muted);">No alerts</p>
             `
         }
-    </div>
+    `;
 
-
-
-
-    <div class="card">
-
-        <h2>
-
-            Brand theme
-
-        </h2>
-
+    const appearanceBody = `
         <label>
             App appearance
         </label>
@@ -505,72 +502,97 @@ function settingsView() {
         </p>
 
         <p style="color:var(--muted)">
-
             Temperatuureenheid: ${appState.settings.temperatureUnit === "C" ? "Celsius" : "Fahrenheit"}
-
         </p>
 
-    </div>
+        <hr style="margin: 16px 0; border: none; border-top: 1px solid var(--border);">
 
-    <div class="card">
+        <label class="toggle-label">
 
-    <h3>
-        Display
-    </h3>
-
-    <label class="toggle-label">
-
-        <input
-            type="checkbox"
-            class="toggle-checkbox"
-            ${
-                appState.theme?.mode === "light"
-                    ? "checked"
-                    : ""
-            }
-            onchange="setColorScheme(this.checked ? 'light' : 'dark')"
-        >
-
-        <span class="toggle-slider"></span>
-        <span class="toggle-label-text">Light mode</span>
-
-    </label>
-
-    <label class="toggle-label">
-
-        <input
-            type="checkbox"
-            class="toggle-checkbox"
-            ${
-                appState.settings.keepScreenAwake
-                    ? "checked"
-                    : ""
-            }
-            onchange="
-                appState.settings.keepScreenAwake=this.checked;
-                saveAppState();
-                if (typeof syncWakeLockState === 'function') {
-                    syncWakeLockState();
+            <input
+                type="checkbox"
+                class="toggle-checkbox"
+                ${
+                    appState.theme?.mode === "light"
+                        ? "checked"
+                        : ""
                 }
-            "
-        >
+                onchange="setColorScheme(this.checked ? 'light' : 'dark')"
+            >
 
-        <span class="toggle-slider"></span>
-        <span class="toggle-label-text">Keep screen awake during active cook</span>
+            <span class="toggle-slider"></span>
+            <span class="toggle-label-text">Light mode</span>
 
-    </label>
+        </label>
 
-    <p style='color:var(--muted); margin-top:8px;'>
-        ${
-            typeof navigator !== "undefined" && "wakeLock" in navigator
-                ? "Wake Lock is supported in this browser."
-                : "Safari/Bluefy fallback is active; the app will try to keep the screen awake using a silent audio workaround."
-        }
-    </p>
+        <label class="toggle-label">
 
-    </div>
+            <input
+                type="checkbox"
+                class="toggle-checkbox"
+                ${
+                    appState.settings.keepScreenAwake
+                        ? "checked"
+                        : ""
+                }
+                onchange="
+                    appState.settings.keepScreenAwake=this.checked;
+                    saveAppState();
+                    if (typeof syncWakeLockState === 'function') {
+                        syncWakeLockState();
+                    }
+                "
+            >
 
+            <span class="toggle-slider"></span>
+            <span class="toggle-label-text">Keep screen awake during active cook</span>
+
+        </label>
+
+        <p style='color:var(--muted); margin-top:8px;'>
+            ${
+                typeof navigator !== "undefined" && "wakeLock" in navigator
+                    ? "Wake Lock is supported in this browser."
+                    : "Safari/Bluefy fallback is active; the app will try to keep the screen awake using a silent audio workaround."
+            }
+        </p>
     `;
 
-    
+    return [
+        settingsGroup({
+            key: "probes",
+            icon: "🌡️",
+            title: "Probes",
+            status: `${activeProbeCount} active`,
+            body: probesBody
+        }),
+        settingsGroup({
+            key: "bluetooth",
+            icon: "📶",
+            title: "Bluetooth",
+            status: appState.bluetooth.connected ? "Connected" : appState.bluetooth.status,
+            body: bluetoothBody
+        }),
+        settingsGroup({
+            key: "network",
+            icon: "🌐",
+            title: "Network Socket",
+            status: appState.network.enabled ? appState.network.status : "Disabled",
+            body: networkBody
+        }),
+        settingsGroup({
+            key: "alerts",
+            icon: "🔔",
+            title: "Alerts & Notifications",
+            status: appState.settings.notifications ? "On" : "Off",
+            body: alertsBody
+        }),
+        settingsGroup({
+            key: "appearance",
+            icon: "🎨",
+            title: "Appearance & Display",
+            status: appState.theme?.brand,
+            body: appearanceBody
+        })
+    ].join("");
 }
