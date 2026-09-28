@@ -326,36 +326,6 @@ const appState = {
 };
 
 
-
-
-
-// ==========================================================
-// STATE UPDATE HELPER
-// ==========================================================
-
-function updateState(callback) {
-
-
-    callback(appState);
-
-    if (
-        typeof scheduleStateSave ===
-        "function"
-    ) {
-        scheduleStateSave();
-    }
-
-    if (typeof render === "function") {
-
-        render();
-
-    }
-
-
-}
-
-
-
 function recordAlert(type, message) {
 
     appState.alerts.history.unshift({

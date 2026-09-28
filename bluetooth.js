@@ -468,29 +468,4 @@ async function connectBluetooth(){
     }
 
 }
-
-
-
-
-
-
-
-
-
-async function sendCommand(bytes){
-
-
-    if(!BLE.writeCharacteristic){
-
-        return;
-
-    }
-
-
-
-    await BLE.writeCharacteristic.writeValue(
-        new Uint8Array(bytes)
-    );
-
-
 }

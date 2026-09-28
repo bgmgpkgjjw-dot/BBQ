@@ -163,47 +163,6 @@ function setColorScheme(mode) {
 }
 
 
-function parseTemperaturePayload(payload) {
-
-    if (!payload) return null;
-
-    const values = payload.split(/[^0-9.-]+/).filter(Boolean);
-
-    if (values.length >= 1) {
-        const temp = Number(values[0]);
-        if (Number.isFinite(temp)) return temp;
-    }
-
-    return null;
-
-}
-
-
-function applyTemperatureReading(rawValue) {
-
-    const temperature = parseTemperaturePayload(rawValue);
-
-    if (temperature === null) return;
-
-    const domeProbe = appState.probes.find(p => p.active && p.type === "dome");
-    const meatProbe = appState.probes.find(p => p.active && p.type === "meat");
-
-    if (domeProbe) {
-        domeProbe.temperature = temperature;
-    }
-
-    if (meatProbe) {
-        meatProbe.temperature = temperature;
-    }
-
-    appState.bluetooth.lastPayload = rawValue;
-    appState.bluetooth.lastUpdatedAt = new Date().toISOString();
-
-    updateLiveUi();
-
-}
-
-
 function connectBluetoothDevice() {
 
     setBluetoothStatus("Requesting device...");

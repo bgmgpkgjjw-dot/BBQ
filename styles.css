@@ -339,26 +339,6 @@ body {
 }
 
 /* ==========================================================
-   COOK HEADER
-   ========================================================== */
-
-.cook-header {
-   margin-bottom: 14px;
-}
-
-.cook-header h2 {
-   font-size: 24px;
-   font-weight: 850;
-   letter-spacing: -.03em;
-}
-
-.cook-header p {
-   margin-top: 4px;
-   font-size: 13px;
-   color: var(--muted);
-}
-
-/* ==========================================================
    PROBES
    ========================================================== */
 
@@ -536,43 +516,6 @@ body {
    margin-bottom: 12px;
 }
 
-.cook-info {
-   display: grid;
-   grid-template-columns: 1fr 1fr;
-   gap: 10px;
-}
-
-.cook-info p {
-   background: var(--overlay-soft);
-   border: 1px solid var(--border);
-   border-radius: 12px;
-   padding: 10px;
-   font-size: 13px;
-}
-
-.cook-info strong {
-   display: block;
-   font-size: 17px;
-   margin-top: 3px;
-}
-
-.cook-phase {
-   margin-top: 14px;
-   padding: 12px;
-   background: var(--inset);
-   border-radius: 14px;
-}
-
-.cook-phase strong {
-   font-size: 16px;
-}
-
-.cook-timer {
-   font-size: 28px;
-   font-weight: 800;
-   margin-top: 8px;
-}
-
 .cook-status {
    color: #8fd18f;
    font-size: 13px;
@@ -598,14 +541,6 @@ body {
    width: 100%;
    box-sizing: border-box;
    min-width: 0;
-}
-
-.temperature-input {
-   width: 100%;
-   height: 42px;
-   font-size: 16px;
-   text-align: center;
-   box-sizing: border-box;
 }
 
 .cook-grid span {
@@ -712,48 +647,6 @@ body {
    border: 1px solid var(--border);
    color: var(--text);
    box-shadow: none;
-}
-
-/* ==========================================================
-   COOK CONTROLS
-   ========================================================== */
-
-.phase-button {
-   background: var(--green);
-   color: white;
-}
-
-.stop-button {
-   background: transparent;
-   border: 1px solid rgba(229, 57, 53, .5);
-   color: #ff8a80;
-}
-
-/* ==========================================================
-   PROGRESS RING SUPPORT
-   ========================================================== */
-
-.progress-ring {
-   width: 110px;
-   height: 110px;
-   border-radius: 50%;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   background: conic-gradient(var(--accent) 0deg, #332A22 0deg);
-   margin: 15px auto;
-}
-
-.progress-ring-inner {
-   width: 88px;
-   height: 88px;
-   border-radius: 50%;
-   background: var(--card);
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   font-size: 22px;
-   font-weight: 800;
 }
 
 /* ==========================================================
@@ -1293,16 +1186,8 @@ select:focus {
       padding: 10px;
    }
 
-   .probe-temperature {
-      font-size: 38px;
-   }
-
    .button {
       height: 44px;
-   }
-
-   .cook-header h2 {
-      font-size: 21px;
    }
 }
 

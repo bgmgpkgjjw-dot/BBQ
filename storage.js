@@ -714,33 +714,6 @@ function getCurrentSession() {
 
 
 
-function deleteCookSession(id) {
-
-    appState.sessions =
-        appState.sessions.filter(
-
-            s => s.id !== id
-
-        );
-
-    addDeletedSessionId(id);
-
-    saveSessions();
-
-}
-
-
-
-function clearAllSessions() {
-
-    appState.sessions = [];
-
-    saveSessions();
-
-}
-
-
-
 function calculateDuration(start, end) {
 
     const ms =
@@ -874,24 +847,6 @@ function loadAppState() {
             error
         );
     }
-}
-
-/* ==========================================================
-   AUTO SAVE
-========================================================== */
-
-let saveTimeout = null;
-
-function scheduleStateSave() {
-
-    if (saveTimeout) {
-        clearTimeout(saveTimeout);
-    }
-
-    saveTimeout = setTimeout(
-        saveAppState,
-        500
-    );
 }
 
 /* ==========================================================

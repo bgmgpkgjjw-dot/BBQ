@@ -346,23 +346,6 @@ function navigate(screen) {
 
 
 
-function rerenderPreservingScroll() {
-
-
-    render();
-
-
-}
-
-
-
-
-
-
-
-
-
-
 if (
     "serviceWorker" in navigator
 ) {
@@ -434,18 +417,6 @@ function supportsWakeLock() {
 function supportsSafariAudioWakeLock() {
     return typeof window !== "undefined" &&
         ("AudioContext" in window || "webkitAudioContext" in window);
-}
-
-function getWakeLockStatusText() {
-    if (supportsWakeLock()) {
-        return "Wake Lock available";
-    }
-
-    if (supportsSafariAudioWakeLock()) {
-        return "Safari-compatible fallback enabled";
-    }
-
-    return "Wake Lock unavailable in this browser; the phone will sleep normally";
 }
 
 async function requestSafariAudioWakeLock() {
