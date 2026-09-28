@@ -110,79 +110,38 @@ function renderProbeCard(probe) {
     <div class="probe-card premium-probe ${getProbeStatus(probe)} ${isDome ? "dome-card" : "meat-card"}">
 
 
-        <div class="probe-title">
+        <div class="probe-header">
 
-            <span>
-                ${isDome ? "Kamado Dome" : probe.name}
-            </span>
+            <div class="probe-header-left">
 
-            ${getApproachingStatus(probe) === "approaching" ? `
-                <span class="alert-badge">Approaching</span>
-            ` : ""}
+                <span class="probe-icon-chip" aria-hidden="true">
+                    ${isDome ? Icons.flame : Icons.probe}
+                </span>
 
-            <span class="probe-id">
-                P${probe.id}
-            </span>
+                <span class="probe-name">
+                    ${isDome ? "Kamado Dome" : probe.name}
+                </span>
+
+            </div>
+
+            <div class="probe-header-right">
+
+                ${getApproachingStatus(probe) === "approaching" ? `
+                    <span class="alert-badge">Approaching</span>
+                ` : ""}
+
+                <span class="probe-id">
+                    P${probe.id}
+                </span>
+
+            </div>
 
         </div>
 
 
+        <div class="probe-reading">
 
-        ${isDome
-
-            ?
-
-            `
-
-        <div class="dome-gauge">
-
-
-            <div class="gauge-circle">
-
-
-                <div class="card-icon-badge gauge-icon">
-                    ${Icons.flame}
-                </div>
-
-
-                <div class="gauge-value"
-                     data-probe-temperature
-                     data-probe-id="${probe.id}">
-
-                    ${formatTemperatureValue(probe.temperature)}
-
-                </div>
-
-
-                <div class="gauge-label">
-                    Dome
-                </div>
-
-
-            </div>
-
-
-        </div>
-
-
-        `
-
-
-            :
-
-
-            `
-
-
-        <div class="thermometer-box">
-
-
-            <div class="card-icon-badge" aria-hidden="true">
-                ${Icons.probe}
-            </div>
-
-
-            <div class="thermometer-value"
+            <div class="probe-reading-value"
                  data-probe-temperature
                  data-probe-id="${probe.id}">
 
@@ -190,29 +149,16 @@ function renderProbeCard(probe) {
 
             </div>
 
+            <div class="probe-reading-target">
+
+                ${target
+                    ? `<span class="target-arrow">→</span> ${target}°<span class="target-unit">C target</span>`
+                    : "No target set"
+                }
+
+            </div>
 
         </div>
-
-
-        `
-
-        }
-
-
-
-
-        <div class="probe-info">
-
-            ${target
-            ?
-            `Target ${target}°C`
-            :
-            "No target"
-        }
-
-        </div>
-
-
 
 
         <div class="progress-bar">
