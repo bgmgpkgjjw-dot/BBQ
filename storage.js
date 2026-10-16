@@ -15,19 +15,8 @@ const HISTORY_SAMPLE_INTERVALS = [
     { afterMs: 2 * 60 * 60 * 1000, intervalMs: 60 * 1000 },
     { afterMs: 8 * 60 * 60 * 1000, intervalMs: 5 * 60 * 1000 }
 ];
-const DOME_OPENING_DROP = 15;
-const DOME_OPENING_RECOVERY = 8;
-const DOME_OPENING_MAX_DURATION = 10 * 60 * 1000;
-const MEAT_SPIKE_THRESHOLD = 8;
-const MEAT_SPIKE_CONFIRM_TOLERANCE = 3;
 const MEAT_CHANGE_THRESHOLD = 1.5;
 const DOME_CHANGE_THRESHOLD = 3;
-// Low-pass filter factor for normal (non-spike) readings: raw sensor jitter of a
-// few degrees was previously passed straight through unfiltered, which combined
-// with the thresholds above to record and display noise as if it were real spikes.
-const DOME_SMOOTHING_ALPHA = 0.3;
-const MEAT_SMOOTHING_ALPHA = 0.3;
-const historyRuntime = new Map();
 const DEVICE_ID_KEY = "hermanos_device_id";
 const DELETED_SESSIONS_KEY = "hermanos_grill_deleted_sessions_v1";
 
@@ -114,17 +103,7 @@ function mergeBackfilledReadings(session, readings) {
         return existingTimestamps.some(existing => Math.abs(existing - timestamp) < interval);
     };
 
-    // Backfilled readings are raw and arrive out of order relative to live samples.
-    // Smooth them with an isolated, chronological runtime/history so they neither
-    // pollute the live smoothing state nor get compared against the newest live
-    // sample, and only fill real gaps instead of interleaving raw values between
-    // already-smoothed live samples (which showed up as fake spikes).
-    const isolated = {
-        id: `${session.id}:backfill`,
-        startedAt: session.startedAt,
-        temperatureHistory: []
-    };
-    historyRuntime.delete(isolated.id);
+    const backfilled = [];
 
     readings
         .filter(reading => !hasNearbySample(reading.timestamp))
@@ -135,21 +114,18 @@ function mergeBackfilledReadings(session, readings) {
             if (dome == null && meat == null) {
                 return;
             }
-            const prepared = prepareHistoricalTemperature(isolated, dome, meat, reading.timestamp);
 
-            if (shouldRecordHistoricalSample(isolated, prepared, reading.timestamp)) {
-                const sample = { timestamp: reading.timestamp, dome: prepared.dome, meat: prepared.meat };
-                if (prepared.domeRaw !== undefined) {
-                    sample.domeRaw = prepared.domeRaw;
-                    sample.domeEvent = prepared.domeEvent;
-                }
-                isolated.temperatureHistory.push(sample);
+            const sample = { timestamp: reading.timestamp, dome, meat };
+            const previous = backfilled.at(-1);
+            const interval = getHistorySampleInterval(session, reading.timestamp);
+
+            if (!previous || reading.timestamp - previous.timestamp >= interval ||
+                isSignificantTemperatureChange(previous, sample)) {
+                backfilled.push(sample);
             }
         });
 
-    historyRuntime.delete(isolated.id);
-
-    session.temperatureHistory.push(...isolated.temperatureHistory);
+    session.temperatureHistory.push(...backfilled);
     session.temperatureHistory.sort((a, b) => a.timestamp - b.timestamp);
 }
 
@@ -187,22 +163,6 @@ async function backfillActiveSessionFromPi() {
     }
 }
 
-function getHistoryRuntime(session) {
-    if (!historyRuntime.has(session.id)) {
-        historyRuntime.set(session.id, {
-            lastRawDome: null,
-            stableDome: null,
-            transientUntil: 0,
-            domeOpening: false,
-            lastRawMeat: null,
-            stableMeat: null,
-            pendingMeatSpike: null
-        });
-    }
-
-    return historyRuntime.get(session.id);
-}
-
 function getHistorySampleInterval(session, timestamp) {
     const startedAt = Date.parse(session.startedAt);
     const elapsed = Number.isNaN(startedAt)
@@ -233,78 +193,6 @@ function isSignificantTemperatureChange(previous, current) {
     );
 }
 
-function prepareHistoricalTemperature(session, dome, meat, timestamp) {
-    const runtime = getHistoryRuntime(session);
-    const previousRawDome = runtime.lastRawDome;
-    const previousStableDome = runtime.stableDome ?? dome;
-
-    if (
-        previousRawDome != null &&
-        dome != null &&
-        previousRawDome - dome >= DOME_OPENING_DROP
-    ) {
-        runtime.domeOpening = true;
-        runtime.transientUntil = timestamp + DOME_OPENING_MAX_DURATION;
-        runtime.stableDome = previousStableDome;
-    }
-
-    runtime.lastRawDome = dome;
-
-    if (runtime.domeOpening) {
-        const recovered = dome != null &&
-            Math.abs(dome - (runtime.stableDome ?? dome)) <= DOME_OPENING_RECOVERY;
-
-        if (recovered || timestamp >= runtime.transientUntil) {
-            runtime.domeOpening = false;
-            runtime.transientUntil = 0;
-            runtime.stableDome = dome;
-        }
-    } else if (dome != null) {
-        // Smooth normal jitter with an EMA instead of passing the raw reading
-        // straight through, otherwise every noisy tick looks like a real spike.
-        runtime.stableDome = runtime.stableDome == null
-            ? dome
-            : runtime.stableDome + DOME_SMOOTHING_ALPHA * (dome - runtime.stableDome);
-    }
-
-    // Reject an implausible one-tick jump (probe dropout/contact loss) unless the
-    // next reading confirms it was a real change, to avoid spiking the graph/history.
-    const previousRawMeat = runtime.lastRawMeat;
-    let meatOut = meat;
-
-    if (meat != null && previousRawMeat != null && Math.abs(meat - previousRawMeat) >= MEAT_SPIKE_THRESHOLD) {
-        const confirmed = runtime.pendingMeatSpike != null &&
-            Math.abs(meat - runtime.pendingMeatSpike) <= MEAT_SPIKE_CONFIRM_TOLERANCE;
-
-        if (confirmed) {
-            runtime.stableMeat = meat;
-            runtime.pendingMeatSpike = null;
-            meatOut = meat;
-        } else {
-            runtime.pendingMeatSpike = meat;
-            meatOut = runtime.stableMeat ?? meat;
-        }
-    } else if (meat != null) {
-        // Same EMA smoothing as dome, for the same reason.
-        runtime.stableMeat = runtime.stableMeat == null
-            ? meat
-            : runtime.stableMeat + MEAT_SMOOTHING_ALPHA * (meat - runtime.stableMeat);
-        runtime.pendingMeatSpike = null;
-        meatOut = runtime.stableMeat;
-    }
-
-    if (meat != null) {
-        runtime.lastRawMeat = meat;
-    }
-
-    return {
-        dome: runtime.stableDome,
-        meat: meatOut,
-        domeRaw: runtime.domeOpening ? dome : undefined,
-        domeEvent: runtime.domeOpening ? "opening" : undefined
-    };
-}
-
 function shouldRecordHistoricalSample(session, sample, timestamp) {
     const previous = session.temperatureHistory.at(-1);
     if (!previous) {
@@ -317,89 +205,6 @@ function shouldRecordHistoricalSample(session, sample, timestamp) {
 
     return intervalElapsed || significantChange;
 }
-
-const TEMPERATURE_HISTORY_REPROCESS_VERSION = 4;
-
-// Re-runs already-recorded samples through the current smoothing/outlier-rejection
-// logic, so cooks recorded before that logic existed (or improved) get cleaned up too.
-function reprocessSessionTemperatureHistory(session) {
-    if (!Array.isArray(session.temperatureHistory) || !session.temperatureHistory.length) {
-        return false;
-    }
-
-    historyRuntime.delete(session.id);
-
-    let changed = false;
-
-    // Median-of-3 removes isolated stored spikes (e.g. from earlier faulty backfills)
-    // that the EMA alone would only smear out.
-    const median3 = (a, b, c) => [a, b, c].sort((x, y) => x - y)[1];
-    const source = session.temperatureHistory;
-    const despiked = field => source.map((sample, i) => {
-        const cur = sample[field];
-        const prev = source[i - 1]?.[field];
-        const next = source[i + 1]?.[field];
-        return Number.isFinite(cur) && Number.isFinite(prev) && Number.isFinite(next)
-            ? median3(prev, cur, next)
-            : cur ?? null;
-    });
-    const despikedDome = despiked("dome");
-    const despikedMeat = despiked("meat");
-
-    session.temperatureHistory = source.map((sample, i) => {
-        const prepared = prepareHistoricalTemperature(
-            session,
-            despikedDome[i],
-            despikedMeat[i],
-            sample.timestamp
-        );
-
-        if (prepared.dome !== sample.dome || prepared.meat !== sample.meat) {
-            changed = true;
-        }
-
-        const next = { ...sample, dome: prepared.dome, meat: prepared.meat };
-
-        if (prepared.domeRaw !== undefined) {
-            next.domeRaw = prepared.domeRaw;
-            next.domeEvent = prepared.domeEvent;
-        } else {
-            delete next.domeRaw;
-            delete next.domeEvent;
-        }
-
-        return next;
-    });
-
-    // Reset runtime so live recording (if this is the active cook) starts fresh
-    // instead of continuing from the reprocessing pass's end state.
-    historyRuntime.delete(session.id);
-
-    return changed;
-}
-
-function reprocessAllSessionsIfNeeded() {
-    if (!Array.isArray(appState.sessions)) {
-        return;
-    }
-
-    let anyChanged = false;
-
-    appState.sessions.forEach(session => {
-        if (session.historyReprocessedVersion === TEMPERATURE_HISTORY_REPROCESS_VERSION) {
-            return;
-        }
-
-        reprocessSessionTemperatureHistory(session);
-        session.historyReprocessedVersion = TEMPERATURE_HISTORY_REPROCESS_VERSION;
-        anyChanged = true;
-    });
-
-    if (anyChanged) {
-        saveSessions();
-    }
-}
-
 
 /* ==========================================================
    INITIALIZE
@@ -430,8 +235,6 @@ function initializeStorage() {
         appState.sessions = [];
 
     }
-
-    reprocessAllSessionsIfNeeded();
 
 }
 
@@ -532,7 +335,6 @@ async function syncSessionsFromPi() {
 
         appState.sessions = Array.from(merged.values())
             .sort((left, right) => new Date(right.startedAt) - new Date(left.startedAt));
-        reprocessAllSessionsIfNeeded();
         localStorage.setItem(STORAGE_KEY, JSON.stringify(appState.sessions));
         render();
         await syncSessionsToPi();
@@ -686,21 +488,10 @@ function recordTemperatureHistory() {
     const timestamp = Date.now();
     const dome = appState.probes.find(p => p.type === "dome")?.temperature ?? null;
     const meat = appState.probes.find(p => p.type === "meat")?.temperature ?? null;
-    const prepared = prepareHistoricalTemperature(session, dome, meat, timestamp);
+    const sample = { timestamp, dome, meat };
 
-    if (!shouldRecordHistoricalSample(session, prepared, timestamp)) {
+    if (!shouldRecordHistoricalSample(session, sample, timestamp)) {
         return;
-    }
-
-    const sample = {
-        timestamp,
-        dome: prepared.dome,
-        meat: prepared.meat
-    };
-
-    if (prepared.domeRaw !== undefined) {
-        sample.domeRaw = prepared.domeRaw;
-        sample.domeEvent = prepared.domeEvent;
     }
 
     session.temperatureHistory.push(sample);

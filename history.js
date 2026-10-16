@@ -599,7 +599,6 @@ function downsampleTemperatureSamples(samples, maxPoints = 600) {
     return Array.from(buckets.values()).map(bucket => {
         const numericDome = bucket.map(sample => sample.dome).filter(Number.isFinite);
         const numericMeat = bucket.map(sample => sample.meat).filter(Number.isFinite);
-        const first = bucket[0];
 
         return {
             timestamp: bucket[Math.floor(bucket.length / 2)].timestamp,
@@ -612,10 +611,7 @@ function downsampleTemperatureSamples(samples, maxPoints = 600) {
             domeMin: numericDome.length ? Math.min(...numericDome) : null,
             domeMax: numericDome.length ? Math.max(...numericDome) : null,
             meatMin: numericMeat.length ? Math.min(...numericMeat) : null,
-            meatMax: numericMeat.length ? Math.max(...numericMeat) : null,
-            domeEvent: bucket.some(sample => sample.domeEvent === "opening")
-                ? "opening"
-                : first.domeEvent
+            meatMax: numericMeat.length ? Math.max(...numericMeat) : null
         };
     });
 }
