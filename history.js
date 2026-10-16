@@ -400,7 +400,7 @@ async function renameCook(sessionId) {
         return;
     }
 
-    const newName = await uiPrompt(
+    const newName = await askText(
         "Rename cook",
         session.name || session.recipe || "New cook",
         { placeholder: "Cook name" }
@@ -430,7 +430,7 @@ async function deleteCook(sessionId) {
         return;
     }
 
-    const confirmed = await uiConfirm(
+    const confirmed = await askConfirm(
         "Delete this cook?",
         `"${session.name || session.recipe}" and its photos will be removed. This cannot be undone.`,
         { confirmText: "Delete", danger: true }
@@ -737,6 +737,28 @@ const COOK_PHOTO_MAX_EDGE = 1280;
 const COOK_PHOTO_QUALITY = 0.8;
 let journalSaveTimer = null;
 
+// Fall back to the browser dialogs if dialogs.js is missing (e.g. not yet deployed),
+// so an action never fails silently.
+function askText(title, value, options) {
+    return typeof uiPrompt === "function"
+        ? uiPrompt(title, value, options)
+        : Promise.resolve(prompt(title, value));
+}
+
+function askConfirm(title, message, options) {
+    return typeof uiConfirm === "function"
+        ? uiConfirm(title, message, options)
+        : Promise.resolve(confirm(`${title}\n\n${message}`));
+}
+
+function showNotice(title, message) {
+    if (typeof uiAlert === "function") {
+        return uiAlert(title, message);
+    }
+    alert(`${title}\n\n${message}`);
+    return Promise.resolve();
+}
+
 function escapeHtmlText(value) {
     return String(value ?? "")
         .replace(/&/g, "&amp;")
@@ -915,7 +937,6 @@ function deletePhotoFromPi(photo) {
 async function addCookPhoto(id, input) {
     const session = findSession(id);
     const file = input.files && input.files[0];
-    input.value = "";
     if (!session || !file) return;
 
     session.photos = session.photos || [];
@@ -925,7 +946,8 @@ async function addCookPhoto(id, input) {
     const endpoint = getPhotoEndpoint(photoId);
 
     if (!endpoint) {
-        uiAlert("Photo not saved", "Set the Pi's server address in Settings to save photos.");
+        input.value = "";
+        showNotice("Photo not saved", "Set the Pi's server address in Settings to save photos.");
         return;
     }
 
@@ -938,7 +960,9 @@ async function addCookPhoto(id, input) {
         });
 
         if (!response.ok) {
-            throw new Error(`Pi returned ${response.status}`);
+            const error = new Error(`Pi returned ${response.status}`);
+            error.status = response.status;
+            throw error;
         }
 
         session.photos.push(photoId);
@@ -946,7 +970,21 @@ async function addCookPhoto(id, input) {
         render();
     } catch (error) {
         console.warn("Photo could not be added", error);
-        uiAlert("Photo not saved", "The Pi could not be reached. Check the connection and try again.");
+
+        let reason = "The Pi could not be reached. Check the connection and try again.";
+        if (error.status === 404) {
+            reason = "The Pi doesn't know about photos yet. Update the Pi and restart the storage service (bbq-storage).";
+        } else if (error.status === 401) {
+            reason = "The Pi rejected the API token. Check it in Settings.";
+        } else if (error.status) {
+            reason = `The Pi returned an error (${error.status}).`;
+        } else if (error.message === "Unable to read image") {
+            reason = "This image format could not be read. Try a different photo.";
+        }
+
+        showNotice("Photo not saved", reason);
+    } finally {
+        input.value = "";
     }
 }
 
