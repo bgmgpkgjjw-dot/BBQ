@@ -96,26 +96,48 @@ function mergeBackfilledReadings(session, readings) {
         session.temperatureHistory = [];
     }
 
-    const existingTimestamps = new Set(session.temperatureHistory.map(sample => sample.timestamp));
+    const existingTimestamps = session.temperatureHistory
+        .map(sample => sample.timestamp)
+        .sort((a, b) => a - b);
+
+    const hasNearbySample = timestamp => {
+        const interval = getHistorySampleInterval(session, timestamp);
+        return existingTimestamps.some(existing => Math.abs(existing - timestamp) < interval);
+    };
+
+    // Backfilled readings are raw and arrive out of order relative to live samples.
+    // Smooth them with an isolated, chronological runtime/history so they neither
+    // pollute the live smoothing state nor get compared against the newest live
+    // sample, and only fill real gaps instead of interleaving raw values between
+    // already-smoothed live samples (which showed up as fake spikes).
+    const isolated = {
+        id: `${session.id}:backfill`,
+        startedAt: session.startedAt,
+        temperatureHistory: []
+    };
+    historyRuntime.delete(isolated.id);
 
     readings
-        .filter(reading => !existingTimestamps.has(reading.timestamp))
+        .filter(reading => !hasNearbySample(reading.timestamp))
         .sort((a, b) => a.timestamp - b.timestamp)
         .forEach(reading => {
             const dome = reading.dome != null ? reading.dome / 10 : null;
             const meat = reading.probe1 != null ? reading.probe1 / 10 : null;
-            const prepared = prepareHistoricalTemperature(session, dome, meat, reading.timestamp);
+            const prepared = prepareHistoricalTemperature(isolated, dome, meat, reading.timestamp);
 
-            if (shouldRecordHistoricalSample(session, prepared, reading.timestamp)) {
+            if (shouldRecordHistoricalSample(isolated, prepared, reading.timestamp)) {
                 const sample = { timestamp: reading.timestamp, dome: prepared.dome, meat: prepared.meat };
                 if (prepared.domeRaw !== undefined) {
                     sample.domeRaw = prepared.domeRaw;
                     sample.domeEvent = prepared.domeEvent;
                 }
-                session.temperatureHistory.push(sample);
+                isolated.temperatureHistory.push(sample);
             }
         });
 
+    historyRuntime.delete(isolated.id);
+
+    session.temperatureHistory.push(...isolated.temperatureHistory);
     session.temperatureHistory.sort((a, b) => a.timestamp - b.timestamp);
 }
 
@@ -284,7 +306,7 @@ function shouldRecordHistoricalSample(session, sample, timestamp) {
     return intervalElapsed || significantChange;
 }
 
-const TEMPERATURE_HISTORY_REPROCESS_VERSION = 2;
+const TEMPERATURE_HISTORY_REPROCESS_VERSION = 3;
 
 // Re-runs already-recorded samples through the current smoothing/outlier-rejection
 // logic, so cooks recorded before that logic existed (or improved) get cleaned up too.
