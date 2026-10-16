@@ -91,6 +91,15 @@ function getCookStorageHeaders(extra = {}) {
     return headers;
 }
 
+// Mirrors the live socket path: raw 0 and 0xFFFF mean "no probe/dropout", not a temperature.
+function decodeLoggedTemperature(raw) {
+    const value = Number(raw);
+    if (raw == null || Number.isNaN(value) || value === 0 || value === 0xFFFF) {
+        return null;
+    }
+    return value / 10;
+}
+
 function mergeBackfilledReadings(session, readings) {
     if (!Array.isArray(session.temperatureHistory)) {
         session.temperatureHistory = [];
@@ -121,8 +130,11 @@ function mergeBackfilledReadings(session, readings) {
         .filter(reading => !hasNearbySample(reading.timestamp))
         .sort((a, b) => a.timestamp - b.timestamp)
         .forEach(reading => {
-            const dome = reading.dome != null ? reading.dome / 10 : null;
-            const meat = reading.probe1 != null ? reading.probe1 / 10 : null;
+            const dome = decodeLoggedTemperature(reading.dome);
+            const meat = decodeLoggedTemperature(reading.probe1);
+            if (dome == null && meat == null) {
+                return;
+            }
             const prepared = prepareHistoricalTemperature(isolated, dome, meat, reading.timestamp);
 
             if (shouldRecordHistoricalSample(isolated, prepared, reading.timestamp)) {
@@ -306,7 +318,7 @@ function shouldRecordHistoricalSample(session, sample, timestamp) {
     return intervalElapsed || significantChange;
 }
 
-const TEMPERATURE_HISTORY_REPROCESS_VERSION = 3;
+const TEMPERATURE_HISTORY_REPROCESS_VERSION = 4;
 
 // Re-runs already-recorded samples through the current smoothing/outlier-rejection
 // logic, so cooks recorded before that logic existed (or improved) get cleaned up too.
@@ -319,11 +331,26 @@ function reprocessSessionTemperatureHistory(session) {
 
     let changed = false;
 
-    session.temperatureHistory = session.temperatureHistory.map(sample => {
+    // Median-of-3 removes isolated stored spikes (e.g. from earlier faulty backfills)
+    // that the EMA alone would only smear out.
+    const median3 = (a, b, c) => [a, b, c].sort((x, y) => x - y)[1];
+    const source = session.temperatureHistory;
+    const despiked = field => source.map((sample, i) => {
+        const cur = sample[field];
+        const prev = source[i - 1]?.[field];
+        const next = source[i + 1]?.[field];
+        return Number.isFinite(cur) && Number.isFinite(prev) && Number.isFinite(next)
+            ? median3(prev, cur, next)
+            : cur ?? null;
+    });
+    const despikedDome = despiked("dome");
+    const despikedMeat = despiked("meat");
+
+    session.temperatureHistory = source.map((sample, i) => {
         const prepared = prepareHistoricalTemperature(
             session,
-            sample.dome ?? null,
-            sample.meat ?? null,
+            despikedDome[i],
+            despikedMeat[i],
             sample.timestamp
         );
 
