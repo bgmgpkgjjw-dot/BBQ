@@ -8,7 +8,7 @@ const https = require("https");
 
 const port = Number(process.env.BBQ_GRILL_PORT || 8080);
 const apiToken = process.env.BBQ_API_TOKEN || null;
-const dataDirectory = process.env.BBQ_DATA_DIR || "/home/william/bbq-data";
+const dataDirectory = process.env.BBQ_DATA_DIR || path.join(require("os").homedir(), "bbq-data");
 const RETENTION_MS = 30 * 24 * 60 * 60 * 1000; // keep 30 days of raw readings
 
 // iOS Safari requires HTTPS (wss) for a page loaded over https to open a socket at all.

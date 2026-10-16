@@ -18,3 +18,30 @@
   "30 minutes to go" notification, then tune thresholds in forecast.js.
 - Step 2: dome stability, drift/overshoot alerts, lid-open detection.
 - Step 3: rest timer, cook notes.
+
+# Project plan: broader availability + monetization
+Decisions: audience = hobbyist community (tens-hundreds). Start self-hosted
+(each user has their own Pi), design so a hybrid model (hosted accounts + Pi
+connects out) can be added later. Monetize via paid cloud features (sync,
+remote alerts, backup) and paid AI coaching; core app stays free.
+
+## Phase 1: safe and installable  [IN PROGRESS]
+- [x] Remove hardcoded paths/IPs (/home/william, 192.168.68.127); config via env
+- [x] One-command Pi installer (services, TLS, generated API token)
+- [x] Quick-start doc
+- [ ] Per-install token + pairing (QR code or setup screen)
+- [ ] AI: user supplies own OpenRouter key (or rate-limited proxy)
+- [x] First-run setup screen + Simulator mode for trying without hardware
+
+## Phase 2: reliable
+- [ ] Tests for forecast.js and storage.js, plus CI
+- [ ] Data export/import/backup, schema migrations
+- [ ] Versioned releases + update mechanism
+- [ ] Test on iOS and Android
+
+## Phase 3: grow / monetize
+- [ ] Validate demand: 10-20 free hobbyist users, ask about paying for remote access + AI coaching
+- [ ] Decide license (avoid fully permissive if selling; consider source-available)
+- [ ] Docs, hardware compatibility list, GitHub issue templates
+- [ ] Cloud accounts + sync + remote alerts (hybrid model), Stripe subscription
+- [ ] Privacy policy, terms of service

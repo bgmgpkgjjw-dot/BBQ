@@ -1,0 +1,41 @@
+# Hermanos BBQ
+
+A grill-monitoring PWA with a Raspberry Pi backend (Bluetooth gateway, live relay, cook history storage, optional AI recipe help).
+
+## Quick start (Raspberry Pi)
+
+1. Clone this repo onto the Pi, e.g. `git clone <repo-url> ~/BBQ`.
+2. Run the installer:
+   ```
+   cd ~/BBQ
+   sudo ./install.sh
+   ```
+   It installs dependencies, creates a random API token in `/etc/bbq/bbq.env`, and enables the four services (`btgateway`, `grill-server`, `bbq-storage`, `bbq-web`).
+3. Open `http://<pi-hostname>.local:3000` on your phone, go to the network settings, and enter the server address and the API token printed by the installer.
+
+Optional installer env vars: `BBQ_USER`, `BBQ_DATA_DIR` (default `~/bbq-data`), `BBQ_TLS_CERT`, `BBQ_TLS_KEY`, `OPENROUTER_API_KEY`.
+
+## Try it without hardware
+
+On first launch the welcome screen offers a **demo** with a simulated cook. It can be toggled later in Settings > Demo mode, and the welcome screen can be reopened from there.
+
+## HTTPS
+
+iOS requires HTTPS for service workers and notifications. Add `BBQ_TLS_CERT` and `BBQ_TLS_KEY` (paths) to `/etc/bbq/bbq.env` and restart the services:
+
+```
+sudo systemctl restart bbq-web grill-server bbq-storage
+```
+
+## AI features
+
+Set your own `OPENROUTER_API_KEY` in `/etc/bbq/bbq.env` to enable AI recipe suggestions.
+
+## Ports
+
+| Service | Port |
+|---|---|
+| bbq-web (app) | 3000 |
+| grill-server (live data) | 8080 |
+| bbq-storage (history) | 8090 |
+| btgateway (localhost only) | 8765 |

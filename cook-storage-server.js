@@ -5,7 +5,7 @@ const path = require("path");
 const Database = require("better-sqlite3");
 
 const port = Number(process.env.BBQ_STORAGE_PORT || 8090);
-const dataDirectory = process.env.BBQ_DATA_DIR || "/home/william/bbq-data";
+const dataDirectory = process.env.BBQ_DATA_DIR || path.join(require("os").homedir(), "bbq-data");
 const dbFile = path.join(dataDirectory, "bbq.db");
 const photoDirectory = path.join(dataDirectory, "photos");
 const legacyJsonFile = path.join(dataDirectory, "cook-sessions.json");

@@ -5,9 +5,9 @@ After=bluetooth.service network-online.target
 
 [Service]
 Type=simple
-User=william
-WorkingDirectory=/home/william/btgateway
-ExecStart=/home/william/btgateway/venv/bin/python3 /home/william/btgateway/server.py
+User=@USER@
+WorkingDirectory=@INSTALL_DIR@/pi-services/btgateway
+ExecStart=@INSTALL_DIR@/pi-services/btgateway/venv/bin/python3 @INSTALL_DIR@/pi-services/btgateway/server.py
 Restart=always
 RestartSec=5
 Environment=PYTHONUNBUFFERED=1

@@ -339,7 +339,7 @@ function checkDomeDeviation(
 
 function checkBluetoothAlert() {
 
-    if (appState.network.enabled) {
+    if (appState.network.enabled || (typeof isSimulatorActive === "function" && isSimulatorActive())) {
         return;
     }
 

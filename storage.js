@@ -655,8 +655,11 @@ function loadAppState() {
         }
 
         if (saved.settings) {
-            appState.settings =
-                saved.settings;
+            appState.settings = {
+                ...appState.settings,
+                onboardingDone: true,
+                ...saved.settings
+            };
         }
 
         if (saved.theme) {

@@ -122,7 +122,7 @@ const appState = {
 
     network: {
         enabled: false,
-        serverAddress: "192.168.68.127",
+        serverAddress: "",
         apiToken: "",
         connected: false,
         status: "Disabled",
@@ -316,7 +316,9 @@ const appState = {
 
         temperatureUnit: "C",
 
-        firstRun: false,
+        onboardingDone: false,
+
+        simulator: false,
 
         keepScreenAwake: true
 

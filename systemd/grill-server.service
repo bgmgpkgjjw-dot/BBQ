@@ -6,11 +6,11 @@ Requires=btgateway.service
 
 [Service]
 Type=simple
-User=william
-WorkingDirectory=/home/william/grill-server/BBQ/pi-services/grill-server
-Environment=BBQ_DATA_DIR=/home/william/bbq-data
+User=@USER@
+WorkingDirectory=@INSTALL_DIR@/pi-services/grill-server
+Environment=BBQ_DATA_DIR=@DATA_DIR@
 EnvironmentFile=/etc/bbq/bbq.env
-ExecStart=/usr/bin/node /home/william/grill-server/BBQ/pi-services/grill-server/server.js
+ExecStart=/usr/bin/node @INSTALL_DIR@/pi-services/grill-server/server.js
 Restart=always
 RestartSec=5
 

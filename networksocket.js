@@ -22,6 +22,10 @@ function getReconnectDelay() {
 }
 
 function getNetworkHealth() {
+    if (typeof isSimulatorActive === "function" && isSimulatorActive()) {
+        return "Receiving data";
+    }
+
     if (!appState.network.enabled) {
         return "Disabled";
     }
@@ -63,7 +67,8 @@ function updateNetworkHealthUi() {
 
     const networkHealth = getNetworkHealth();
     const isLive = networkHealth === "Receiving data";
-    status.textContent = isLive ? "Live" : "Not connected";
+    const isDemo = typeof isSimulatorActive === "function" && isSimulatorActive();
+    status.textContent = isDemo ? "Demo mode" : isLive ? "Live" : "Not connected";
     status.className = `status ${isLive ? "live" : "stale"}`;
 }
 
@@ -285,6 +290,9 @@ function closeNetworkSocket() {
 
 function setNetworkSocketEnabled(enabled, serverAddress) {
     if (enabled && serverAddress) {
+        if (typeof stopSimulator === "function") {
+            stopSimulator();
+        }
         appState.network.enabled = true;
         appState.network.serverAddress = serverAddress;
         saveAppState();

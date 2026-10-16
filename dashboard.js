@@ -135,7 +135,10 @@ function updateLiveUi() {
     const status = document.querySelector("[data-live-status]");
 
     if (status) {
-        if (appState.network.enabled && typeof getNetworkHealth === "function") {
+        if (typeof isSimulatorActive === "function" && isSimulatorActive()) {
+            status.textContent = "Demo mode";
+            status.className = "status live";
+        } else if (appState.network.enabled && typeof getNetworkHealth === "function") {
             const networkHealth = getNetworkHealth();
             status.textContent = networkHealth === "Receiving data"
                 ? "Live"
@@ -481,7 +484,9 @@ function dashboardView() {
             data-live-status
         >
             ${
-                appState.network.enabled
+                typeof isSimulatorActive === "function" && isSimulatorActive()
+                    ? "Demo mode"
+                    : appState.network.enabled
                     ? "Not connected"
                     : appState.bluetooth.connected
                     ? "Connected"

@@ -517,6 +517,30 @@ function settingsView() {
         </p>
     `;
 
+    const demoBody = `
+        <p style="color:var(--muted); font-size:13px; margin-bottom:12px">
+            Feeds a simulated cook into the app so you can explore it without a thermometer or Raspberry Pi.
+            Turning it on disconnects the network socket.
+        </p>
+
+        <label class="toggle-label">
+            <input
+                type="checkbox"
+                class="toggle-checkbox"
+                ${appState.settings.simulator ? "checked" : ""}
+                onchange="setSimulatorEnabled(this.checked)"
+            >
+            <span class="toggle-slider"></span>
+            <span class="toggle-label-text">Demo mode</span>
+        </label>
+
+        <div class="button-row">
+            <button class="button secondary" onclick="showOnboarding()">
+                Show welcome screen
+            </button>
+        </div>
+    `;
+
     return [
         settingsGroup({
             key: "probes",
@@ -538,6 +562,13 @@ function settingsView() {
             title: "Network Socket",
             status: appState.network.enabled ? appState.network.status : "Disabled",
             body: networkBody
+        }),
+        settingsGroup({
+            key: "demo",
+            icon: Icons.flame,
+            title: "Demo mode",
+            status: appState.settings.simulator ? "On" : "Off",
+            body: demoBody
         }),
         settingsGroup({
             key: "alerts",

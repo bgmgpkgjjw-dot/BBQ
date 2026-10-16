@@ -141,6 +141,12 @@ function render() {
 
 
 
+    const nav = app.querySelector(".nav");
+
+    if (nav) {
+        nav.style.display = appState.screen === "welcome" ? "none" : "";
+    }
+
     app
         .querySelectorAll(".nav button")
         .forEach(button => {
@@ -254,6 +260,8 @@ function getTitle() {
 
         ai: "AI Assistant",
 
+        welcome: "Welcome",
+
     };
 
 
@@ -303,6 +311,10 @@ function renderScreen() {
         case "settings":
 
             return settingsView();
+
+        case "welcome":
+
+            return onboardingView();
 
         case "aiRecipe":
             return aiRecipeDetailView();
