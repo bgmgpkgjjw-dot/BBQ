@@ -10,7 +10,7 @@
   same root cause as the graph spikes, now down to ~510 for a 5.5h cook.
 
 # Wishlist
-- Swipe to delete cook
+- [DONE] Swipe to delete cook
 
 # To do
 - Evaluate the core ETA and stall detection after a real cook: compare the

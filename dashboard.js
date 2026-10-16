@@ -514,19 +514,21 @@ function dashboardView() {
 
                 ? `
 
-                    <button
-                        class="button"
-                        onclick="navigate('recipes')"
-                    >
-                        Choose recipe
-                    </button>
+                    <div class="action-row">
+                        <button
+                            class="btn btn-primary"
+                            onclick="startManualCook()"
+                        >
+                            Start cook
+                        </button>
 
-                    <button
-                        class="button"
-                        onclick="startManualCook()"
-                    >
-                        Start cook
-                    </button>
+                        <button
+                            class="btn btn-ghost"
+                            onclick="navigate('recipes')"
+                        >
+                            Choose recipe
+                        </button>
+                    </div>
 
                 `
 

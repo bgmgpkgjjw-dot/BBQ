@@ -310,28 +310,26 @@ function recipeListView() {
 
     return `
 
-        <button
-            class="button"
-            onclick="
-                appState.screen='ai';
-                render();
-            "
-        >
-            AI assistant
-        </button>
+        <div class="action-row">
+            <button
+                class="btn btn-primary"
+                onclick="startManualCook()"
+            >
+                Start cook
+            </button>
 
-        <br><br>
+            <button
+                class="btn btn-ghost"
+                onclick="
+                    appState.screen='ai';
+                    render();
+                "
+            >
+                AI assistant
+            </button>
+        </div>
 
-        <button
-            class="button"
-            onclick="startManualCook()"
-        >
-            Start cook
-        </button>
-
-        <br><br>
-
-        <h2>Saved AI recipes</h2>
+        <h2 class="section-title">Saved AI recipes</h2>
 
         ${appState.ai.savedRecipes.length
 
@@ -375,7 +373,7 @@ function recipeListView() {
 
         <br>
 
-    <h2>Recipe library</h2>
+    <h2 class="section-title">Recipe library</h2>
 
         <div class="recipe-list">
 

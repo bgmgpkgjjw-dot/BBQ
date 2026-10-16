@@ -9,144 +9,74 @@
 
 function historyView() {
 
-
-    if (
-        !appState.sessions ||
-        appState.sessions.length === 0
-    ) {
-
+    if (!appState.sessions || appState.sessions.length === 0) {
         return `
-
-        <div class="card">
-
-            <h2>
-            History
-            </h2>
-
-            <p style="color:var(--muted)">
-            No saved cooks yet.
-            </p>
-
-        </div>
-
-        `;
-
+        <div class="empty-state">
+            <p class="empty-title">No cooks yet</p>
+            <p class="empty-text">Finished cooks show up here with their graph, notes and photos.</p>
+        </div>`;
     }
 
-
-
     return `
-
-
-    <div class="card">
-
-        <h2>
-        Cook history
-        </h2>
-
-    </div>
-
-
-
-    ${appState.sessions
-            .map(renderHistoryCard)
-            .join("")
-        }
-
-
-    `;
-
-
+    <p class="list-hint">${appState.sessions.length} cook${appState.sessions.length === 1 ? "" : "s"} · swipe left to delete</p>
+    ${appState.sessions.map(renderHistoryCard).join("")}`;
 }
 
-
-
+function getSessionPeakCore(session) {
+    const values = (session.temperatureHistory || [])
+        .map(sample => sample.meat)
+        .filter(Number.isFinite);
+    return values.length ? Math.max(...values) : null;
+}
 
 function renderHistoryCard(session) {
 
+    const date = new Date(session.startedAt).toLocaleDateString(
+        "en-GB",
+        { day: "numeric", month: "short", year: "numeric" }
+    );
 
-    const date =
-        new Date(
-            session.startedAt
-        )
-            .toLocaleDateString(
-                "en-US"
-            );
-
-
-
-    const samples =
-        session.temperatureHistory
-            ?
-            session.temperatureHistory.length
-            :
-            0;
-
-
+    const peakCore = getSessionPeakCore(session);
+    const photoCount = (session.photos || []).length;
 
     return `
-
-
     <div class="history-swipe" data-session-id="${session.id}">
 
         <div class="history-swipe-delete">
-            <button
-            type="button"
-            aria-label="Delete cook"
-            onclick="deleteCook('${session.id}')">
+            <button type="button" aria-label="Delete cook"
+                onclick="deleteCook('${session.id}')">
                 Delete
             </button>
         </div>
 
-        <div class="card history-card">
+        <div class="history-card" role="button" tabindex="0"
+            onclick="openHistorySessionFromTap('${session.id}')">
 
+            <div class="history-card-main">
+                <h2 class="history-card-title">${escapeHtmlText(session.name || session.recipe || "Cook")}</h2>
+                <p class="history-card-date">${date}</p>
+                <div class="history-chips">
+                    <span class="chip">${escapeHtmlText(session.duration || "—")}</span>
+                    ${peakCore != null ? `<span class="chip">Core ${peakCore.toFixed(0)}°C</span>` : ""}
+                    ${photoCount ? `<span class="chip">${photoCount} photo${photoCount > 1 ? "s" : ""}</span>` : ""}
+                </div>
+            </div>
 
-            <h2>
-            ${session.name || session.recipe}
-            </h2>
-
-
-
-            <p>
-            ${date}
-            </p>
-
-
-
-            <p>
-            ${session.duration || "—"}
-            </p>
-
-
-
-            <p>
-            ${samples} temperature readings
-            </p>
-
-            ${session.rating ? `<p class="history-rating">${renderStars(session.rating)}</p>` : ""}
-
-
-
-            <button
-            class="button secondary"
-            onclick="openHistorySession('${session.id}')">
-
-            View details
-
-            </button>
-
-
-
+            <div class="history-card-side">
+                ${session.rating ? `<span class="history-rating">${renderStars(session.rating)}</span>` : ""}
+                <span class="history-chevron" aria-hidden="true">›</span>
+            </div>
         </div>
-
-    </div>
-
-
-    `;
-
-
+    </div>`;
 }
 
+// A swipe must not count as a tap on the card underneath.
+let historyLastSwipeAt = 0;
+
+function openHistorySessionFromTap(id) {
+    if (Date.now() - historyLastSwipeAt < 350) return;
+    openHistorySession(id);
+}
 
 const HISTORY_SWIPE_OPEN_DISTANCE = 84;
 let historySwipeState = null;
@@ -240,6 +170,10 @@ function initHistorySwipeGestures() {
         const finalTranslate = startTranslate + deltaX;
 
         historySwipeState = null;
+
+        if (axis === "x" && Math.abs(deltaX) > 8) {
+            historyLastSwipeAt = Date.now();
+        }
 
         if (axis !== "x") {
             card.style.transition = "transform .2s ease";
@@ -363,53 +297,24 @@ function historyDetailView() {
     return `
 
 
-    <div class="section-actions">
-        <button
-            class="button secondary"
-            onclick="closeHistoryDetail()">
-            ← Back
-        </button>
-    </div>
-
-
-
-    <div class="card">
-
-
-        <h2>
-        ${session.name || session.recipe}
-        </h2>
-
-        <div class="stacked-actions">
-            <button
-                class="button secondary"
-                onclick="renameCook('${session.id}')">
-                Rename cook
-            </button>
-
-            <button
-                class="button danger"
-                onclick="deleteCook('${session.id}')">
-                Delete cook
-            </button>
+    <div class="detail-nav">
+        <button type="button" class="btn btn-ghost btn-sm" onclick="closeHistoryDetail()">‹ Back</button>
+        <div class="detail-nav-actions">
+            <button type="button" class="icon-btn" aria-label="Rename cook"
+                onclick="renameCook('${session.id}')">${Icons.edit}</button>
+            <button type="button" class="icon-btn icon-btn-danger" aria-label="Delete cook"
+                onclick="deleteCook('${session.id}')">${Icons.trash}</button>
         </div>
-
-        <p>
-        Started:
-        ${new Date(session.startedAt).toLocaleString("en-US")}
-        </p>
-
-
-        <p>
-        Duration:
-        ${session.duration || "—"}
-        </p>
-
-
     </div>
 
-
-
+    <div class="detail-hero">
+        <h2 class="detail-title">${escapeHtmlText(session.name || session.recipe)}</h2>
+        <p class="detail-sub">
+            ${new Date(session.startedAt).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+            · ${escapeHtmlText(session.duration || "—")}
+        </p>
+        ${session.rating ? `<p class="history-rating">${renderStars(session.rating)}</p>` : ""}
+    </div>
 
     <div class="card">
 
@@ -418,10 +323,6 @@ function historyDetailView() {
         </h3>
 
 
-        <p>
-        Measurements:
-        ${samples.length}
-        </p>
 
         <div class="history-metrics">
             <div class="history-metric dome-metric">
@@ -490,55 +391,35 @@ function closeHistoryDetail() {
 
 }
 
-function renameCook(sessionId) {
+async function renameCook(sessionId) {
 
-    const session =
-        appState.sessions.find(
-            s => s.id === sessionId
-        );
-
+    const session = appState.sessions.find(s => s.id === sessionId);
 
     if (!session) {
         console.error("Session not found", sessionId);
         return;
     }
 
+    const newName = await uiPrompt(
+        "Rename cook",
+        session.name || session.recipe || "New cook",
+        { placeholder: "Cook name" }
+    );
 
-    const currentName =
-        session.name ||
-        session.recipe ||
-        "New cook";
-
-
-    const newName =
-        prompt(
-            "New name for this cook:",
-            currentName
-        );
-
-
-    if (!newName || !newName.trim()) {
+    if (!newName) {
         return;
     }
 
-
-    session.name =
-        newName.trim();
-
+    session.name = newName;
 
     // keep backwards compatibility
-    session.recipe =
-        session.recipe || session.name;
+    session.recipe = session.recipe || session.name;
 
-
-    saveSessions();
-
-
+    touchSession(session);
     render();
-
 }
 
-function deleteCook(sessionId) {
+async function deleteCook(sessionId) {
 
     const session =
         appState.sessions.find(
@@ -549,10 +430,11 @@ function deleteCook(sessionId) {
         return;
     }
 
-    const confirmed =
-        confirm(
-            `Delete cook "${session.name || session.recipe}"?\n\nThis action cannot be undone.`
-        );
+    const confirmed = await uiConfirm(
+        "Delete this cook?",
+        `"${session.name || session.recipe}" and its photos will be removed. This cannot be undone.`,
+        { confirmText: "Delete", danger: true }
+    );
 
     if (!confirmed) {
         return;
@@ -768,10 +650,7 @@ function renderHistoryDetailChart() {
                 plugins: {
 
                     legend: {
-                        labels: {
-                            color: "#F2EBDD",
-                            filter: item => !item.text.endsWith("target")
-                        }
+                        display: false
                     },
 
                     tooltip: {
@@ -1046,7 +925,7 @@ async function addCookPhoto(id, input) {
     const endpoint = getPhotoEndpoint(photoId);
 
     if (!endpoint) {
-        alert("Set the Pi's server address in Settings to save photos.");
+        uiAlert("Photo not saved", "Set the Pi's server address in Settings to save photos.");
         return;
     }
 
@@ -1067,7 +946,7 @@ async function addCookPhoto(id, input) {
         render();
     } catch (error) {
         console.warn("Photo could not be added", error);
-        alert("The photo could not be saved on the Pi. Check the connection and try again.");
+        uiAlert("Photo not saved", "The Pi could not be reached. Check the connection and try again.");
     }
 }
 
