@@ -563,6 +563,8 @@ function deleteCook(sessionId) {
             s => s.id !== sessionId
         );
 
+    (session.photos || []).forEach(deletePhotoFromPi);
+
     if (typeof addDeletedSessionId === "function") {
         addDeletedSessionId(sessionId);
     }
@@ -851,9 +853,9 @@ function setupHistoryChartTooltipDismiss(canvas) {
    DOME SUMMARY + COOK JOURNAL (rating, notes, photos)
 ========================================================== */
 
-const MAX_COOK_PHOTOS = 3;
-const COOK_PHOTO_MAX_EDGE = 800;
-const COOK_PHOTO_QUALITY = 0.65;
+const MAX_COOK_PHOTOS = 6;
+const COOK_PHOTO_MAX_EDGE = 1280;
+const COOK_PHOTO_QUALITY = 0.8;
 let journalSaveTimer = null;
 
 function escapeHtmlText(value) {
@@ -931,7 +933,7 @@ function renderJournalCard(session) {
         <div class="journal-photos">
             ${photos.map((src, index) => `
                 <div class="journal-photo">
-                    <img src="${src}" alt="Cook photo ${index + 1}">
+                    <img src="${getPhotoSrc(src)}" alt="Cook photo ${index + 1}">
                     <button type="button" aria-label="Remove photo"
                         onclick="removeCookPhoto('${id}', ${index})">×</button>
                 </div>
@@ -977,7 +979,7 @@ function updateCookJournal(id, field, value) {
     journalSaveTimer = setTimeout(saveSessions, 800);
 }
 
-function resizePhotoToDataUrl(file) {
+function resizePhotoToBlob(file) {
     return new Promise((resolve, reject) => {
         const url = URL.createObjectURL(file);
         const image = new Image();
@@ -989,7 +991,11 @@ function resizePhotoToDataUrl(file) {
             canvas.height = Math.round(image.height * scale);
             canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
             URL.revokeObjectURL(url);
-            resolve(canvas.toDataURL("image/jpeg", COOK_PHOTO_QUALITY));
+            canvas.toBlob(
+                blob => blob ? resolve(blob) : reject(new Error("Unable to encode image")),
+                "image/jpeg",
+                COOK_PHOTO_QUALITY
+            );
         };
 
         image.onerror = () => {
@@ -1001,31 +1007,67 @@ function resizePhotoToDataUrl(file) {
     });
 }
 
+function getPhotoEndpoint(photoId) {
+    const base = typeof getCookStorageUrl === "function" ? getCookStorageUrl() : null;
+    return base ? base.replace("/api/cook-sessions", `/api/photos/${photoId}`) : null;
+}
+
+// Photos saved by the first journal version are inline data URLs; newer ones are Pi file ids.
+function getPhotoSrc(photo) {
+    if (String(photo).startsWith("data:")) return photo;
+
+    const endpoint = getPhotoEndpoint(photo);
+    if (!endpoint) return "";
+
+    const token = appState.network?.apiToken;
+    return token ? `${endpoint}?token=${encodeURIComponent(token)}` : endpoint;
+}
+
+function deletePhotoFromPi(photo) {
+    if (String(photo).startsWith("data:")) return;
+
+    const endpoint = getPhotoEndpoint(photo);
+    if (!endpoint) return;
+
+    fetch(endpoint, { method: "DELETE", headers: getCookStorageHeaders() })
+        .catch(error => console.warn("Photo could not be removed from the Pi", error));
+}
+
 async function addCookPhoto(id, input) {
     const session = findSession(id);
     const file = input.files && input.files[0];
+    input.value = "";
     if (!session || !file) return;
 
     session.photos = session.photos || [];
     if (session.photos.length >= MAX_COOK_PHOTOS) return;
 
-    try {
-        session.photos.push(await resizePhotoToDataUrl(file));
+    const photoId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+    const endpoint = getPhotoEndpoint(photoId);
 
-        // saveSessions() swallows quota errors, so check explicitly to avoid silently losing a photo.
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(appState.sessions));
-        } catch (quotaError) {
-            session.photos.pop();
-            alert("Not enough storage left on this device for another photo.");
-            return;
+    if (!endpoint) {
+        alert("Set the Pi's server address in Settings to save photos.");
+        return;
+    }
+
+    try {
+        const blob = await resizePhotoToBlob(file);
+        const response = await fetch(endpoint, {
+            method: "PUT",
+            headers: getCookStorageHeaders({ "Content-Type": "image/jpeg" }),
+            body: blob
+        });
+
+        if (!response.ok) {
+            throw new Error(`Pi returned ${response.status}`);
         }
 
+        session.photos.push(photoId);
         touchSession(session);
         render();
     } catch (error) {
         console.warn("Photo could not be added", error);
-        alert("That photo could not be added.");
+        alert("The photo could not be saved on the Pi. Check the connection and try again.");
     }
 }
 
@@ -1033,7 +1075,8 @@ function removeCookPhoto(id, index) {
     const session = findSession(id);
     if (!session || !session.photos) return;
 
-    session.photos.splice(index, 1);
+    const [removed] = session.photos.splice(index, 1);
+    deletePhotoFromPi(removed);
     touchSession(session);
     render();
 }

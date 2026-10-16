@@ -7,6 +7,7 @@ const Database = require("better-sqlite3");
 const port = Number(process.env.BBQ_STORAGE_PORT || 8090);
 const dataDirectory = process.env.BBQ_DATA_DIR || "/home/william/bbq-data";
 const dbFile = path.join(dataDirectory, "bbq.db");
+const photoDirectory = path.join(dataDirectory, "photos");
 const legacyJsonFile = path.join(dataDirectory, "cook-sessions.json");
 const apiToken = process.env.BBQ_API_TOKEN || null;
 const openRouterApiKey = process.env.OPENROUTER_API_KEY || null;
@@ -109,11 +110,94 @@ function readTemperatureLog(sinceMs, untilMs) {
     return selectReadingsStatement.all(sinceMs, untilMs);
 }
 
-function isAuthorized(request) {
+fs.mkdirSync(photoDirectory, { recursive: true });
+
+const MAX_PHOTO_BYTES = 6 * 1024 * 1024;
+const PHOTO_ID_PATTERN = /^[a-z0-9-]{8,64}$/i;
+
+function isJpeg(buffer) {
+    return buffer.length > 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+}
+
+function isAuthorized(request, requestUrl) {
     if (!apiToken) {
         return true;
     }
-    return request.headers["x-bbq-token"] === apiToken;
+    // <img> tags cannot send headers, so photo GETs may pass the token in the URL.
+    const urlToken = request.method === "GET" && requestUrl.pathname.startsWith("/api/photos/")
+        ? requestUrl.searchParams.get("token")
+        : null;
+    return request.headers["x-bbq-token"] === apiToken || urlToken === apiToken;
+}
+
+function handlePhotoRequest(request, response, requestUrl) {
+    const id = requestUrl.pathname.slice("/api/photos/".length);
+    if (!PHOTO_ID_PATTERN.test(id)) {
+        sendJson(response, 400, { error: "Invalid photo id" });
+        return;
+    }
+
+    const file = path.join(photoDirectory, `${id}.jpg`);
+
+    if (request.method === "GET") {
+        fs.readFile(file, (error, data) => {
+            if (error) {
+                sendJson(response, 404, { error: "Photo not found" });
+                return;
+            }
+            response.writeHead(200, {
+                "Content-Type": "image/jpeg",
+                "Cache-Control": "private, max-age=31536000, immutable",
+                "Access-Control-Allow-Origin": "*"
+            });
+            response.end(data);
+        });
+        return;
+    }
+
+    if (request.method === "DELETE") {
+        fs.rm(file, { force: true }, () => sendJson(response, 200, { ok: true }));
+        return;
+    }
+
+    if (request.method !== "PUT") {
+        sendJson(response, 405, { error: "Method not allowed" });
+        return;
+    }
+
+    const chunks = [];
+    let size = 0;
+    let tooLarge = false;
+
+    request.on("data", chunk => {
+        size += chunk.length;
+        if (size > MAX_PHOTO_BYTES) {
+            tooLarge = true;
+            return;
+        }
+        chunks.push(chunk);
+    });
+    request.on("end", () => {
+        if (tooLarge) {
+            sendJson(response, 413, { error: "Photo too large" });
+            return;
+        }
+
+        const data = Buffer.concat(chunks);
+        if (!isJpeg(data)) {
+            sendJson(response, 400, { error: "Photo must be a JPEG" });
+            return;
+        }
+
+        fs.writeFile(file, data, error => {
+            if (error) {
+                console.error("Unable to save photo", error);
+                sendJson(response, 500, { error: "Unable to save photo" });
+                return;
+            }
+            sendJson(response, 200, { id });
+        });
+    });
 }
 
 function buildRecipePrompt(ingredients, category) {
@@ -195,7 +279,7 @@ function sendJson(response, status, body) {
     response.writeHead(status, {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, PUT, OPTIONS",
+        "Access-Control-Allow-Methods": "GET, PUT, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, X-BBQ-Token, X-BBQ-Device-Id"
     });
     response.end(JSON.stringify(body));
@@ -209,8 +293,13 @@ const server = (tlsOptions ? https : http).createServer(tlsOptions || {}, (reque
 
     const requestUrl = new URL(request.url, "http://localhost");
 
-    if (!isAuthorized(request)) {
+    if (!isAuthorized(request, requestUrl)) {
         sendJson(response, 401, { error: "Unauthorized" });
+        return;
+    }
+
+    if (requestUrl.pathname.startsWith("/api/photos/")) {
+        handlePhotoRequest(request, response, requestUrl);
         return;
     }
 
