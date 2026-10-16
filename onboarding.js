@@ -105,6 +105,68 @@ function finishOnboarding(choice) {
     render();
 }
 
+/* ----------------------------------------------------------
+   Pairing link: https://<pi>:3000/#pair=<address>|<token>
+   The fragment is never sent to a server, and is removed from the
+   address bar once read.
+---------------------------------------------------------- */
+
+function readPairingFromHash() {
+    const match = window.location.hash.match(/^#pair=(.+)$/);
+    if (!match) {
+        return null;
+    }
+
+    let decoded;
+    try {
+        decoded = decodeURIComponent(match[1]);
+    } catch (error) {
+        return null;
+    }
+
+    const separator = decoded.indexOf("|");
+    const address = (separator === -1 ? decoded : decoded.slice(0, separator)).trim();
+    const token = separator === -1 ? "" : decoded.slice(separator + 1).trim();
+
+    // Hostname or IPv4 only, so a crafted link cannot smuggle in a path or port.
+    if (!/^[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?$/.test(address)) {
+        return null;
+    }
+
+    return { address, token };
+}
+
+async function applyPairingFromHash() {
+    const pairing = readPairingFromHash();
+
+    if (window.location.hash.startsWith("#pair=")) {
+        history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+
+    if (!pairing) {
+        return;
+    }
+
+    const confirmed = await uiConfirm(
+        "Pair with grill server?",
+        `Connect this app to ${pairing.address} and save its access token? Only continue if you scanned this from your own Raspberry Pi.`,
+        { confirmText: "Pair" }
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    appState.network.apiToken = pairing.token;
+    appState.settings.onboardingDone = true;
+    setNetworkSocketEnabled(true, pairing.address);
+    appState.screen = "dashboard";
+    saveAppState();
+    render();
+}
+
+window.addEventListener("load", applyPairingFromHash);
+
 window.showOnboarding = showOnboarding;
 window.finishOnboarding = finishOnboarding;
 

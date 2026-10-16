@@ -23,7 +23,7 @@ ENV_FILE="$ENV_DIR/bbq.env"
 
 echo "==> Installing system packages"
 apt-get update
-apt-get install -y nodejs npm python3 python3-venv bluez build-essential python3-dev
+apt-get install -y nodejs npm python3 python3-venv bluez build-essential python3-dev qrencode
 
 echo "==> Installing Node dependencies"
 sudo -u "$SERVICE_USER" bash -c "cd '$INSTALL_DIR' && npm install --omit=dev"
@@ -63,9 +63,19 @@ TOKEN="$(grep '^BBQ_API_TOKEN=' "$ENV_FILE" | cut -d= -f2-)"
 SCHEME=http
 grep -q '^BBQ_TLS_CERT=' "$ENV_FILE" && SCHEME=https
 echo
-echo "Done. Open the app at: $SCHEME://$(hostname).local:3000"
-echo "In Settings > Network enter server address '$(hostname).local' and API token:"
+PAIR_HOST="$(hostname).local"
+PAIR_URL="$SCHEME://$PAIR_HOST:3000/#pair=$PAIR_HOST%7C$TOKEN"
+echo "Done. Open the app at: $SCHEME://$PAIR_HOST:3000"
+echo
+echo "To pair a phone, open this link (or scan the QR code below) on it:"
+echo "    $PAIR_URL"
+if command -v qrencode >/dev/null 2>&1; then
+    qrencode -t ANSIUTF8 "$PAIR_URL"
+fi
+echo
+echo "Or enter manually in Settings > Network: address '$PAIR_HOST', token:"
 echo "    $TOKEN"
+echo "Anyone with this link or token can read your grill data; don't share it."
 if [[ "$SCHEME" == http ]]; then
     echo "Note: iOS needs HTTPS for notifications; add BBQ_TLS_CERT and BBQ_TLS_KEY to $ENV_FILE, then: sudo systemctl restart bbq-web grill-server bbq-storage"
 fi

@@ -29,7 +29,7 @@ remote alerts, backup) and paid AI coaching; core app stays free.
 - [x] Remove hardcoded paths/IPs (/home/william, 192.168.68.127); config via env
 - [x] One-command Pi installer (services, TLS, generated API token)
 - [x] Quick-start doc
-- [ ] Per-install token + pairing (QR code or setup screen)
+- [x] Per-install token + pairing (QR code or setup screen)
 - [ ] AI: user supplies own OpenRouter key (or rate-limited proxy)
 - [x] First-run setup screen + Simulator mode for trying without hardware
 
