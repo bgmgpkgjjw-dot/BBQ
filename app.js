@@ -401,14 +401,14 @@ if (typeof applyColorScheme === "function") {
     applyColorScheme(appState.theme?.mode || "dark");
 }
 
+let wakeLock = null;
+let safariAudioWakeLock = null;
+
 render();
 
 // ====================================================================
 // WAKE LOCK
 // ====================================================================
-
-let wakeLock = null;
-let safariAudioWakeLock = null;
 
 function supportsWakeLock() {
     return typeof navigator !== "undefined" && "wakeLock" in navigator;

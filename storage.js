@@ -351,6 +351,10 @@ async function syncSessionsFromPi() {
 
 function startCookSession() {
 
+    if (typeof alertState !== "undefined") {
+        alertState.fired.clear();
+    }
+
     const session = {
 
         id:

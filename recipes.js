@@ -694,5 +694,3 @@ window.setServings = setServings;
 window.setPrimaryAmount = setPrimaryAmount;
 
 window.loadRecipeIntoCook = loadRecipeIntoCook;
-
-window.startManualCook = startManualCook;

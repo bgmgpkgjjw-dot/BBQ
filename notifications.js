@@ -155,6 +155,7 @@ function checkAlerts() {
 
     checkMeatTarget(meat);
     checkApproachingMeatTarget(meat);
+    checkMeatForecast(meat);
     checkDomeDeviation(dome);
     checkApproachingDomeTarget(dome);
     checkBluetoothAlert();
@@ -345,6 +346,39 @@ function playAlertSound() {
 function triggerVibration() {
     if (navigator.vibrate) {
         navigator.vibrate([100, 50, 100]);
+    }
+}
+
+function checkMeatForecast(meat) {
+    if (!meat || meat.temperature == null || typeof getMeatForecast !== "function") {
+        return;
+    }
+
+    const forecast = getMeatForecast();
+    if (!forecast) return;
+
+    if (forecast.state === "stalled" && !alertState.fired.has("meat-stall")) {
+        alertState.fired.add("meat-stall");
+        sendNotification(
+            "Stall detected",
+            `${meat.name} is plateauing at ${meat.temperature.toFixed(1)}°C. This is normal, so be patient.`,
+            "meat-stall"
+        );
+    }
+
+    // Fires once when about 30 minutes remain.
+    if (
+        forecast.state === "estimate" &&
+        forecast.confidence !== "rough" &&
+        forecast.etaMs <= 30 * 60 * 1000 &&
+        !alertState.fired.has("meat-eta-30")
+    ) {
+        alertState.fired.add("meat-eta-30");
+        sendNotification(
+            "About 30 minutes to go",
+            `${meat.name} should reach ${appState.cook.meatTarget}°C in about ${formatForecastDuration(forecast.etaMs)}`,
+            "meat-eta-30"
+        );
     }
 }
 

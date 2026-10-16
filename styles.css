@@ -1380,3 +1380,25 @@ PREMIUM PROBE CARDS
    }
 
 }
+
+.probe-eta {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: baseline;
+   gap: 4px 10px;
+   margin-top: 10px;
+}
+
+.eta-main {
+   font-size: 16px;
+   font-weight: 700;
+}
+
+.eta-main.eta-stall {
+   color: var(--yellow);
+}
+
+.eta-sub {
+   font-size: 12px;
+   opacity: .7;
+}

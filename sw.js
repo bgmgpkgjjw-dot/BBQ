@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bbq-pwa-v15';
+const CACHE_NAME = 'bbq-pwa-v16';
 const ASSETS = [
   './',
   './index.html',
@@ -10,6 +10,7 @@ const ASSETS = [
   './settings.js',
   './simulator.js',
   './state.js',
+  './forecast.js',
   './networksocket.js'
 ];
 

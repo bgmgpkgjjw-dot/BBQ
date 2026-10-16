@@ -52,6 +52,45 @@ function getApproachingStatus(probe) {
     return null;
 }
 
+function getMeatForecast() {
+    const meat = appState.probes.find(p => p.type === "meat");
+    const session = typeof getCurrentSession === "function" ? getCurrentSession() : null;
+
+    if (!appState.cook.active || !meat || typeof estimateCoreForecast !== "function") {
+        return null;
+    }
+
+    return estimateCoreForecast({
+        history: session?.temperatureHistory,
+        meatTemp: Number(meat.temperature),
+        target: Number(appState.cook.meatTarget),
+        cookStartedAt: appState.cook.startedAt ? Date.parse(appState.cook.startedAt) : null
+    });
+}
+
+function renderForecastHtml(forecast) {
+    if (!forecast) return "";
+
+    if (forecast.state === "estimate") {
+        const finish = new Date(forecast.finishAt)
+            .toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        const rough = forecast.confidence === "rough" ? " (rough)" : "";
+        return `<span class="eta-main">≈ ${formatForecastDuration(forecast.etaMs)}</span>
+            <span class="eta-sub">ready around ${finish}${rough}</span>`;
+    }
+    if (forecast.state === "stalled") {
+        return `<span class="eta-main eta-stall">Stall</span>
+            <span class="eta-sub">Core is plateauing, time estimate unreliable</span>`;
+    }
+    if (forecast.state === "flat") {
+        return `<span class="eta-sub">Core not rising, no estimate</span>`;
+    }
+    if (forecast.state === "reached") {
+        return `<span class="eta-main">Target reached</span>`;
+    }
+    return `<span class="eta-sub">Collecting data for a time estimate…</span>`;
+}
+
 function updateLiveUi() {
     const status = document.querySelector("[data-live-status]");
 
@@ -84,6 +123,11 @@ function updateLiveUi() {
     });
 
 
+
+    const etaEl = document.querySelector("[data-meat-eta]");
+    if (etaEl) {
+        etaEl.innerHTML = renderForecastHtml(getMeatForecast());
+    }
 
     const timer =
         document.querySelector("[data-cook-time]");
@@ -169,6 +213,11 @@ function renderProbeCard(probe) {
             </div>
 
         </div>
+
+        ${!isDome && target && appState.cook.active ? `
+        <div class="probe-eta" data-meat-eta>
+            ${renderForecastHtml(getMeatForecast())}
+        </div>` : ""}
 
 
     </div>
