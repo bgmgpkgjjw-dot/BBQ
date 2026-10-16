@@ -11,3 +11,10 @@
 
 # Wishlist
 - Swipe to delete cook
+
+# To do
+- Evaluate the core ETA and stall detection after a real cook: compare the
+  estimate with the actual finish time, check the stall flag and the
+  "30 minutes to go" notification, then tune thresholds in forecast.js.
+- Step 2: dome stability, drift/overshoot alerts, lid-open detection.
+- Step 3: rest timer, cook notes.

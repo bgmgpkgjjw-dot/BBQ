@@ -1402,3 +1402,98 @@ PREMIUM PROBE CARDS
    font-size: 12px;
    opacity: .7;
 }
+
+.dome-pill {
+   font-size: 12px;
+   font-weight: 700;
+   padding: 3px 10px;
+   border-radius: 999px;
+   white-space: nowrap;
+}
+
+.dome-ok {
+   color: var(--green);
+   background: color-mix(in srgb, var(--green) 18%, transparent);
+}
+
+.dome-warn,
+.dome-lid {
+   color: var(--yellow);
+   background: color-mix(in srgb, var(--yellow) 18%, transparent);
+}
+
+.journal-label {
+   font-size: 12px;
+   color: var(--muted);
+   margin: 14px 0 6px;
+}
+
+.journal-stars {
+   display: flex;
+   gap: 4px;
+}
+
+.journal-star {
+   background: none;
+   border: 0;
+   font-size: 28px;
+   line-height: 1;
+   padding: 2px;
+   color: var(--muted);
+   cursor: pointer;
+}
+
+.journal-star.on,
+.history-rating {
+   color: var(--yellow);
+}
+
+.journal-input {
+   width: 100%;
+   box-sizing: border-box;
+   font: inherit;
+   color: inherit;
+   background: var(--overlay-soft);
+   border: 1px solid var(--border);
+   border-radius: 8px;
+   padding: 10px;
+   resize: vertical;
+}
+
+.journal-photos {
+   display: grid;
+   grid-template-columns: repeat(2, 1fr);
+   gap: 8px;
+   margin-bottom: 8px;
+}
+
+.journal-photo {
+   position: relative;
+}
+
+.journal-photo img {
+   width: 100%;
+   aspect-ratio: 1;
+   object-fit: cover;
+   border-radius: 8px;
+   display: block;
+}
+
+.journal-photo button {
+   position: absolute;
+   top: 6px;
+   right: 6px;
+   width: 28px;
+   height: 28px;
+   border: 0;
+   border-radius: 50%;
+   background: rgba(0, 0, 0, .65);
+   color: #fff;
+   font-size: 18px;
+   line-height: 1;
+}
+
+.journal-add-photo {
+   display: inline-block;
+   text-align: center;
+}

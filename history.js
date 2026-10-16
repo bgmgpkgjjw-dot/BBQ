@@ -123,6 +123,8 @@ function renderHistoryCard(session) {
             ${samples} temperature readings
             </p>
 
+            ${session.rating ? `<p class="history-rating">${renderStars(session.rating)}</p>` : ""}
+
 
 
             <button
@@ -303,15 +305,19 @@ function openHistorySession(id) {
 function historyDetailView() {
 
 
-    const session =
+    const selected =
         appState.selectedHistory;
 
 
-    if (!session) {
+    if (!selected) {
 
         return historyView();
 
     }
+
+    // Prefer the live object so journal edits show after a Pi sync replaced the reference.
+    const session =
+        appState.sessions.find(s => s.id === selected.id) || selected;
 
 
 
@@ -457,8 +463,10 @@ function historyDetailView() {
         </div>
 
     </div>
-    
-    
+
+    ${renderDomeSummaryCard(session)}
+
+    ${renderJournalCard(session)}
 
     `;
 
@@ -837,4 +845,195 @@ function setupHistoryChartTooltipDismiss(canvas) {
             historyDetailChart.update();
         }
     });
+}
+
+/* ==========================================================
+   DOME SUMMARY + COOK JOURNAL (rating, notes, photos)
+========================================================== */
+
+const MAX_COOK_PHOTOS = 3;
+const COOK_PHOTO_MAX_EDGE = 800;
+const COOK_PHOTO_QUALITY = 0.65;
+let journalSaveTimer = null;
+
+function escapeHtmlText(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+}
+
+function renderStars(rating) {
+    return [1, 2, 3, 4, 5]
+        .map(n => n <= rating ? "★" : "☆")
+        .join("");
+}
+
+function renderDomeSummaryCard(session) {
+    if (typeof summarizeDomeSession !== "function") return "";
+
+    const summary = summarizeDomeSession(
+        session.temperatureHistory,
+        Number(session.domeTarget) || null
+    );
+    if (!summary) return "";
+
+    const lidMinutes = Math.round(summary.lidOpenMs / 60000);
+
+    return `
+    <div class="card">
+        <h3>Dome control</h3>
+        <div class="history-metrics">
+            <div class="history-metric dome-metric">
+                <span class="history-metric-label">Average dome</span>
+                <strong>${summary.meanDome.toFixed(0)}°C</strong>
+                <small>${summary.timeInRangePct != null ? `${summary.timeInRangePct}% within ±5° of ${session.domeTarget}°C` : "No dome target"}</small>
+            </div>
+            <div class="history-metric">
+                <span class="history-metric-label">Lid opened</span>
+                <strong>${summary.lidOpens}×</strong>
+                <small>${summary.lidOpens ? `about ${lidMinutes} min in total` : "Not detected"}</small>
+            </div>
+        </div>
+    </div>`;
+}
+
+function renderJournalCard(session) {
+    const photos = session.photos || [];
+    const id = session.id;
+
+    return `
+    <div class="card journal-card">
+        <h3>Cook journal</h3>
+
+        <p class="journal-label">Rating</p>
+        <div class="journal-stars" role="group" aria-label="Rating">
+            ${[1, 2, 3, 4, 5].map(n => `
+                <button type="button"
+                    class="journal-star ${n <= (session.rating || 0) ? "on" : ""}"
+                    aria-label="${n} star${n > 1 ? "s" : ""}"
+                    onclick="setCookRating('${id}', ${n})">${n <= (session.rating || 0) ? "★" : "☆"}</button>
+            `).join("")}
+        </div>
+
+        <p class="journal-label">Notes</p>
+        <textarea class="journal-input" rows="4"
+            placeholder="Rub, wood, vent settings, wrap time, how it turned out…"
+            oninput="updateCookJournal('${id}', 'notes', this.value)">${escapeHtmlText(session.notes)}</textarea>
+
+        <p class="journal-label">Next time</p>
+        <textarea class="journal-input" rows="2"
+            placeholder="What would you change?"
+            oninput="updateCookJournal('${id}', 'improve', this.value)">${escapeHtmlText(session.improve)}</textarea>
+
+        <p class="journal-label">Photos (${photos.length}/${MAX_COOK_PHOTOS})</p>
+        <div class="journal-photos">
+            ${photos.map((src, index) => `
+                <div class="journal-photo">
+                    <img src="${src}" alt="Cook photo ${index + 1}">
+                    <button type="button" aria-label="Remove photo"
+                        onclick="removeCookPhoto('${id}', ${index})">×</button>
+                </div>
+            `).join("")}
+        </div>
+
+        ${photos.length < MAX_COOK_PHOTOS ? `
+        <label class="button secondary journal-add-photo">
+            Add photo
+            <input type="file" accept="image/*" hidden
+                onchange="addCookPhoto('${id}', this)">
+        </label>` : ""}
+    </div>`;
+}
+
+function touchSession(session) {
+    session.updatedAt = new Date().toISOString();
+    saveSessions();
+}
+
+function findSession(id) {
+    return appState.sessions.find(s => s.id === id);
+}
+
+function setCookRating(id, rating) {
+    const session = findSession(id);
+    if (!session) return;
+
+    session.rating = session.rating === rating ? null : rating;
+    touchSession(session);
+    render();
+}
+
+// Debounced so typing doesn't re-upload the whole session on every keystroke.
+function updateCookJournal(id, field, value) {
+    const session = findSession(id);
+    if (!session) return;
+
+    session[field] = value;
+    session.updatedAt = new Date().toISOString();
+
+    clearTimeout(journalSaveTimer);
+    journalSaveTimer = setTimeout(saveSessions, 800);
+}
+
+function resizePhotoToDataUrl(file) {
+    return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const image = new Image();
+
+        image.onload = () => {
+            const scale = Math.min(1, COOK_PHOTO_MAX_EDGE / Math.max(image.width, image.height));
+            const canvas = document.createElement("canvas");
+            canvas.width = Math.round(image.width * scale);
+            canvas.height = Math.round(image.height * scale);
+            canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+            URL.revokeObjectURL(url);
+            resolve(canvas.toDataURL("image/jpeg", COOK_PHOTO_QUALITY));
+        };
+
+        image.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error("Unable to read image"));
+        };
+
+        image.src = url;
+    });
+}
+
+async function addCookPhoto(id, input) {
+    const session = findSession(id);
+    const file = input.files && input.files[0];
+    if (!session || !file) return;
+
+    session.photos = session.photos || [];
+    if (session.photos.length >= MAX_COOK_PHOTOS) return;
+
+    try {
+        session.photos.push(await resizePhotoToDataUrl(file));
+
+        // saveSessions() swallows quota errors, so check explicitly to avoid silently losing a photo.
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appState.sessions));
+        } catch (quotaError) {
+            session.photos.pop();
+            alert("Not enough storage left on this device for another photo.");
+            return;
+        }
+
+        touchSession(session);
+        render();
+    } catch (error) {
+        console.warn("Photo could not be added", error);
+        alert("That photo could not be added.");
+    }
+}
+
+function removeCookPhoto(id, index) {
+    const session = findSession(id);
+    if (!session || !session.photos) return;
+
+    session.photos.splice(index, 1);
+    touchSession(session);
+    render();
 }

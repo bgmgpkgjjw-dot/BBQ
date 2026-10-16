@@ -156,6 +156,7 @@ function checkAlerts() {
     checkMeatTarget(meat);
     checkApproachingMeatTarget(meat);
     checkMeatForecast(meat);
+    checkDomeStability(dome);
     checkDomeDeviation(dome);
     checkApproachingDomeTarget(dome);
     checkBluetoothAlert();
@@ -229,6 +230,44 @@ function checkMeatTarget(meat) {
     }
 }
 
+function checkDomeStability(dome) {
+    if (!dome || dome.temperature == null || typeof getDomeAnalysis !== "function") {
+        return;
+    }
+
+    const analysis = getDomeAnalysis();
+    if (!analysis) return;
+
+    if (analysis.lidOpen && analysis.lidOpenMs >= 3 * 60 * 1000 && shouldTriggerAlert("lid-open", 10)) {
+        sendNotification(
+            "Lid open for 3+ minutes",
+            "Close the lid to keep the temperature up.",
+            "lid-open"
+        );
+    }
+
+    if (analysis.overshootRisk && shouldTriggerAlert("dome-overshoot", 15)) {
+        sendNotification(
+            "Dome rising fast",
+            `${dome.temperature.toFixed(0)}°C and climbing towards ${appState.cook.domeTarget}°C. Close the vents now, since the ceramic keeps heating afterwards.`,
+            "dome-overshoot"
+        );
+    }
+
+    const limit = appState.alerts.domeDeviation;
+    if (
+        analysis.offset != null &&
+        Math.abs(analysis.offset) >= limit / 2 &&
+        shouldTriggerAlert("dome-drift", 30)
+    ) {
+        sendNotification(
+            analysis.offset < 0 ? "Dome drifting low" : "Dome drifting high",
+            `Averaging ${Math.abs(analysis.offset).toFixed(0)}°C ${analysis.offset < 0 ? "below" : "above"} target over the last 10 minutes.`,
+            "dome-drift"
+        );
+    }
+}
+
 function checkDomeDeviation(
     dome
 ) {
@@ -238,6 +277,14 @@ function checkDomeDeviation(
         dome.temperature == null
     ) {
         return;
+    }
+
+    // A dropping dome during/after lid-open is expected, not an alarm.
+    if (typeof getDomeAnalysis === "function") {
+        const analysis = getDomeAnalysis();
+        if (analysis && (analysis.lidOpen || analysis.recovering)) {
+            return;
+        }
     }
 
     const target =

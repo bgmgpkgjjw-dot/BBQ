@@ -68,6 +68,46 @@ function getMeatForecast() {
     });
 }
 
+function getDomeAnalysis() {
+    const session = typeof getCurrentSession === "function" ? getCurrentSession() : null;
+
+    if (!appState.cook.active || !session || typeof analyzeDome !== "function") {
+        return null;
+    }
+
+    return analyzeDome({
+        history: session.temperatureHistory,
+        target: Number(appState.cook.domeTarget) || null
+    });
+}
+
+function renderDomeStatusHtml(analysis) {
+    if (!analysis) return "";
+
+    if (analysis.lidOpen) {
+        const minutes = Math.max(1, Math.round(analysis.lidOpenMs / 60000));
+        return `<span class="dome-pill dome-lid">Lid open · ${minutes} min</span>`;
+    }
+    if (analysis.recovering) {
+        return `<span class="dome-pill dome-lid">Recovering after lid</span>`;
+    }
+
+    const parts = [];
+    if (analysis.overshootRisk) {
+        parts.push(`<span class="dome-pill dome-warn">Rising fast · close vents</span>`);
+    }
+    if (analysis.swing != null) {
+        const level = analysis.swing <= 5 ? "dome-ok" : "dome-warn";
+        parts.push(`<span class="dome-pill ${level}">±${analysis.swing.toFixed(1)}° · ${analysis.rating}</span>`);
+    } else {
+        parts.push(`<span class="eta-sub">Measuring stability…</span>`);
+    }
+    if (analysis.offset != null && Math.abs(analysis.offset) >= 3) {
+        parts.push(`<span class="eta-sub">avg ${Math.abs(analysis.offset).toFixed(0)}° ${analysis.offset < 0 ? "below" : "above"} target</span>`);
+    }
+    return parts.join("");
+}
+
 function renderForecastHtml(forecast) {
     if (!forecast) return "";
 
@@ -123,6 +163,11 @@ function updateLiveUi() {
     });
 
 
+
+    const domeEl = document.querySelector("[data-dome-status]");
+    if (domeEl) {
+        domeEl.innerHTML = renderDomeStatusHtml(getDomeAnalysis());
+    }
 
     const etaEl = document.querySelector("[data-meat-eta]");
     if (etaEl) {
@@ -213,6 +258,11 @@ function renderProbeCard(probe) {
             </div>
 
         </div>
+
+        ${isDome && appState.cook.active ? `
+        <div class="probe-eta" data-dome-status>
+            ${renderDomeStatusHtml(getDomeAnalysis())}
+        </div>` : ""}
 
         ${!isDome && target && appState.cook.active ? `
         <div class="probe-eta" data-meat-eta>
