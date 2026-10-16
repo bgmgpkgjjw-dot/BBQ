@@ -296,11 +296,8 @@ async function connectBluetooth(){
         BLE.device =
             await navigator.bluetooth.requestDevice({
 
-                filters: [
-                    {
-                        namePrefix: "Grill"
-                    }
-                ],
+                // Show every nearby device: units differ in advertised name/services.
+                acceptAllDevices: true,
 
 
                 optionalServices: [

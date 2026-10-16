@@ -33,6 +33,12 @@ sudo systemctl restart bbq-web grill-server bbq-storage
 
 Set your own `OPENROUTER_API_KEY` in `/etc/bbq/bbq.env` to enable AI recipe suggestions.
 
+## Bluetooth thermometer
+
+The Pi gateway auto-detects a thermometer advertising the `ffb0` service (or named `Grill…`). To pin a specific unit, add `BBQ_BLE_ADDRESS=AA:BB:CC:DD:EE:FF` to `/etc/bbq/bbq.env` and run `sudo systemctl restart btgateway`. The thermometer accepts one connection at a time, so close other apps first.
+
+Direct phone Bluetooth needs a Web Bluetooth browser (Chrome on Android, Bluefy on iOS) and lists all nearby devices.
+
 ## Ports
 
 | Service | Port |

@@ -11,6 +11,7 @@ ExecStart=@INSTALL_DIR@/pi-services/btgateway/venv/bin/python3 @INSTALL_DIR@/pi-
 Restart=always
 RestartSec=5
 Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=-/etc/bbq/bbq.env
 
 [Install]
 WantedBy=multi-user.target

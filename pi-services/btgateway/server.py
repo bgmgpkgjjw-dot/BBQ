@@ -1,10 +1,15 @@
 import asyncio
 import json
 import websockets
-from bleak import BleakClient
+import os
+from bleak import BleakClient, BleakScanner
 
-DEVICE_ADDRESS = "60:98:66:C3:BE:F3"
+# Optional: pin a specific thermometer (MAC address). When unset, the gateway
+# scans for the first device advertising the thermometer service.
+DEVICE_ADDRESS = os.environ.get("BBQ_BLE_ADDRESS", "").strip() or None
+SERVICE_UUID = "0000ffb0-0000-1000-8000-00805f9b34fb"
 CHAR_UUID = "0000ffb2-0000-1000-8000-00805f9b34fb"
+SCAN_SECONDS = 10
 
 # Bound to localhost only: this feed carries no auth token, so it must
 # never be reachable from the network, only from grill-server on this Pi.
@@ -99,12 +104,32 @@ def notification_handler(sender, data):
 
         asyncio.create_task(broadcast(packet))
 
+async def find_device_address():
+    if DEVICE_ADDRESS:
+        return DEVICE_ADDRESS
+
+    print(f"Scanning {SCAN_SECONDS}s for a thermometer...")
+    found = await BleakScanner.discover(timeout=SCAN_SECONDS, return_adv=True)
+    for device, adv in found.values():
+        name = device.name or adv.local_name or ""
+        if SERVICE_UUID in [u.lower() for u in adv.service_uuids] or name.startswith("Grill"):
+            print(f"Found {name or 'device'} at {device.address}")
+            return device.address
+
+    return None
+
 async def bluetooth_task():
     while True:
         try:
-            print("Connecting to BLE device...")
+            address = await find_device_address()
+            if not address:
+                print("No thermometer found; is it on and not connected to another app?")
+                await asyncio.sleep(5)
+                continue
 
-            async with BleakClient(DEVICE_ADDRESS) as client:
+            print(f"Connecting to BLE device {address}...")
+
+            async with BleakClient(address) as client:
                 print("BLE connected")
 
                 await client.start_notify(
