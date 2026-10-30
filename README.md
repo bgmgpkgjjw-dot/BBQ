@@ -21,6 +21,12 @@ Optional installer env vars: `BBQ_USER`, `BBQ_DATA_DIR` (default `~/bbq-data`), 
 
 On first launch the welcome screen offers a **demo** with a simulated cook. It can be toggled later in Settings > Demo mode, and the welcome screen can be reopened from there.
 
+## Cook-time forecast
+
+The live ETA estimates when the meat probe will reach its target. It uses recent meat readings and the average dome temperature, assuming the current heating conditions continue; it does not account for cut, weight, wrapping, or future stalls. Small changes in dome readings are not fitted as changes in the meat's heating rate. If the heating model cannot be fitted, the app uses the recent meat-temperature trend instead.
+
+The forecast needs at least six recent readings over 12 minutes and waits when the meat probe is disconnected or stale, or its latest recorded reading is over 10 minutes old. It reports a stall or an estimate exceeding 24 hours instead of displaying an ETA in those cases. An ETA is not a guarantee of doneness.
+
 ## HTTPS
 
 iOS requires HTTPS for service workers and notifications. Add `BBQ_TLS_CERT` and `BBQ_TLS_KEY` (paths) to `/etc/bbq/bbq.env` and restart the services:

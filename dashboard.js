@@ -60,6 +60,11 @@ function getMeatForecast() {
         return null;
     }
 
+    if (meat.temperature == null || !Number.isFinite(meat.lastSeen) ||
+        Date.now() - meat.lastSeen > PROBE_STALE_MS) {
+        return { state: "unavailable" };
+    }
+
     return estimateCoreForecast({
         history: session?.temperatureHistory,
         meatTemp: Number(meat.temperature),
@@ -111,6 +116,9 @@ function renderDomeStatusHtml(analysis) {
 function renderForecastHtml(forecast) {
     if (!forecast) return "";
 
+    if (forecast.state === "unavailable") {
+        return `<span class="eta-sub">Waiting for meat probe…</span>`;
+    }
     if (forecast.state === "estimate") {
         const finish = new Date(forecast.finishAt)
             .toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -124,6 +132,9 @@ function renderForecastHtml(forecast) {
     }
     if (forecast.state === "flat") {
         return `<span class="eta-sub">Core not rising, no estimate</span>`;
+    }
+    if (forecast.state === "too-long") {
+        return `<span class="eta-sub">Estimate exceeds 24 hours</span>`;
     }
     if (forecast.state === "reached") {
         return `<span class="eta-main">Target reached</span>`;

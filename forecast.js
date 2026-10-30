@@ -5,12 +5,10 @@
    Pure functions: no DOM / appState access, so they can be unit tested.
 
    Model: the meat warms towards the dome temperature (Newton's law of
-   heating): dT/dt = k * (dome - T). k is fitted on a recent window, then
-   solved for the time to reach the target. This captures the natural
-   slow-down as the core nears the dome temperature, which a plain linear
-   extrapolation would miss (it would be too optimistic at the end of a cook).
-   When the dome is too close to the target for that to be meaningful, it
-   falls back to a linear extrapolation.
+   heating): dT/dt = k * (dome - T). The recent average dome temperature
+   is held constant while fitting k to the meat-temperature history. This
+   prevents small dome fluctuations from being mistaken for meat heating.
+   When the model cannot be fitted, it falls back to a linear extrapolation.
 ========================================================== */
 
 const FORECAST_CONFIG = {
@@ -18,6 +16,7 @@ const FORECAST_CONFIG = {
     shortWindowMs: 10 * 60 * 1000,
     minSpanMs: 8 * 60 * 1000,
     minSamples: 6,
+    maxSampleAgeMs: 10 * 60 * 1000,
     minSlopePerMin: 0.02,
     stallMinTemp: 60,
     stallMaxTemp: 85,
@@ -82,13 +81,14 @@ function forecastDomeReference(samples, now) {
 function forecastNewtonMinutes(samples, now, target, meatNow, domeRef) {
     if (domeRef == null || domeRef - target < FORECAST_CONFIG.minDomeMargin) return null;
 
-    const windowed = samples.filter(s => s.timestamp >= now - FORECAST_CONFIG.windowMs && Number.isFinite(s.dome));
-    if (windowed.length < FORECAST_CONFIG.minSamples) return null;
+    const windowed = samples.filter(s => s.timestamp >= now - FORECAST_CONFIG.windowMs);
 
-    // ln(dome - T) is linear in time with slope -k.
+    // Hold dome constant during the fit: measured dome changes are not changes in meat temperature.
     const points = windowed
-        .filter(s => s.dome - s.meat > 1)
-        .map(s => ({ x: s.timestamp / 60000, y: Math.log(s.dome - s.meat) }));
+        .filter(s => domeRef - s.meat > 1)
+        .map(s => ({ x: s.timestamp / 60000, y: Math.log(domeRef - s.meat) }));
+    if (points.length < FORECAST_CONFIG.minSamples ||
+        (points.at(-1).x - points[0].x) * 60000 < FORECAST_CONFIG.minSpanMs) return null;
     const fit = forecastRegression(points);
     if (!fit || fit.slope >= 0) return null;
 
@@ -109,7 +109,7 @@ function formatForecastDuration(ms) {
 
 /*
    Returns { state, etaMs, finishAt, stalled, confidence, slopePerHour }.
-   state: "waiting" | "reached" | "stalled" | "flat" | "estimate"
+   state: "waiting" | "reached" | "stalled" | "flat" | "too-long" | "estimate"
 */
 function estimateCoreForecast({ history, meatTemp, target, now = Date.now(), cookStartedAt = null }) {
     const result = {
@@ -121,13 +121,17 @@ function estimateCoreForecast({ history, meatTemp, target, now = Date.now(), coo
         slopePerHour: null
     };
 
-    if (!Number.isFinite(meatTemp) || !Number.isFinite(target)) return result;
+    if (!Number.isFinite(meatTemp) || meatTemp <= 0 ||
+        !Number.isFinite(target) || target <= 0) return result;
 
     if (meatTemp >= target) {
         return { ...result, state: "reached" };
     }
 
     const samples = forecastValidSamples(history, now);
+    if (!samples.length || now - samples.at(-1).timestamp > FORECAST_CONFIG.maxSampleAgeMs) {
+        return result;
+    }
     const long = forecastSlope(samples, now, FORECAST_CONFIG.windowMs);
 
     if (!long || long.count < FORECAST_CONFIG.minSamples || long.spanMs < FORECAST_CONFIG.minSpanMs) {
@@ -164,9 +168,10 @@ function estimateCoreForecast({ history, meatTemp, target, now = Date.now(), coo
         : linearMinutes;
 
     const etaMs = minutes * 60000;
-    if (!Number.isFinite(etaMs) || etaMs <= 0 || etaMs > FORECAST_CONFIG.maxEtaMs) {
+    if (!Number.isFinite(etaMs) || etaMs <= 0) {
         return { ...result, state: "flat" };
     }
+    if (etaMs > FORECAST_CONFIG.maxEtaMs) return { ...result, state: "too-long" };
 
     const steady = long.r2 >= 0.9 && long.spanMs >= 20 * 60 * 1000;
     const approximate = long.r2 >= 0.7;
