@@ -76,20 +76,30 @@ async function requestAi(payload) {
         throw new Error("Configure the Pi's server address in Settings first.");
     }
 
-    const response = await fetch(
-        cookStorageUrl.replace("/api/cook-sessions", "/api/ai/recipes"),
-        {
-            method: "POST",
-            headers: getCookStorageHeaders({ "Content-Type": "application/json" }),
-            body: JSON.stringify(payload)
-        }
-    );
+    // The server gives up after 90 s, so the client must never wait forever.
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 110000);
 
+    let response;
     let data = null;
     try {
-        data = await response.json();
-    } catch {
-        data = null;
+        response = await fetch(
+            cookStorageUrl.replace("/api/cook-sessions", "/api/ai/recipes"),
+            {
+                method: "POST",
+                headers: getCookStorageHeaders({ "Content-Type": "application/json" }),
+                body: JSON.stringify(payload),
+                signal: controller.signal
+            }
+        );
+        data = await response.json().catch(() => null);
+    } catch (error) {
+        if (error?.name === "AbortError") {
+            throw new Error("The Pi did not answer in time. Check that the storage server is updated and restarted, then retry.");
+        }
+        throw new Error("Could not reach the Pi. Check the server address and Wi-Fi.");
+    } finally {
+        clearTimeout(timer);
     }
 
     if (!response.ok) {
