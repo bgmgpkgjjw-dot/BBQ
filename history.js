@@ -1150,8 +1150,15 @@ function loadShareImage(src) {
     });
 }
 
-async function sharePhoto(session) {
-    const photo = (session.photos || [])[0];
+const SHARE_MAX_PHOTOS = 3;
+
+async function sharePhotos(session) {
+    const photos = (session.photos || []).slice(0, SHARE_MAX_PHOTOS);
+    const loaded = await Promise.all(photos.map(loadSharePhoto));
+    return loaded.filter(Boolean);
+}
+
+async function loadSharePhoto(photo) {
     if (!photo) return null;
 
     try {
@@ -1176,36 +1183,153 @@ async function sharePhoto(session) {
     }
 }
 
-function drawShareSparkline(ctx, history, x, y, width, height) {
-    const samples = (history || []).filter(sample => Number.isFinite(sample.dome) || Number.isFinite(sample.meat));
+const SHARE_DOME_COLOR = "#E5A93D";
+const SHARE_CORE_COLOR = "#4DB6A5";
+
+function shareDuration(session) {
+    if (session.duration) return session.duration;
+    const samples = session.temperatureHistory || [];
+    if (samples.length < 2) return "";
+    const minutes = Math.round((samples[samples.length - 1].timestamp - samples[0].timestamp) / 60000);
+    if (!(minutes > 0)) return "";
+    return minutes >= 60 ? `${Math.floor(minutes / 60)}h ${minutes % 60}m` : `${minutes}m`;
+}
+
+function shareDomeAverage(session) {
+    const dome = (session.temperatureHistory || []).map(sample => sample.dome).filter(Number.isFinite);
+    return dome.length ? dome.reduce((sum, value) => sum + value, 0) / dome.length : null;
+}
+
+function formatShareAxisTime(ms) {
+    const minutes = Math.round(ms / 60000);
+    if (minutes < 60) return `${minutes}m`;
+    const hours = Math.floor(minutes / 60);
+    const rest = minutes % 60;
+    return rest ? `${hours}h ${rest}m` : `${hours}h`;
+}
+
+function drawShareChart(ctx, session, x, y, width, height) {
+    ctx.fillStyle = "#23201C";
+    roundedRect(ctx, x, y, width, height, 20);
+    ctx.fill();
+
+    const samples = (session.temperatureHistory || [])
+        .filter(sample => Number.isFinite(sample.dome) || Number.isFinite(sample.meat));
+
+    ctx.font = "500 18px sans-serif";
+    ctx.textBaseline = "middle";
+    [["Dome", SHARE_DOME_COLOR, 0], ["Core", SHARE_CORE_COLOR, 110], ["Lid open", "#F5F4F0", 220]].forEach(([label, color, dx]) => {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(x + 32 + dx, y + 30, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#9DA5A5";
+        ctx.fillText(label, x + 46 + dx, y + 30);
+    });
+    ctx.textBaseline = "alphabetic";
+
     if (samples.length < 2) return;
 
-    const values = samples.flatMap(sample => [sample.dome, sample.meat].filter(Number.isFinite));
-    const min = Math.min(...values) - 4;
-    const max = Math.max(...values) + 4;
-    const span = Math.max(1, max - min);
+    const plotX = x + 72;
+    const plotY = y + 60;
+    const plotW = width - 72 - 28;
+    const plotH = height - 60 - 44;
+    const t0 = samples[0].timestamp;
+    const span = Math.max(1, samples[samples.length - 1].timestamp - t0);
+    const targets = [session.domeTarget, session.meatTarget].filter(Number.isFinite);
+    const values = samples.flatMap(sample => [sample.dome, sample.meat].filter(Number.isFinite)).concat(targets);
+    const max = Math.ceil((Math.max(...values) + 5) / 20) * 20;
+    const min = Math.max(0, Math.floor((Math.min(...values) - 5) / 20) * 20);
+    const range = Math.max(1, max - min);
+    const px = timestamp => plotX + ((timestamp - t0) / span) * plotW;
+    const py = value => plotY + plotH - ((value - min) / range) * plotH;
+
+    ctx.font = "400 16px sans-serif";
+    ctx.lineWidth = 1;
+    for (let value = min; value <= max; value += 20) {
+        ctx.strokeStyle = "rgba(255,255,255,0.08)";
+        ctx.beginPath();
+        ctx.moveTo(plotX, py(value));
+        ctx.lineTo(plotX + plotW, py(value));
+        ctx.stroke();
+        ctx.fillStyle = "#9DA5A5";
+        ctx.textAlign = "right";
+        ctx.fillText(String(value), plotX - 12, py(value) + 5);
+    }
+
+    ctx.textAlign = "left";
+    ctx.fillText("0h", plotX, y + height - 14);
+    ctx.textAlign = "right";
+    ctx.fillText(formatShareAxisTime(span), plotX + plotW, y + height - 14);
+    ctx.textAlign = "left";
+
+    if (Number.isFinite(session.meatTarget)) {
+        ctx.save();
+        ctx.setLineDash([10, 8]);
+        ctx.strokeStyle = SHARE_CORE_COLOR;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(plotX, py(session.meatTarget));
+        ctx.lineTo(plotX + plotW, py(session.meatTarget));
+        ctx.stroke();
+        ctx.restore();
+        ctx.fillStyle = SHARE_CORE_COLOR;
+        ctx.textAlign = "right";
+        ctx.fillText(`Core target ${session.meatTarget.toFixed(0)}°C`, plotX + plotW, py(session.meatTarget) - 8);
+        ctx.textAlign = "left";
+    }
 
     const plot = (key, color) => {
         ctx.beginPath();
         let started = false;
-        samples.forEach((sample, index) => {
+        samples.forEach(sample => {
             if (!Number.isFinite(sample[key])) return;
-            const px = x + (index / (samples.length - 1)) * width;
-            const py = y + height - ((sample[key] - min) / span) * height;
             if (!started) {
-                ctx.moveTo(px, py);
+                ctx.moveTo(px(sample.timestamp), py(sample[key]));
                 started = true;
             } else {
-                ctx.lineTo(px, py);
+                ctx.lineTo(px(sample.timestamp), py(sample[key]));
             }
         });
         ctx.strokeStyle = color;
         ctx.lineWidth = 3;
+        ctx.lineJoin = "round";
         ctx.stroke();
     };
+    plot("dome", SHARE_DOME_COLOR);
+    plot("meat", SHARE_CORE_COLOR);
 
-    plot("dome", "#E5A93D");
-    plot("meat", "#4DB6A5");
+    (session.events || []).forEach(event => {
+        if (event.type !== "lid" || event.timestamp < t0 || event.timestamp > t0 + span) return;
+        const ex = px(event.timestamp);
+        ctx.save();
+        ctx.setLineDash([4, 6]);
+        ctx.strokeStyle = "rgba(245,244,240,0.35)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(ex, plotY);
+        ctx.lineTo(ex, plotY + plotH);
+        ctx.stroke();
+        ctx.restore();
+        ctx.fillStyle = "#171511";
+        ctx.strokeStyle = "#F5F4F0";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(ex, plotY + 4, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+    });
+}
+
+function drawShareCover(ctx, photo, x, y, width, height, radius) {
+    ctx.save();
+    roundedRect(ctx, x, y, width, height, radius);
+    ctx.clip();
+    const scale = Math.max(width / photo.width, height / photo.height);
+    const w = photo.width * scale;
+    const h = photo.height * scale;
+    ctx.drawImage(photo, x + (width - w) / 2, y + (height - h) / 2, w, h);
+    ctx.restore();
 }
 
 function roundedRect(ctx, x, y, width, height, radius) {
@@ -1219,74 +1343,124 @@ function roundedRect(ctx, x, y, width, height, radius) {
 }
 
 async function renderShareCard(session) {
+    const W = 1080;
+    const H = 1350;
+    const M = 40;
+    const innerW = W - M * 2;
     const canvas = document.createElement("canvas");
-    canvas.width = 800;
-    canvas.height = 1000;
+    canvas.width = W;
+    canvas.height = H;
     const ctx = canvas.getContext("2d");
-    const photo = await sharePhoto(session);
+    const photos = await sharePhotos(session);
     const peaks = cookPeaks(session);
 
     ctx.fillStyle = "#171511";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#C88B3D";
-    ctx.fillRect(0, 0, canvas.width, 8);
+    ctx.fillRect(0, 0, W, H);
 
     ctx.fillStyle = "#E2B36C";
-    ctx.font = "700 14px sans-serif";
-    ctx.fillText("HERMANOS", 56, 72);
+    ctx.font = "700 20px sans-serif";
+    ctx.letterSpacing = "6px";
+    ctx.fillText("HERMANOS", M, 58);
+    ctx.letterSpacing = "0px";
 
-    ctx.fillStyle = "#F5F4F0";
-    ctx.font = "800 42px sans-serif";
-    const name = session.name || session.recipe || "Cook";
-    ctx.fillText(name.slice(0, 28), 56, 140);
-
-    ctx.fillStyle = "#9DA5A5";
-    ctx.font = "400 22px sans-serif";
+    const name = (session.name || session.recipe || "Cook").slice(0, 28);
     const when = session.startedAt
         ? new Date(session.startedAt).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric" })
         : "";
-    ctx.fillText([when, session.duration].filter(Boolean).join("  ·  "), 56, 184);
 
+    const heroY = 84;
+    const thumbs = photos.slice(1);
+    const heroH = photos.length === 0 ? 220 : thumbs.length ? 520 : 760;
+    let cursor = heroY;
+
+    if (photos.length) {
+        drawShareCover(ctx, photos[0], M, heroY, innerW, heroH, 24);
+        const fade = ctx.createLinearGradient(0, heroY + heroH - 240, 0, heroY + heroH);
+        fade.addColorStop(0, "rgba(23,21,17,0)");
+        fade.addColorStop(1, "rgba(23,21,17,0.9)");
+        ctx.save();
+        roundedRect(ctx, M, heroY, innerW, heroH, 24);
+        ctx.clip();
+        ctx.fillStyle = fade;
+        ctx.fillRect(M, heroY + heroH - 240, innerW, 240);
+        ctx.restore();
+    } else {
+        ctx.fillStyle = "#23201C";
+        roundedRect(ctx, M, heroY, innerW, heroH, 24);
+        ctx.fill();
+    }
+
+    ctx.fillStyle = "#E2B36C";
+    ctx.font = "800 64px sans-serif";
+    ctx.fillText(name, M + 32, heroY + heroH - 78);
+    ctx.fillStyle = "#D8D6D0";
+    ctx.font = "400 30px sans-serif";
+    ctx.fillText(when, M + 32, heroY + heroH - 30);
     if (session.rating) {
         ctx.fillStyle = "#E2B36C";
-        ctx.font = "400 28px sans-serif";
-        ctx.fillText(renderStars(session.rating), 56, 232);
+        ctx.font = "400 40px sans-serif";
+        ctx.textAlign = "right";
+        ctx.fillText(renderStars(session.rating), M + innerW - 32, heroY + heroH - 30);
+        ctx.textAlign = "left";
+    }
+    cursor += heroH + 16;
+
+    if (thumbs.length) {
+        const gap = 16;
+        const thumbW = (innerW - gap * (thumbs.length - 1)) / thumbs.length;
+        thumbs.forEach((photo, index) => {
+            drawShareCover(ctx, photo, M + index * (thumbW + gap), cursor, thumbW, 180, 20);
+        });
+        cursor += 180 + 20;
     }
 
+    const duration = shareDuration(session);
+    const domeAvg = shareDomeAverage(session);
     const stats = [
-        ["Dome peak", peaks.dome != null ? `${peaks.dome.toFixed(0)}°C` : "—"],
-        ["Core peak", peaks.meat != null ? `${peaks.meat.toFixed(0)}°C` : "—"]
+        {
+            label: "Core peak",
+            value: peaks.meat != null ? `${peaks.meat.toFixed(0)}°C` : "—",
+            sub: Number.isFinite(session.meatTarget) ? `Target ${session.meatTarget.toFixed(0)}°C` : "",
+            color: SHARE_CORE_COLOR
+        },
+        {
+            label: "Dome avg",
+            value: domeAvg != null ? `${domeAvg.toFixed(0)}°C` : "—",
+            sub: "",
+            color: SHARE_DOME_COLOR
+        },
+        { label: "Total cook time", value: duration || "—", sub: "", color: "#F5F4F0" }
     ];
+    const tileGap = 16;
+    const tileW = (innerW - tileGap * (stats.length - 1)) / stats.length;
+    const tileH = 150;
     stats.forEach((stat, index) => {
-        const x = 56 + index * 340;
+        const x = M + index * (tileW + tileGap);
         ctx.fillStyle = "#23201C";
-        roundedRect(ctx, x, 270, 310, 120, 18);
+        roundedRect(ctx, x, cursor, tileW, tileH, 20);
         ctx.fill();
         ctx.fillStyle = "#9DA5A5";
-        ctx.font = "700 16px sans-serif";
-        ctx.fillText(stat[0], x + 24, 314);
-        ctx.fillStyle = index === 0 ? "#E5A93D" : "#4DB6A5";
-        ctx.font = "800 36px sans-serif";
-        ctx.fillText(stat[1], x + 24, 362);
+        ctx.font = "600 22px sans-serif";
+        ctx.fillText(stat.label, x + 24, cursor + 42);
+        ctx.fillStyle = stat.color;
+        ctx.font = "800 48px sans-serif";
+        ctx.fillText(stat.value, x + 24, cursor + 100);
+        if (stat.sub) {
+            ctx.fillStyle = "#9DA5A5";
+            ctx.font = "400 20px sans-serif";
+            ctx.fillText(stat.sub, x + 24, cursor + 132);
+        }
     });
+    cursor += tileH + 20;
 
-    drawShareSparkline(ctx, session.temperatureHistory, 56, 430, 688, 120);
-
-    if (photo) {
-        const frame = { x: 56, y: 580, width: 688, height: 300 };
-        ctx.save();
-        roundedRect(ctx, frame.x, frame.y, frame.width, frame.height, 18);
-        ctx.clip();
-        const scale = Math.max(frame.width / photo.width, frame.height / photo.height);
-        const width = photo.width * scale;
-        const height = photo.height * scale;
-        ctx.drawImage(photo, frame.x + (frame.width - width) / 2, frame.y + (frame.height - height) / 2, width, height);
-        ctx.restore();
-    }
+    const footerY = H - 28;
+    drawShareChart(ctx, session, M, cursor, innerW, footerY - 40 - cursor);
 
     ctx.fillStyle = "#9DA5A5";
-    ctx.font = "400 16px sans-serif";
-    ctx.fillText("Hermanos Grill Companion", 56, 940);
+    ctx.font = "400 20px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Hermanos Grill Companion", W / 2, footerY);
+    ctx.textAlign = "left";
 
     return new Promise(resolve => canvas.toBlob(blob => resolve(blob), "image/png"));
 }
