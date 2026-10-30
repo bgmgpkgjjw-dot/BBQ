@@ -1840,3 +1840,83 @@ PREMIUM PROBE CARDS
    line-height: 1.4;
    margin: 10px 0 0;
 }
+
+.rest-card {
+   margin: 14px 0;
+   padding: 14px 16px;
+   border-radius: var(--radius);
+   background: var(--inset);
+   border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.rest-card.rest-done {
+   border-color: color-mix(in srgb, var(--green) 55%, transparent);
+}
+
+.rest-head {
+   display: flex;
+   justify-content: space-between;
+   align-items: baseline;
+   color: var(--muted);
+   font-size: 14px;
+}
+
+.rest-head strong {
+   color: var(--accent-light);
+   font-size: 32px;
+   font-variant-numeric: tabular-nums;
+}
+
+.rest-sub {
+   margin: 8px 0 0;
+   color: var(--muted);
+   font-size: 13px;
+   line-height: 1.4;
+}
+
+.rest-actions {
+   display: flex;
+   gap: 8px;
+   margin-top: 12px;
+}
+
+.ai-servings {
+   display: flex;
+   align-items: center;
+   gap: 10px;
+   font-size: 14px;
+   color: var(--muted);
+}
+
+.ai-servings input {
+   width: 100%;
+   margin: 0;
+}
+
+.ai-error {
+   border: 1px solid color-mix(in srgb, var(--danger) 55%, transparent);
+}
+
+.ai-idea-meta,
+.ai-note {
+   color: var(--muted);
+   font-size: 13px;
+}
+
+.ai-note {
+   color: var(--yellow);
+}
+
+.ai-chips {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 8px;
+   margin-bottom: 10px;
+}
+
+.ai-chips .chip {
+   cursor: pointer;
+   border: 1px solid var(--border);
+   background: transparent;
+   color: var(--text);
+}

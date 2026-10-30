@@ -39,6 +39,8 @@ sudo systemctl restart bbq-web grill-server bbq-storage
 
 Set your own `OPENROUTER_API_KEY` in `/etc/bbq/bbq.env` to enable AI recipe suggestions.
 
+The assistant uses free OpenRouter models only: it tries a pinned list in order and falls back when one is rate limited or answers badly. Override the list with `OPENROUTER_MODELS` (comma separated, best first) in the same file. Only what you type in the assistant is sent to the provider, never your cook history or notes. Free models are rate limited, so the app shows a "Try again" button when the limit is hit. After updating, restart the storage service.
+
 ## Bluetooth thermometer
 
 The Pi gateway auto-detects a thermometer advertising the `ffb0` service (or named `Grill…`). To pin a specific unit, add `BBQ_BLE_ADDRESS=AA:BB:CC:DD:EE:FF` to `/etc/bbq/bbq.env` and run `sudo systemctl restart btgateway`. The thermometer accepts one connection at a time, so close other apps first.

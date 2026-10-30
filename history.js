@@ -57,7 +57,7 @@ function renderHistoryCard(session) {
                 <p class="history-card-date">${date}</p>
                 <div class="history-chips">
                     <span class="chip">${escapeHtmlText(session.duration || "—")}</span>
-                    ${peakCore != null ? `<span class="chip">Core ${peakCore.toFixed(0)}°C</span>` : ""}
+                    ${peakCore != null ? `<span class="chip">Core ${formatTemp(peakCore)}</span>` : ""}
                     ${photoCount ? `<span class="chip">${photoCount} photo${photoCount > 1 ? "s" : ""}</span>` : ""}
                 </div>
             </div>
@@ -264,6 +264,7 @@ function historyChartIsCurrent(chart, canvas, session, sampleCount) {
         chart.canvas === canvas &&
         chart._bbqSessionId === session.id &&
         chart._bbqSampleCount === sampleCount &&
+        (chart._bbqUnit || "C") === (typeof getTemperatureUnit === "function" ? getTemperatureUnit() : "C") &&
         chart._bbqDomeTarget === session.domeTarget &&
         chart._bbqMeatTarget === session.meatTarget &&
         (chart._bbqEvents || "") === eventSignature(session)
@@ -329,8 +330,8 @@ function shareCookText(session) {
         session.name || session.recipe || "Cook",
         [when, session.duration].filter(Boolean).join(" · "),
         session.rating ? renderStars(session.rating) : "",
-        peaks.dome != null ? `Dome peak ${peaks.dome.toFixed(0)}°C` : "",
-        peaks.meat != null ? `Core peak ${peaks.meat.toFixed(0)}°C` : ""
+        peaks.dome != null ? `Dome peak ${formatTemp(peaks.dome)}` : "",
+        peaks.meat != null ? `Core peak ${formatTemp(peaks.meat)}` : ""
     ];
 
     return lines.filter(Boolean).join("\n");
@@ -369,9 +370,9 @@ function historyDetailView() {
                 ...samples.map(
                     x => x.dome || 0
                 )
-            ).toFixed(1)
+            )
             :
-            "—";
+            null;
 
 
 
@@ -382,16 +383,16 @@ function historyDetailView() {
                 ...samples.map(
                     x => x.meat || 0
                 )
-            ).toFixed(1)
+            )
             :
-            "—";
+            null;
 
     const latestSample = samples.at(-1) || {};
     const latestDome = Number.isFinite(latestSample.dome)
-        ? `${latestSample.dome.toFixed(1)}°C`
+        ? formatTemp(latestSample.dome, 1)
         : "—";
     const latestMeat = Number.isFinite(latestSample.meat)
-        ? `${latestSample.meat.toFixed(1)}°C`
+        ? formatTemp(latestSample.meat, 1)
         : "—";
 
     setTimeout( () => renderHistoryDetailChart(), 50 );
@@ -435,13 +436,13 @@ function historyDetailView() {
             <div class="history-metric dome-metric">
                 <span class="history-metric-label">Dome now</span>
                 <strong>${latestDome}</strong>
-                <small>Peak ${maxDome}°C</small>
+                <small>Peak ${formatTemp(maxDome, 1)}</small>
             </div>
 
             <div class="history-metric core-metric">
                 <span class="history-metric-label">Core now</span>
                 <strong>${latestMeat}</strong>
-                <small>Peak ${maxMeat}°C</small>
+                <small>Peak ${formatTemp(maxMeat, 1)}</small>
             </div>
         </div>
 
@@ -637,7 +638,7 @@ function chartTooltipLabel(context) {
     const value = context.parsed.y;
     return value == null
         ? context.dataset.label
-        : `${context.dataset.label}: ${Number(value).toFixed(1)}°C`;
+        : `${context.dataset.label}: ${formatTemp(value, 1)}`;
 }
 
 function openLidEventFromChart(chart, elements, sessionId) {
@@ -954,12 +955,13 @@ function renderHistoryDetailChart() {
                             color: "rgba(242,235,221,.08)"
                         },
                         ticks: {
-                            color: "#918678"
+                            color: "#918678",
+                            callback: value => Math.round(celsiusToDisplay(value))
                         },
 
                         title: {
                             display: true,
-                            text: "°C",
+                            text: temperatureUnitLabel(),
                             color: "#918678"
                         }
                     }
@@ -967,6 +969,7 @@ function renderHistoryDetailChart() {
             }
         });
 
+    historyDetailChart._bbqUnit = getTemperatureUnit();
     historyDetailChart._bbqSessionId = session.id;
     historyDetailChart._bbqSampleCount = rawSampleCount;
     historyDetailChart._bbqDomeTarget = session.domeTarget;
@@ -1195,6 +1198,12 @@ function shareDuration(session) {
     return minutes >= 60 ? `${Math.floor(minutes / 60)}h ${minutes % 60}m` : `${minutes}m`;
 }
 
+function shareRestMs(session) {
+    const start = Date.parse(session.restStartedAt);
+    const end = Date.parse(session.restEndedAt || session.finishedAt);
+    return Number.isFinite(start) && Number.isFinite(end) && end - start >= 60000 ? end - start : 0;
+}
+
 function shareDomeAverage(session) {
     const dome = (session.temperatureHistory || []).map(sample => sample.dome).filter(Number.isFinite);
     return dome.length ? dome.reduce((sum, value) => sum + value, 0) / dome.length : null;
@@ -1254,7 +1263,7 @@ function drawShareChart(ctx, session, x, y, width, height) {
         ctx.stroke();
         ctx.fillStyle = "#9DA5A5";
         ctx.textAlign = "right";
-        ctx.fillText(String(value), plotX - 12, py(value) + 5);
+        ctx.fillText(String(Math.round(celsiusToDisplay(value))), plotX - 12, py(value) + 5);
     }
 
     ctx.textAlign = "left";
@@ -1275,7 +1284,7 @@ function drawShareChart(ctx, session, x, y, width, height) {
         ctx.restore();
         ctx.fillStyle = SHARE_CORE_COLOR;
         ctx.textAlign = "right";
-        ctx.fillText(`Core target ${session.meatTarget.toFixed(0)}°C`, plotX + plotW, py(session.meatTarget) - 8);
+        ctx.fillText(`Core target ${formatTemp(session.meatTarget)}`, plotX + plotW, py(session.meatTarget) - 8);
         ctx.textAlign = "left";
     }
 
@@ -1419,18 +1428,22 @@ async function renderShareCard(session) {
     const stats = [
         {
             label: "Core peak",
-            value: peaks.meat != null ? `${peaks.meat.toFixed(0)}°C` : "—",
-            sub: Number.isFinite(session.meatTarget) ? `Target ${session.meatTarget.toFixed(0)}°C` : "",
+            value: formatTemp(peaks.meat),
+            sub: Number.isFinite(session.meatTarget) ? `Target ${formatTemp(session.meatTarget)}` : "",
             color: SHARE_CORE_COLOR
         },
         {
             label: "Dome avg",
-            value: domeAvg != null ? `${domeAvg.toFixed(0)}°C` : "—",
+            value: formatTemp(domeAvg),
             sub: "",
             color: SHARE_DOME_COLOR
         },
         { label: "Total cook time", value: duration || "—", sub: "", color: "#F5F4F0" }
     ];
+    const restMs = shareRestMs(session);
+    if (restMs) {
+        stats.push({ label: "Rest", value: formatShareAxisTime(restMs), sub: "", color: "#F5F4F0" });
+    }
     const tileGap = 16;
     const tileW = (innerW - tileGap * (stats.length - 1)) / stats.length;
     const tileH = 150;
@@ -1440,10 +1453,10 @@ async function renderShareCard(session) {
         roundedRect(ctx, x, cursor, tileW, tileH, 20);
         ctx.fill();
         ctx.fillStyle = "#9DA5A5";
-        ctx.font = "600 22px sans-serif";
+        ctx.font = `600 ${stats.length > 3 ? 19 : 22}px sans-serif`;
         ctx.fillText(stat.label, x + 24, cursor + 42);
         ctx.fillStyle = stat.color;
-        ctx.font = "800 48px sans-serif";
+        ctx.font = `800 ${stats.length > 3 ? 42 : 48}px sans-serif`;
         ctx.fillText(stat.value, x + 24, cursor + 100);
         if (stat.sub) {
             ctx.fillStyle = "#9DA5A5";
@@ -1528,8 +1541,8 @@ function renderDomeSummaryCard(session) {
         <div class="history-metrics">
             <div class="history-metric dome-metric">
                 <span class="history-metric-label">Average dome</span>
-                <strong>${summary.meanDome.toFixed(0)}°C</strong>
-                <small>${summary.timeInRangePct != null ? `${summary.timeInRangePct}% within ±5° of ${session.domeTarget}°C` : "No dome target"}</small>
+                <strong>${formatTemp(summary.meanDome)}</strong>
+                <small>${summary.timeInRangePct != null ? `${summary.timeInRangePct}% within ±${formatTempDelta(5)} of ${formatTemp(session.domeTarget)}` : "No dome target"}</small>
             </div>
             <div class="history-metric">
                 <span class="history-metric-label">Lid opened</span>

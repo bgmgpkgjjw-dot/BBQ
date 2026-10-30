@@ -7,7 +7,7 @@ function formatTemperatureValue(value) {
     if (value === null || value === undefined || Number.isNaN(Number(value))) {
         return "—";
     }
-    const [whole, decimal] = Number(value).toFixed(1).split(".");
+    const [whole, decimal] = celsiusToDisplay(value).toFixed(1).split(".");
     return `${whole}<span class="temp-decimal">.${decimal}</span>°`;
 }
 
@@ -108,7 +108,7 @@ function renderDomeStatusHtml(analysis) {
         parts.push(`<span class="dome-pill dome-warn">${text}</span>`);
     } else if (analysis.swing != null) {
         const level = analysis.swing <= 5 ? "dome-ok" : "dome-warn";
-        parts.push(`<span class="dome-pill ${level}">±${analysis.swing.toFixed(1)}° · ${analysis.rating}</span>`);
+        parts.push(`<span class="dome-pill ${level}">±${formatTempDelta(analysis.swing, 1)} · ${analysis.rating}</span>`);
     } else if (!analysis.lidOpen) {
         parts.push(`<span class="eta-sub">Measuring stability…</span>`);
     }
@@ -209,6 +209,11 @@ function updateLiveUi() {
         etaEl.innerHTML = renderForecastHtml(getMeatForecast());
     }
 
+    const restEl = document.querySelector("[data-rest-countdown]");
+    if (restEl && appState.cook.restStartedAt) {
+        restEl.textContent = restCountdownText();
+    }
+
     const timer =
         document.querySelector("[data-cook-time]");
 
@@ -276,7 +281,7 @@ function renderProbeCard(probe) {
             <div class="probe-reading-target">
 
                 ${target
-                    ? `<span class="target-arrow">→</span> ${target}°<span class="target-unit">C target</span>`
+                    ? `<span class="target-arrow">→</span> ${Math.round(celsiusToDisplay(target))}°<span class="target-unit">${getTemperatureUnit()} target</span>`
                     : "No target set"
                 }
 
@@ -424,7 +429,7 @@ function renderCookPanel() {
             max="600"
             inputmode="numeric"
             pattern="[0-9]*"
-            value="${appState.cook.domeTarget ?? ""}"
+            value="${targetInputValue(appState.cook.domeTarget)}"
             onchange="updateDomeTarget(this.value)"
         >
         </div>
@@ -438,7 +443,7 @@ function renderCookPanel() {
             max="250"
             inputmode="numeric"
             pattern="[0-9]*"
-            value="${appState.cook.meatTarget ?? ""}"
+            value="${targetInputValue(appState.cook.meatTarget)}"
             onchange="updateMeatTarget(this.value)"
         >
         </div>
@@ -454,7 +459,7 @@ function renderCookPanel() {
         <p>
             Dome:
             ${currentPhase.domeTarget != null
-                ? `${currentPhase.domeTarget}°C`
+                ? formatTemp(currentPhase.domeTarget)
                 : "--"
             }
         </p>
@@ -462,7 +467,7 @@ function renderCookPanel() {
         <p>
             Core:
             ${currentPhase.meatTarget != null
-                ? `${currentPhase.meatTarget}°C`
+                ? formatTemp(currentPhase.meatTarget)
                 : "--"
             }
         </p>
@@ -502,6 +507,8 @@ function renderCookPanel() {
 
     </div>
  </div>
+
+    ${renderRestCardHtml()}
 
     <div class="chart-container">
         <canvas id="activeCookChart"></canvas>
@@ -718,6 +725,7 @@ function stopCook() {
     appState.cook.phase = 0;
     appState.cook.startedAt = null;
     appState.cook.completedPhases = [];
+    clearRestState();
 
     appState.currentSessionId = null;
 
@@ -733,9 +741,9 @@ function stopCook() {
 
 function updateDomeTarget(value) {
 
-    const target = Number(value);
+    const target = displayToCelsius(value);
 
-    if (Number.isNaN(target)) {
+    if (target === null) {
         return;
     }
 
@@ -762,9 +770,9 @@ function updateMeatTarget(value) {
         appState.cook.meatTarget = null;
     } else {
 
-        const target = Number(value);
+        const target = displayToCelsius(value);
 
-        if (Number.isNaN(target)) {
+        if (target === null) {
             return;
         }
 
@@ -815,6 +823,153 @@ function pruneStaleProbeReadings() {
 
 window.pruneStaleProbeReadings = pruneStaleProbeReadings;
 
+// ==========================================================
+// REST TIMER
+// Starts when the core reaches the target of the final phase.
+// ==========================================================
+
+const REST_STEP_MINUTES = 5;
+const REST_MIN_MINUTES = 5;
+const REST_MAX_MINUTES = 24 * 60;
+
+function isFinalPhase() {
+    const phases = appState.cook.phases || [];
+    return !phases.length || appState.cook.phase >= phases.length - 1;
+}
+
+function startRest(meat) {
+    const cook = appState.cook;
+    const session = typeof getCurrentSession === "function" ? getCurrentSession() : null;
+    const carryover = typeof estimateCarryover === "function"
+        ? estimateCarryover({ history: session?.temperatureHistory, meatTemp: Number(meat.temperature) })
+        : null;
+
+    cook.restStartedAt = Date.now();
+    cook.restDurationMs = (Number(appState.settings.restMinutes) || 30) * 60000;
+    cook.restCarryoverC = carryover ? carryover.deltaC : null;
+    cook.restPeakC = carryover ? carryover.peakC : null;
+    cook.restDone = false;
+
+    if (session) {
+        session.restStartedAt = new Date(cook.restStartedAt).toISOString();
+        session.restEndedAt = null;
+        session.updatedAt = new Date().toISOString();
+        if (typeof saveSessions === "function") saveSessions();
+    }
+    if (typeof saveAppState === "function") saveAppState();
+    render();
+}
+
+function finishRest(notify) {
+    const cook = appState.cook;
+    cook.restDone = true;
+
+    const session = typeof getCurrentSession === "function" ? getCurrentSession() : null;
+    if (session) {
+        session.restEndedAt = new Date().toISOString();
+        session.updatedAt = session.restEndedAt;
+        if (typeof saveSessions === "function") saveSessions();
+    }
+    if (typeof saveAppState === "function") saveAppState();
+
+    if (notify && typeof sendNotification === "function") {
+        sendNotification("Rest finished", "Time to slice and serve.", "rest-done");
+    }
+    render();
+}
+
+function checkRestTimer() {
+    const cook = appState.cook;
+    if (!cook.active) return;
+
+    if (!cook.restStartedAt) {
+        const meat = appState.probes.find(probe => probe.type === "meat");
+        const target = Number(cook.meatTarget);
+        if (
+            meat && Number.isFinite(target) && target > 0 &&
+            Number(meat.temperature) >= target &&
+            Number.isFinite(meat.lastSeen) && Date.now() - meat.lastSeen <= PROBE_STALE_MS &&
+            isFinalPhase()
+        ) {
+            startRest(meat);
+        }
+        return;
+    }
+
+    if (!cook.restDone && Date.now() - cook.restStartedAt >= cook.restDurationMs) {
+        finishRest(true);
+    }
+}
+
+function adjustRestMinutes(delta) {
+    const cook = appState.cook;
+    if (!cook.restStartedAt || cook.restDone) return;
+
+    const minutes = Math.min(
+        REST_MAX_MINUTES,
+        Math.max(REST_MIN_MINUTES, Math.round(cook.restDurationMs / 60000) + delta)
+    );
+    cook.restDurationMs = minutes * 60000;
+    appState.settings.restMinutes = minutes;
+    if (typeof saveAppState === "function") saveAppState();
+    render();
+}
+
+function endRest() {
+    if (appState.cook.restStartedAt && !appState.cook.restDone) finishRest(false);
+}
+
+function formatRestCountdown(ms) {
+    const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    const mmss = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    return hours ? `${hours}:${mmss}` : mmss;
+}
+
+function restCountdownText() {
+    const cook = appState.cook;
+    return formatRestCountdown(cook.restStartedAt + cook.restDurationMs - Date.now());
+}
+
+function renderRestCardHtml() {
+    const cook = appState.cook;
+    if (!cook.active || !cook.restStartedAt) return "";
+
+    const carryover = cook.restCarryoverC == null
+        ? "Carryover can't be estimated, so keep an eye on the core."
+        : cook.restCarryoverC < 0.5
+            ? "The core was flat, so little carryover is expected."
+            : `Core may still climb about ${formatTempDelta(cook.restCarryoverC)} (to ≈ ${formatTemp(cook.restPeakC)}).`;
+
+    if (cook.restDone) {
+        const minutes = Math.round(cook.restDurationMs / 60000);
+        return `
+    <div class="rest-card rest-done">
+        <div class="rest-head"><span>Rest finished</span><strong>${minutes} min</strong></div>
+        <p class="rest-sub">Time to slice and serve.</p>
+    </div>`;
+    }
+
+    return `
+    <div class="rest-card">
+        <div class="rest-head">
+            <span>Resting · ${Math.round(cook.restDurationMs / 60000)} min</span>
+            <strong data-rest-countdown>${restCountdownText()}</strong>
+        </div>
+        <p class="rest-sub">${carryover}</p>
+        <div class="rest-actions">
+            <button class="button secondary" onclick="adjustRestMinutes(-${REST_STEP_MINUTES})">−${REST_STEP_MINUTES} min</button>
+            <button class="button secondary" onclick="adjustRestMinutes(${REST_STEP_MINUTES})">+${REST_STEP_MINUTES} min</button>
+            <button class="button secondary" onclick="endRest()">End rest</button>
+        </div>
+    </div>`;
+}
+
+window.adjustRestMinutes = adjustRestMinutes;
+window.endRest = endRest;
+
 let activeCookChart = null;
 
 function ensureActiveCookChart() {
@@ -823,7 +978,7 @@ function ensureActiveCookChart() {
         return null;
     }
 
-    if (activeCookChart && activeCookChart.canvas === canvas) {
+    if (activeCookChart && activeCookChart.canvas === canvas && activeCookChart._bbqUnit === getTemperatureUnit()) {
         return activeCookChart;
     }
 
@@ -894,13 +1049,14 @@ function ensureActiveCookChart() {
                 },
                 y: {
                     grid: { color: "rgba(242,235,221,.08)" },
-                    ticks: { color: "#918678" },
-                    title: { display: true, text: "°C", color: "#918678" }
+                    ticks: { color: "#918678", callback: value => Math.round(celsiusToDisplay(value)) },
+                    title: { display: true, text: temperatureUnitLabel(), color: "#918678" }
                 }
             }
         }
     });
 
+    activeCookChart._bbqUnit = getTemperatureUnit();
     activeCookChart._bbqSampleCount = 0;
     if (typeof bindChartTooltipDismiss === "function") {
         bindChartTooltipDismiss(canvas, () => activeCookChart);
@@ -967,6 +1123,7 @@ setInterval(() => {
 
         updateLiveUi();
         updateActiveCookChart();
+        checkRestTimer();
 
     } else if (pruneStaleProbeReadings()) {
 

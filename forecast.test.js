@@ -2,7 +2,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const vm = require("node:vm");
-const { estimateCoreForecast, FORECAST_CONFIG } = require("./forecast");
+const { estimateCoreForecast, estimateCarryover, CARRYOVER_CONFIG, FORECAST_CONFIG } = require("./forecast");
 
 const minute = 60 * 1000;
 const now = 60 * minute;
@@ -95,4 +95,20 @@ test("dashboard suppresses forecasts when the meat probe is missing or stale", (
     probe.temperature = null;
     assert.equal(context.getMeatForecast().state, "unavailable");
     assert.match(context.renderForecastHtml({ state: "too-long" }), /exceeds 24 hours/);
+});
+
+test("carryover follows the recent slope and is capped", () => {
+    const steady = historyFor({ meat: i => 60 + i * 0.3 });
+    const result = estimateCarryover({ history: steady, meatTemp: steady.at(-1).meat, now });
+    assert.ok(Math.abs(result.deltaC - 3) < 0.3);
+    assert.ok(Math.abs(result.peakC - (steady.at(-1).meat + result.deltaC)) < 1e-9);
+
+    const fast = historyFor({ meat: i => 30 + i * 2 });
+    assert.equal(estimateCarryover({ history: fast, meatTemp: fast.at(-1).meat, now }).deltaC, CARRYOVER_CONFIG.maxDeltaC);
+});
+
+test("carryover is zero when the core is flat and unknown without data", () => {
+    const flat = historyFor({ meat: () => 70 });
+    assert.equal(estimateCarryover({ history: flat, meatTemp: 70, now }).deltaC, 0);
+    assert.equal(estimateCarryover({ history: [], meatTemp: 70, now }), null);
 });

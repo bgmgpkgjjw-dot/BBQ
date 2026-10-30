@@ -114,9 +114,14 @@ const appState = {
     // AI Recepeten
     ai: {
         ingredients: "",
-        category: "anything",
+        category: "Anything",
+        servings: 4,
+        maxHours: "",
         loading: false,
+        error: null,
+        ideas: [],
         results: [],
+        refineText: "",
         savedRecipes: []
     },
 
@@ -170,6 +175,19 @@ const appState = {
         lastPhaseChange: null,
 
         completedPhases: [],
+
+
+        // Rest timer: starts when the core reaches its final target
+
+        restStartedAt: null,
+
+        restDurationMs: null,
+
+        restCarryoverC: null,
+
+        restPeakC: null,
+
+        restDone: false,
 
 
         // For future expansion
@@ -320,13 +338,23 @@ const appState = {
 
         simulator: false,
 
-        keepScreenAwake: true
+        keepScreenAwake: true,
+
+        restMinutes: 30
 
     },
 
 
 };
 
+
+function clearRestState() {
+    appState.cook.restStartedAt = null;
+    appState.cook.restDurationMs = null;
+    appState.cook.restCarryoverC = null;
+    appState.cook.restPeakC = null;
+    appState.cook.restDone = false;
+}
 
 function recordAlert(type, message) {
 

@@ -355,6 +355,8 @@ function startCookSession() {
         alertState.fired.clear();
     }
 
+    clearRestState();
+
     const session = {
 
         id:
@@ -675,7 +677,13 @@ function loadAppState() {
         }
 
         if(saved.ai){
-            appState.ai = saved.ai;
+            appState.ai = {
+                ...appState.ai,
+                ...saved.ai,
+                loading: false,
+                error: null,
+                category: saved.ai.category === "anything" ? "Anything" : (saved.ai.category || "Anything")
+            };
         }
 
         if(saved.network){

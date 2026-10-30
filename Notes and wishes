@@ -17,7 +17,7 @@
   estimate with the actual finish time, check the stall flag and the
   "30 minutes to go" notification, then tune thresholds in forecast.js.
 - [DONE] Step 2: dome stability, drift/overshoot alerts, lid-open detection.
-- [DONE] Cook journal: rating, notes, next time, photos. Rest timer is still open.
+- [DONE] Cook journal: rating, notes, next time, photos. Rest timer is done.
 
 # App improvements
 Order matters. Do not start fan/blower control, Apple Watch, or accounts yet.
@@ -29,9 +29,11 @@ Order matters. Do not start fan/blower control, Apple Watch, or accounts yet.
 - [ ] Name probes 3–6 and give each an independent target and ETA. Slots exist
   in state.js but are unused. A brisket needs a flat and a point, not one
   "Meat" probe.
-- [ ] Apply the °F/°C setting. temperatureUnit is stored and never used.
-- [ ] Rest timer when the core hits target, plus a short carryover estimate
-  from the last slope ("it will climb about 4°"). No physics model.
+- [DONE] Apply the °F/°C setting (Settings > Appearance). Data stays in °C;
+  display, target inputs, charts, notifications and recipe text convert.
+- [DONE] Rest timer when the core hits the final phase target, plus a carryover
+  estimate from the last 10 minutes of slope (capped at 8°C). Length adjustable
+  in 5 min steps; notification when the rest ends.
 - [DONE] Lid openings are flagged on the cook and history charts. Tap the
   flag to say why it was opened. Wrap / spritz / sauce markers are still open.
 - [DONE] Share a cook card with friends: name, date, duration, rating, peaks

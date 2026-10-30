@@ -3,6 +3,7 @@ const https = require("https");
 const fs = require("fs");
 const path = require("path");
 const Database = require("better-sqlite3");
+const recipeAi = require("./recipe-ai");
 
 const port = Number(process.env.BBQ_STORAGE_PORT || 8090);
 const dataDirectory = process.env.BBQ_DATA_DIR || path.join(require("os").homedir(), "bbq-data");
@@ -200,86 +201,11 @@ function handlePhotoRequest(request, response, requestUrl) {
     });
 }
 
-function buildRecipePrompt(ingredients, category) {
-    return `
-        You are a professional Kamado BBQ chef. Generate exactly 3 recipes using the ingredients and style below.
-
-        RECIPE MIX (strict):
-        - 2 of the 3 recipes must be classic, well-known, low-effort Kamado dishes — the kind of recipes that show up constantly on Big Green Egg, Kamado Joe, and Smokey Goodness content (e.g. pulled pork, ribs, chicken thighs, smoked salmon, pizza, burgers). Simple ingredient lists, minimal steps, no unusual techniques.
-        - 1 of the 3 recipes may be more "surprising" — a twist on a classic or a less common cut/method — but it must still be realistic for a home Kamado grill with normal supermarket ingredients. No fusion cuisine, no molecular techniques, no hard-to-find ingredients.
-
-        LABOR CONSTRAINT:
-        - Prefer recipes with 5-8 steps and default difficulty "Easy" or "Medium." Avoid multi-day brines/marinades or techniques requiring special equipment unless the recipe style explicitly calls for it.
-
-        TEMPERATURE RULES:
-        - "dome_temperature" = required dome/cooking temperature in Celsius, always filled in (e.g. "180°C"). Never leave blank.
-        - "target_temperature" = required internal meat temperature in Celsius, or null if not applicable.
-
-        PHASES:
-        - Include multiple phases only when the recipe naturally has them (e.g. pulled pork: Smoke → Wrap → Finish; brisket: Smoke → Wrap → Rest; ribs: Smoke → Wrap → Sauce).
-        - Simple recipes (burgers, veg, fish) should have a single phase.
-
-        Available ingredients: ${ingredients}
-        Recipe style: ${category}
-
-        Return ONLY valid JSON, no commentary, in this exact format:
-
-        [
-        {
-            "title": "",
-            "description": "",
-            "dome_temperature": "180°C",
-            "target_temperature": "72°C",
-            "duration": "45 minutes",
-            "difficulty": "Easy",
-            "phases": [
-            { "name": "Smoke", "dome_temperature": 120, "target_temperature": 75 },
-            { "name": "Wrap", "dome_temperature": 130, "target_temperature": 92 }
-            ],
-            "ingredients": [],
-            "steps": []
-        }
-        ]
-    `;
-}
-
-async function generateRecipes(ingredients, category) {
-    if (!openRouterApiKey) {
-        throw new Error("AI recipes are not configured on this server (missing OPENROUTER_API_KEY)");
-    }
-
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-            "Authorization": `Bearer ${openRouterApiKey}`,
-            "Content-Type": "application/json",
-            "X-Title": "Hermanos Grill Companion"
-        },
-        body: JSON.stringify({
-            model: "openrouter/free",
-            messages: [{ role: "user", content: buildRecipePrompt(ingredients, category) }]
-        })
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-        throw new Error(JSON.stringify(data));
-    }
-
-    let text = data?.choices?.[0]?.message?.content;
-    if (!text) {
-        throw new Error(JSON.stringify(data));
-    }
-
-    text = text.replace(/```json|```/g, "");
-    return JSON.parse(text);
-}
-
 function sendJson(response, status, body) {
     response.writeHead(status, {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Methods": "GET, PUT, POST, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, X-BBQ-Token, X-BBQ-Device-Id"
     });
     response.end(JSON.stringify(body));
@@ -332,18 +258,23 @@ const server = (tlsOptions ? https : http).createServer(tlsOptions || {}, (reque
         request.setEncoding("utf8");
         request.on("data", chunk => {
             requestBody += chunk;
-            if (requestBody.length > 10 * 1024) {
+            if (requestBody.length > 32 * 1024) {
                 request.destroy();
             }
         });
         request.on("end", async () => {
             try {
-                const { ingredients, category } = JSON.parse(requestBody);
-                const recipes = await generateRecipes(ingredients || "", category || "anything");
-                sendJson(response, 200, { recipes });
+                const body = JSON.parse(requestBody);
+                const mode = ["ideas", "recipe", "refine"].includes(body.mode) ? body.mode : null;
+                if (!mode) {
+                    sendJson(response, 400, { error: "mode must be ideas, recipe or refine" });
+                    return;
+                }
+                sendJson(response, 200, await recipeAi.generate(mode, body, { apiKey: openRouterApiKey }));
             } catch (error) {
                 console.error("Unable to generate AI recipes", error);
-                sendJson(response, 502, { error: error.message });
+                const status = error instanceof recipeAi.RecipeAiError ? error.status : 400;
+                sendJson(response, status, { error: error.message });
             }
         });
         return;

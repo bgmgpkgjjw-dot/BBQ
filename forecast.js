@@ -185,11 +185,40 @@ function estimateCoreForecast({ history, meatTemp, target, now = Date.now(), coo
     };
 }
 
+/*
+   Carryover: how much the core is likely to keep climbing after it is taken
+   off the heat. Deliberately simple, with no physics model: the slope over
+   the last few minutes carries on for about CARRYOVER_CONFIG.minutes, capped.
+   Returns { deltaC, peakC, slopePerMin } or null without enough recent data.
+*/
+const CARRYOVER_CONFIG = {
+    windowMs: 10 * 60 * 1000,
+    minutes: 10,
+    maxDeltaC: 8,
+    minSlopePerMin: 0.05
+};
+
+function estimateCarryover({ history, meatTemp, now = Date.now() }) {
+    if (!Number.isFinite(meatTemp) || meatTemp <= 0) return null;
+
+    const samples = forecastValidSamples(history, now);
+    const slope = forecastSlope(samples, now, CARRYOVER_CONFIG.windowMs);
+    if (!slope) return null;
+
+    const rising = slope.slope >= CARRYOVER_CONFIG.minSlopePerMin;
+    const deltaC = rising
+        ? Math.min(CARRYOVER_CONFIG.maxDeltaC, slope.slope * CARRYOVER_CONFIG.minutes)
+        : 0;
+
+    return { deltaC, peakC: meatTemp + deltaC, slopePerMin: slope.slope };
+}
+
 if (typeof window !== "undefined") {
+    window.estimateCarryover = estimateCarryover;
     window.estimateCoreForecast = estimateCoreForecast;
     window.formatForecastDuration = formatForecastDuration;
 }
 
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { estimateCoreForecast, formatForecastDuration, FORECAST_CONFIG };
+    module.exports = { estimateCoreForecast, estimateCarryover, formatForecastDuration, FORECAST_CONFIG, CARRYOVER_CONFIG };
 }

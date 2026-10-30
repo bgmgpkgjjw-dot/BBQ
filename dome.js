@@ -235,6 +235,15 @@ function mergeLidEvents(events, detected) {
     return { events: next, changed };
 }
 
+// units.js is not loaded when this file is required from Node.
+function domeTemperature(celsius) {
+    return typeof formatTemp === "function" ? formatTemp(celsius) : `${Math.round(celsius)}°C`;
+}
+
+function domeDegrees(delta) {
+    return typeof formatTempDelta === "function" ? formatTempDelta(delta) : `${Math.round(delta)}°C`;
+}
+
 function ventAdvice(analysis, { target = null, current = null, limit = 8 } = {}) {
     if (!analysis) return null;
 
@@ -269,7 +278,7 @@ function ventAdvice(analysis, { target = null, current = null, limit = 8 } = {})
         return {
             title: "Dome rising fast",
             short: "Rising fast · close the bottom vent",
-            body: `Close the bottom vent to a crack${knownTarget != null ? ` before it reaches ${knownTarget}°C` : ""}. The ceramic keeps heating after the vent is closed.`
+            body: `Close the bottom vent to a crack${knownTarget != null ? ` before it reaches ${domeTemperature(knownTarget)}` : ""}. The ceramic keeps heating after the vent is closed.`
         };
     }
 
@@ -293,7 +302,7 @@ function ventAdvice(analysis, { target = null, current = null, limit = 8 } = {})
         return {
             title: "Dome drifting high",
             short: "A little hot · close the bottom vent a touch",
-            body: `Averaging ${Math.abs(analysis.offset).toFixed(0)}°C above target. Close the bottom vent a touch and leave the top daisy wheel.`
+            body: `Averaging ${domeDegrees(Math.abs(analysis.offset))} above target. Close the bottom vent a touch and leave the top daisy wheel.`
         };
     }
 
@@ -301,7 +310,7 @@ function ventAdvice(analysis, { target = null, current = null, limit = 8 } = {})
         return {
             title: "Dome drifting low",
             short: "A little low · open the bottom vent",
-            body: `Averaging ${Math.abs(analysis.offset).toFixed(0)}°C below target. Open the bottom vent about a pencil width. Leave the top daisy wheel.`
+            body: `Averaging ${domeDegrees(Math.abs(analysis.offset))} below target. Open the bottom vent about a pencil width. Leave the top daisy wheel.`
         };
     }
 

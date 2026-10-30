@@ -460,9 +460,17 @@ function settingsView() {
             Current theme: ${appState.theme.brand}
         </p>
 
-        <p style="color:var(--muted)">
-            Temperatuureenheid: ${appState.settings.temperatureUnit === "C" ? "Celsius" : "Fahrenheit"}
-        </p>
+        <label style="display:block; margin-top:16px;">
+            Temperature unit
+        </label>
+
+        <select
+            class="button theme-select"
+            onchange="setTemperatureUnit(this.value)"
+        >
+            <option value="C" ${getTemperatureUnit() === "C" ? "selected" : ""}>Celsius (°C)</option>
+            <option value="F" ${getTemperatureUnit() === "F" ? "selected" : ""}>Fahrenheit (°F)</option>
+        </select>
 
         <hr style="margin: 16px 0; border: none; border-top: 1px solid var(--border);">
 

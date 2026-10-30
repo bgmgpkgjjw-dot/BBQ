@@ -345,15 +345,11 @@ function recipeListView() {
                         >
 
                             <h2>
-                                ${recipe.title}
+                                ${aiEscape(recipe.title)}
                             </h2>
 
                             <p>
-                                ${recipe.dome_temperature ?? recipe.temperature ?? "--"}
-                                ·
-                                ${recipe.target_temperature ? `${recipe.target_temperature}°C target` : "No target"}
-                                ·
-                                ${recipe.duration || "--"}
+                                ${aiRecipeSummaryLine(recipe) || "--"}
                             </p>
 
                         </div>
@@ -393,7 +389,7 @@ function recipeListView() {
                             <p>
                                 ${recipe.meat}
                                 ·
-                                ${recipe.dome}°C
+                                ${formatTemp(recipe.dome)}
                                 ·
                                 ${recipe.duration}
                             </p>
@@ -493,7 +489,7 @@ ${recipe.category}
 
 <p>
 Dome:
-<strong>${recipe.dome}°C</strong>
+<strong>${formatTemp(recipe.dome)}</strong>
 </p>
 
 
@@ -502,7 +498,7 @@ ${recipe.target
             `
 <p>
 Kern:
-<strong>${recipe.target}°C</strong>
+<strong>${formatTemp(recipe.target)}</strong>
 </p>
 `
             : ""
@@ -614,7 +610,7 @@ ${formatAmount(item)}
 <ol class="setup-list">
 
 ${recipe.setup.map(
-            step => `<li>${step}</li>`
+            step => `<li>${localizeTemperatureText(step)}</li>`
         ).join("")
         }
 
@@ -644,7 +640,7 @@ ${phase.name}
 
 
 <strong>
-${phase.description || `${phase.domeTarget ?? "—"}°C dome${phase.meatTarget != null ? ` · ${phase.meatTarget}°C core` : ""}`}
+${localizeTemperatureText(phase.description) || `${formatTemp(phase.domeTarget)} dome${phase.meatTarget != null ? ` · ${formatTemp(phase.meatTarget)} core` : ""}`}
 </strong>
 
 </div>

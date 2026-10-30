@@ -53,6 +53,7 @@ function loadHistoryHelpers() {
         setTimeout() {},
         clearTimeout() {}
     });
+    vm.runInContext(fs.readFileSync(require.resolve("./units.js"), "utf8"), context);
     vm.runInContext(fs.readFileSync(require.resolve("./history.js"), "utf8"), context);
     return context;
 }
@@ -106,4 +107,21 @@ test("cooking like last time copies the plan, not the journal", () => {
     assert.equal(settings.notes, undefined);
     assert.equal(settings.photos, undefined);
     assert.equal(settings.temperatureHistory, undefined);
+});
+
+test("temperatures follow the chosen unit, stored values stay in Celsius", () => {
+    const context = vm.createContext({ console, appState: { settings: { temperatureUnit: "F" } } });
+    vm.runInContext(fs.readFileSync(require.resolve("./units.js"), "utf8"), context);
+
+    assert.equal(context.formatTemp(100), "212°F");
+    assert.equal(context.formatTempDelta(5, 1), "9.0°");
+    assert.equal(context.targetInputValue(93.3333), "200");
+    assert.ok(Math.abs(context.displayToCelsius("203") - 95) < 1e-9);
+    assert.equal(context.localizeTemperatureText("Stabilize at 120°C or 110-130°C"), "Stabilize at 248°F or 230-266°F");
+
+    context.appState.settings.temperatureUnit = "C";
+    assert.equal(context.formatTemp(100), "100°C");
+    assert.equal(context.displayToCelsius("95"), 95);
+    assert.equal(context.displayToCelsius(""), null);
+    assert.equal(context.localizeTemperatureText("120°C"), "120°C");
 });

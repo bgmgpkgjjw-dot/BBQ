@@ -224,7 +224,7 @@ function checkMeatTarget(meat) {
 
         sendNotification(
             "Target reached",
-            `${meat.name} reached ${meat.temperature.toFixed(1)}°C`,
+            `${meat.name} reached ${formatTemp(meat.temperature, 1)}`,
             key
         );
     }
@@ -266,7 +266,7 @@ function checkDomeStability(dome) {
     ) {
         sendNotification(
             advice?.title || (analysis.offset < 0 ? "Dome drifting low" : "Dome drifting high"),
-            advice?.body || `Averaging ${Math.abs(analysis.offset).toFixed(0)}°C ${analysis.offset < 0 ? "below" : "above"} target.`,
+            advice?.body || `Averaging ${formatTempDelta(Math.abs(analysis.offset))} ${analysis.offset < 0 ? "below" : "above"} target.`,
             "dome-drift"
         );
     }
@@ -430,7 +430,7 @@ function checkMeatForecast(meat) {
         alertState.fired.add("meat-stall");
         sendNotification(
             "Stall detected",
-            `${meat.name} is plateauing at ${meat.temperature.toFixed(1)}°C. This is normal, so be patient.`,
+            `${meat.name} is plateauing at ${formatTemp(meat.temperature, 1)}. This is normal, so be patient.`,
             "meat-stall"
         );
     }
@@ -445,7 +445,7 @@ function checkMeatForecast(meat) {
         alertState.fired.add("meat-eta-30");
         sendNotification(
             "About 30 minutes to go",
-            `${meat.name} should reach ${appState.cook.meatTarget}°C in about ${formatForecastDuration(forecast.etaMs)}`,
+            `${meat.name} should reach ${formatTemp(appState.cook.meatTarget)} in about ${formatForecastDuration(forecast.etaMs)}`,
             "meat-eta-30"
         );
     }
@@ -479,7 +479,7 @@ function checkApproachingMeatTarget(meat) {
 
         sendNotification(
             "Core approaching target",
-            `${meat.name} at ${meat.temperature.toFixed(1)}°C, target is ${target}°C`,
+            `${meat.name} at ${formatTemp(meat.temperature, 1)}, target is ${formatTemp(target)}`,
             key
         );
     }
@@ -513,7 +513,7 @@ function checkApproachingDomeTarget(dome) {
 
         sendNotification(
             "Dome approaching target",
-            `${dome.temperature.toFixed(1)}°C, target is ${target}°C`,
+            `${formatTemp(dome.temperature, 1)}, target is ${formatTemp(target)}`,
             key
         );
     }
