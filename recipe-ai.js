@@ -303,7 +303,11 @@ function validateRecipe(raw) {
 
 /* ---------- model calls ---------- */
 
-async function callModel({ model, messages, schemaName, schema, apiKey, fetchImpl, signal }) {
+async function callModel({ model, messages, schemaName, schema, apiKey, fetchImpl, signal, plain = false }) {
+    // Some free models reject json_schema; plain mode relies on the prompt and our own validation.
+    const format = plain
+        ? {}
+        : { response_format: { type: "json_schema", json_schema: { name: schemaName, strict: true, schema } } };
     const response = await fetchImpl("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         signal,
@@ -316,10 +320,7 @@ async function callModel({ model, messages, schemaName, schema, apiKey, fetchImp
             model,
             messages,
             temperature: 0.4,
-            response_format: {
-                type: "json_schema",
-                json_schema: { name: schemaName, strict: true, schema }
-            }
+            ...format
         })
     });
 
@@ -356,6 +357,7 @@ async function runTask({ schemaName, schema, messages, validate, apiKey, models,
 
     const deadline = now() + LIMITS.totalBudgetMs;
     const failures = [];
+    const plainModels = new Set();
 
     for (const model of models) {
         let conversation = messages;
@@ -370,7 +372,13 @@ async function runTask({ schemaName, schema, messages, validate, apiKey, models,
             let text = null;
 
             try {
-                text = await callModel({ model, messages: conversation, schemaName, schema, apiKey, fetchImpl, signal: controller.signal });
+                try {
+                    text = await callModel({ model, messages: conversation, schemaName, schema, apiKey, fetchImpl, signal: controller.signal, plain: plainModels.has(model) });
+                } catch (error) {
+                    if (plainModels.has(model) || !/response_format|json_schema|structured|schema/i.test(error.message)) throw error;
+                    plainModels.add(model);
+                    text = await callModel({ model, messages: conversation, schemaName, schema, apiKey, fetchImpl, signal: controller.signal, plain: true });
+                }
                 return { result: validate(extractJson(text)), model };
             } catch (error) {
                 if (error instanceof RecipeAiError && !error.retryable) throw error;
@@ -390,6 +398,7 @@ async function runTask({ schemaName, schema, messages, validate, apiKey, models,
         }
     }
 
+    console.error("All AI models failed:", failures);
     throw new RecipeAiError(`No AI model could answer right now. ${failures.slice(-3).join("; ")}`);
 }
 
