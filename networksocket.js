@@ -10,6 +10,7 @@
 let networkSocket = null;
 let reconnectTimer = null;
 let reconnectAttempts = 0;
+let networkPacketHasReadings = false;
 const RECONNECT_BASE_INTERVAL = 2000; // 2 seconds
 const RECONNECT_MAX_INTERVAL = 30000; // cap backoff at 30 seconds
 const NETWORK_PACKET_STALE_MS = 10000;
@@ -59,17 +60,8 @@ function getNetworkLastPacketText() {
     return `Last packet: ${new Date(lastPacketTime).toLocaleTimeString()}`;
 }
 
-function updateNetworkHealthUi() {
-    const status = document.querySelector("[data-live-status]");
-    if (!status) {
-        return;
-    }
-
-    const networkHealth = getNetworkHealth();
-    const isLive = networkHealth === "Receiving data";
-    const isDemo = typeof isSimulatorActive === "function" && isSimulatorActive();
-    status.textContent = isDemo ? "Demo mode" : isLive ? "Live" : "Not connected";
-    status.className = `status ${isLive ? "live" : "stale"}`;
+function hasNetworkTemperatureReadings() {
+    return networkPacketHasReadings;
 }
 
 function initNetworkSocket(serverAddress) {
@@ -92,6 +84,8 @@ function initNetworkSocket(serverAddress) {
             appState.network.status = "Connected";
             appState.network.error = "";
             appState.network.lastConnectedAt = new Date().toISOString();
+            appState.network.lastUpdatedAt = null;
+            networkPacketHasReadings = false;
             reconnectAttempts = 0;
             saveAppState();
             render();
@@ -161,6 +155,7 @@ function processNetworkPayload(payload) {
     */
 
     let updated = false;
+    let hasReadings = false;
 
     // Map dome temperature to Probe 1
     // Network format: raw value (like Bluetooth), divide by 10 to get Celsius
@@ -181,6 +176,7 @@ function processNetworkPayload(payload) {
                 probe.lastSeen = Date.now();
                 probe.online = true;
                 updated = true;
+                hasReadings = true;
                 console.log("Network: Dome temperature", temp, "°C (raw:", raw, ")");
             }
         }
@@ -204,6 +200,7 @@ function processNetworkPayload(payload) {
                 probe.lastSeen = Date.now();
                 probe.online = true;
                 updated = true;
+                hasReadings = true;
                 console.log("Network: Probe 1 (Meat) temperature", temp, "°C (raw:", raw, ")");
             }
         }
@@ -227,6 +224,7 @@ function processNetworkPayload(payload) {
                 probe.lastSeen = Date.now();
                 probe.online = true;
                 updated = true;
+                hasReadings = true;
                 console.log("Network: Probe 2 temperature", temp, "°C (raw:", raw, ")");
             }
         }
@@ -244,6 +242,7 @@ function processNetworkPayload(payload) {
 
     appState.network.lastUpdatedAt = new Date().toISOString();
     appState.network.lastPayload = JSON.stringify(payload);
+    networkPacketHasReadings = hasReadings;
     saveAppState();
 
     if (typeof checkAlerts === "function") {
@@ -311,4 +310,4 @@ window.setNetworkSocketEnabled = setNetworkSocketEnabled;
 window.getNetworkHealth = getNetworkHealth;
 window.getNetworkLastPacketText = getNetworkLastPacketText;
 
-setInterval(updateNetworkHealthUi, 1000);
+setInterval(updateDashboardConnectionStatus, 1000);

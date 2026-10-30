@@ -43,6 +43,8 @@ Set your own `OPENROUTER_API_KEY` in `/etc/bbq/bbq.env` to enable AI recipe sugg
 
 The Pi gateway auto-detects a thermometer advertising the `ffb0` service (or named `Grill…`). To pin a specific unit, add `BBQ_BLE_ADDRESS=AA:BB:CC:DD:EE:FF` to `/etc/bbq/bbq.env` and run `sudo systemctl restart btgateway`. The thermometer accepts one connection at a time, so close other apps first.
 
+The dashboard reports the Pi connection separately from thermometer readings. “Thermometer not connected or no readings” means the Pi is reachable but has no recent readings; it does not confirm the thermometer's Bluetooth connection state.
+
 Direct phone Bluetooth needs a Web Bluetooth browser (Chrome on Android, Bluefy on iOS) and lists all nearby devices.
 
 ## Ports

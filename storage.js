@@ -672,7 +672,11 @@ function loadAppState() {
         }
 
         if(saved.network){
-            appState.network = saved.network;
+            appState.network = {
+                ...saved.network,
+                connected: false,
+                status: saved.network.enabled ? "Connecting" : "Disabled"
+            };
         }
 
         if (saved.bluetooth) {

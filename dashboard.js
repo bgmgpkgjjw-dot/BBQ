@@ -142,26 +142,45 @@ function renderForecastHtml(forecast) {
     return `<span class="eta-sub">Collecting data for a time estimate…</span>`;
 }
 
-function updateLiveUi() {
-    const status = document.querySelector("[data-live-status]");
-
-    if (status) {
-        if (typeof isSimulatorActive === "function" && isSimulatorActive()) {
-            status.textContent = "Demo mode";
-            status.className = "status live";
-        } else if (appState.network.enabled && typeof getNetworkHealth === "function") {
-            const networkHealth = getNetworkHealth();
-            status.textContent = networkHealth === "Receiving data"
-                ? "Live"
-                : "Not connected";
-            status.className = `status ${networkHealth === "Receiving data" ? "live" : "stale"}`;
-        } else {
-            status.textContent = appState.bluetooth.connected
-                ? `${appState.bluetooth.device || "Bluetooth"} connected`
-                : "Not connected";
-            status.className = "status";
-        }
+function getDashboardConnectionStatus() {
+    if (typeof isSimulatorActive === "function" && isSimulatorActive()) {
+        return { text: "Demo mode", className: "status live" };
     }
+
+    if (appState.network.enabled) {
+        if (!appState.network.connected) {
+            return { text: "Pi not connected", className: "status stale" };
+        }
+
+        const health = getNetworkHealth();
+        if (health === "Connected, waiting for data") {
+            return { text: "Pi connected · Waiting for thermometer data", className: "status" };
+        }
+        if (health !== "Receiving data") {
+            return { text: "Pi connected · No recent data from Pi", className: "status stale" };
+        }
+        if (!hasNetworkTemperatureReadings()) {
+            return { text: "Pi connected · Thermometer not connected or no readings", className: "status stale" };
+        }
+        return { text: "Pi connected · Live", className: "status live" };
+    }
+
+    return appState.bluetooth.connected
+        ? { text: "Thermometer connected", className: "status live" }
+        : { text: "Thermometer not connected", className: "status" };
+}
+
+function updateDashboardConnectionStatus() {
+    const status = document.querySelector("[data-live-status]");
+    if (status) {
+        const connection = getDashboardConnectionStatus();
+        status.textContent = connection.text;
+        status.className = connection.className;
+    }
+}
+
+function updateLiveUi() {
+    updateDashboardConnectionStatus();
 
     document.querySelectorAll("[data-probe-temperature]").forEach(el => {
 
@@ -488,21 +507,15 @@ function dashboardView() {
             p.type !== "unused"
         );
 
+    const connection = getDashboardConnectionStatus();
+
     return `
 
         <div
-            class="status ${appState.network.enabled ? "stale" : ""}"
+            class="${connection.className}"
             data-live-status
         >
-            ${
-                typeof isSimulatorActive === "function" && isSimulatorActive()
-                    ? "Demo mode"
-                    : appState.network.enabled
-                    ? "Not connected"
-                    : appState.bluetooth.connected
-                    ? "Connected"
-                    : "Not connected"
-            }
+            ${connection.text}
         </div>
 
         <div class="probe-container">
