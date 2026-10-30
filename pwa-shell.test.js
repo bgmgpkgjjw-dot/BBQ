@@ -14,7 +14,7 @@ test("service worker precaches every local script the page loads", () => {
     for (const src of scripts) {
         assert.ok(sw.includes(`'./${src}'`), `missing ${src}`);
     }
-    assert.match(sw, /bbq-pwa-v25/);
+    assert.match(sw, /bbq-pwa-v26/);
 });
 
 test("history chart rebuilds when the canvas or target changed", () => {

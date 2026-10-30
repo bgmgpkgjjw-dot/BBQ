@@ -238,34 +238,48 @@ function checkDomeStability(dome) {
     const analysis = getDomeAnalysis();
     if (!analysis) return;
 
+    const advice = domeVentAdvice(analysis, dome);
+
     if (analysis.lidOpen && analysis.lidOpenMs >= 3 * 60 * 1000 && shouldTriggerAlert("lid-open", 10)) {
         sendNotification(
             "Lid open for 3+ minutes",
-            "Close the lid to keep the temperature up.",
+            advice?.body || "Leave the bottom vent and the top daisy wheel until the lid is closed.",
             "lid-open"
         );
     }
 
     if (analysis.overshootRisk && shouldTriggerAlert("dome-overshoot", 15)) {
         sendNotification(
-            "Dome rising fast",
-            `${dome.temperature.toFixed(0)}°C and climbing towards ${appState.cook.domeTarget}°C. Close the vents now, since the ceramic keeps heating afterwards.`,
+            advice?.title || "Dome rising fast",
+            advice?.body || "Close the bottom vent to a crack. The ceramic keeps heating after it is closed.",
             "dome-overshoot"
         );
     }
 
     const limit = appState.alerts.domeDeviation;
     if (
+        !analysis.lidOpen &&
+        !analysis.recovering &&
         analysis.offset != null &&
         Math.abs(analysis.offset) >= limit / 2 &&
         shouldTriggerAlert("dome-drift", 30)
     ) {
         sendNotification(
-            analysis.offset < 0 ? "Dome drifting low" : "Dome drifting high",
-            `Averaging ${Math.abs(analysis.offset).toFixed(0)}°C ${analysis.offset < 0 ? "below" : "above"} target over the last 10 minutes.`,
+            advice?.title || (analysis.offset < 0 ? "Dome drifting low" : "Dome drifting high"),
+            advice?.body || `Averaging ${Math.abs(analysis.offset).toFixed(0)}°C ${analysis.offset < 0 ? "below" : "above"} target.`,
             "dome-drift"
         );
     }
+}
+
+function domeVentAdvice(analysis, dome) {
+    if (typeof ventAdvice !== "function") return null;
+    const current = Number(dome?.temperature);
+    return ventAdvice(analysis, {
+        target: Number(appState.cook?.domeTarget),
+        current: Number.isFinite(current) ? current : null,
+        limit: Number(appState.alerts?.domeDeviation) || 8
+    });
 }
 
 function checkDomeDeviation(
@@ -309,9 +323,13 @@ function checkDomeDeviation(
             )
         ) {
 
+            const advice = domeVentAdvice(
+                typeof getDomeAnalysis === "function" ? getDomeAnalysis() : {},
+                dome
+            );
             sendNotification(
-                "Dome too hot",
-                `${dome.temperature.toFixed(1)}°C`
+                advice?.title || "Dome too hot",
+                advice?.body || "Close the bottom vent and narrow the top daisy wheel."
             );
         }
     }
@@ -328,9 +346,13 @@ function checkDomeDeviation(
             )
         ) {
 
+            const advice = domeVentAdvice(
+                typeof getDomeAnalysis === "function" ? getDomeAnalysis() : {},
+                dome
+            );
             sendNotification(
-                "Dome too cold",
-                `${dome.temperature.toFixed(1)}°C`
+                advice?.title || "Dome too cold",
+                advice?.body || "Open the bottom vent wider. Check the top daisy wheel has not been blown closed."
             );
         }
     }

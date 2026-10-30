@@ -16,8 +16,37 @@
 - Evaluate the core ETA and stall detection after a real cook: compare the
   estimate with the actual finish time, check the stall flag and the
   "30 minutes to go" notification, then tune thresholds in forecast.js.
-- Step 2: dome stability, drift/overshoot alerts, lid-open detection.
-- Step 3: rest timer, cook notes.
+- [DONE] Step 2: dome stability, drift/overshoot alerts, lid-open detection.
+- [DONE] Cook journal: rating, notes, next time, photos. Rest timer is still open.
+
+# App improvements
+Order matters. Do not start fan/blower control, Apple Watch, or accounts yet.
+
+## Table stakes other BBQ apps already have
+- [ ] Alerts when the phone leaves the Pi's Wi-Fi (ntfy, Telegram, or the
+  outbound relay from phase 3). This is the feature people pay FireBoard
+  and Meater for.
+- [ ] Name probes 3–6 and give each an independent target and ETA. Slots exist
+  in state.js but are unused. A brisket needs a flat and a point, not one
+  "Meat" probe.
+- [ ] Apply the °F/°C setting. temperatureUnit is stored and never used.
+- [ ] Rest timer when the core hits target, plus a short carryover estimate
+  from the last slope ("it will climb about 4°"). No physics model.
+- [DONE] Lid openings are flagged on the cook and history charts. Tap the
+  flag to say why it was opened. Wrap / spritz / sauce markers are still open.
+- [DONE] Share a cook card with friends: name, date, duration, rating, peaks
+  and the first photo. Notes and "next time" stay private. CSV export is
+  still open.
+
+## What would make this app different
+- [DONE] Vent guidance: dashboard and notifications say what to do with the
+  bottom vent and top daisy wheel, including leaving them alone while the
+  lid is open.
+- [DONE] Cook like this: history loads that cook's targets and phases into a
+  new cook, and the live chart draws the previous dome and core as dashed lines.
+- [ ] Stall advice tied to the recipe: wrap now, or leave it because the bark
+  is not set. One decision, not a chatbot.
+- [ ] Danger-zone time: how long the core sat between 5°C and 60°C.
 
 # Project plan: broader availability + monetization
 Decisions: audience = hobbyist community (tens-hundreds). Start self-hosted

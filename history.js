@@ -265,8 +265,75 @@ function historyChartIsCurrent(chart, canvas, session, sampleCount) {
         chart._bbqSessionId === session.id &&
         chart._bbqSampleCount === sampleCount &&
         chart._bbqDomeTarget === session.domeTarget &&
-        chart._bbqMeatTarget === session.meatTarget
+        chart._bbqMeatTarget === session.meatTarget &&
+        (chart._bbqEvents || "") === eventSignature(session)
     );
+}
+
+function eventSignature(session) {
+    return (session?.events || [])
+        .map(event => `${event.id}:${event.timestamp}:${event.reason || ""}`)
+        .join("|");
+}
+
+function syncSessionLidEvents(session) {
+    if (!session || typeof detectLidEvents !== "function" || typeof mergeLidEvents !== "function") {
+        return false;
+    }
+
+    const samples = (session.temperatureHistory || [])
+        .filter(sample => sample && Number.isFinite(sample.timestamp) && Number.isFinite(sample.dome) && sample.dome > 0);
+    const merged = mergeLidEvents(session.events, detectLidEvents(samples).events);
+    session.events = merged.events;
+    return merged.changed;
+}
+
+function settingsFromCook(session) {
+    const phases = typeof structuredClone === "function"
+        ? structuredClone(session.phases || [])
+        : JSON.parse(JSON.stringify(session.phases || []));
+    const first = phases[0] || {};
+
+    return {
+        name: session.name || session.recipe || "New cook",
+        recipe: session.recipe || null,
+        phases,
+        domeTarget: first.domeTarget ?? session.domeTarget ?? null,
+        meatTarget: first.meatTarget ?? session.meatTarget ?? null,
+        likeSessionId: session.id
+    };
+}
+
+function cookPeaks(session) {
+    const samples = session?.temperatureHistory || [];
+    const dome = samples.map(sample => sample.dome).filter(Number.isFinite);
+    const meat = samples.map(sample => sample.meat).filter(Number.isFinite);
+
+    return {
+        dome: dome.length ? Math.max(...dome) : null,
+        meat: meat.length ? Math.max(...meat) : null
+    };
+}
+
+// Friends get the result, not the private journal.
+function shareCookText(session) {
+    const peaks = cookPeaks(session);
+    const when = session.startedAt
+        ? new Date(session.startedAt).toLocaleString("en-GB", {
+            day: "numeric",
+            month: "short",
+            year: "numeric"
+        })
+        : "";
+    const lines = [
+        session.name || session.recipe || "Cook",
+        [when, session.duration].filter(Boolean).join(" · "),
+        session.rating ? renderStars(session.rating) : "",
+        peaks.dome != null ? `Dome peak ${peaks.dome.toFixed(0)}°C` : "",
+        peaks.meat != null ? `Core peak ${peaks.meat.toFixed(0)}°C` : ""
+    ];
+
+    return lines.filter(Boolean).join("\n");
 }
 
 function historyDetailView() {
@@ -286,7 +353,9 @@ function historyDetailView() {
     const session =
         appState.sessions.find(s => s.id === selected.id) || selected;
 
-
+    if (syncSessionLidEvents(session)) {
+        saveSessions();
+    }
 
     const samples =
         session.temperatureHistory || [];
@@ -349,6 +418,11 @@ function historyDetailView() {
         ${session.rating ? `<p class="history-rating">${renderStars(session.rating)}</p>` : ""}
     </div>
 
+    <div class="action-row">
+        <button type="button" class="btn btn-primary" onclick="cookLikeThis('${session.id}')">Cook like this</button>
+        <button type="button" class="btn btn-ghost" onclick="shareCook('${session.id}')">Share</button>
+    </div>
+
     <div class="card">
 
         <h3>
@@ -397,6 +471,8 @@ function historyDetailView() {
         </div>
 
     </div>
+
+    ${renderLidEventList(session)}
 
     ${renderDomeSummaryCard(session)}
 
@@ -541,6 +617,172 @@ function downsampleTemperatureSamples(samples, maxPoints = 600) {
     });
 }
 
+function chartTooltipFilter(context) {
+    if (context.dataset.isTargetLine) return false;
+    if (context.dataset.isEvent) {
+        return context.dataset.eventMeta?.[context.dataIndex] != null;
+    }
+    return context.parsed.y != null;
+}
+
+function chartTooltipLabel(context) {
+    if (context.dataset.isEvent) {
+        const event = context.dataset.eventMeta?.[context.dataIndex];
+        if (!event) return "Lid opened";
+        return event.reason
+            ? `Lid opened · ${event.reason}`
+            : "Lid opened · tap to say why";
+    }
+
+    const value = context.parsed.y;
+    return value == null
+        ? context.dataset.label
+        : `${context.dataset.label}: ${Number(value).toFixed(1)}°C`;
+}
+
+function openLidEventFromChart(chart, elements, sessionId) {
+    const hit = elements.find(element => chart.data.datasets[element.datasetIndex]?.isEvent);
+    const event = hit && chart.data.datasets[hit.datasetIndex].eventMeta?.[hit.index];
+    if (event?.type === "lid") {
+        explainLidEvent(sessionId, event.id);
+    }
+}
+
+let lidFlagIcon = null;
+
+function getLidFlagIcon() {
+    if (lidFlagIcon || typeof document === "undefined" || !document.createElement) {
+        return lidFlagIcon;
+    }
+
+    const canvas = document.createElement("canvas");
+    if (!canvas.getContext) return null;
+
+    canvas.width = 32;
+    canvas.height = 32;
+    const ctx = canvas.getContext("2d");
+    ctx.strokeStyle = "#E2B36C";
+    ctx.fillStyle = "#E2B36C";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(8, 28);
+    ctx.lineTo(8, 4);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(8, 5);
+    ctx.lineTo(26, 11);
+    ctx.lineTo(8, 17);
+    ctx.closePath();
+    ctx.fill();
+    lidFlagIcon = canvas;
+    return canvas;
+}
+
+function eventSeries(samples, events) {
+    const data = samples.map(() => null);
+    const meta = samples.map(() => null);
+
+    for (const event of events || []) {
+        if (event.type !== "lid") continue;
+
+        let index = -1;
+        let best = Infinity;
+        samples.forEach((sample, i) => {
+            const delta = Math.abs(sample.timestamp - event.timestamp);
+            if (delta < best) {
+                best = delta;
+                index = i;
+            }
+        });
+
+        if (index < 0 || best > 8 * 60 * 1000) continue;
+        const y = Number.isFinite(samples[index].dome) ? samples[index].dome : samples[index].meat;
+        if (!Number.isFinite(y)) continue;
+        data[index] = y;
+        meta[index] = event;
+    }
+
+    return { data, meta };
+}
+
+function lidEventDataset(samples, events) {
+    const series = eventSeries(samples, events || []);
+    const icon = getLidFlagIcon();
+
+    return {
+        label: "Lid",
+        data: series.data,
+        eventMeta: series.meta,
+        isEvent: true,
+        pointStyle: icon || "triangle",
+        pointRadius: series.data.map(value => value == null ? 0 : 8),
+        pointHoverRadius: series.data.map(value => value == null ? 0 : 11),
+        borderWidth: 0,
+        showLine: false
+    };
+}
+
+function nearestReferenceSample(history, timestamp, toleranceMs) {
+    let best = null;
+    let bestDelta = Infinity;
+
+    for (const sample of history || []) {
+        if (!Number.isFinite(sample?.timestamp)) continue;
+        const delta = Math.abs(sample.timestamp - timestamp);
+        if (delta < bestDelta) {
+            best = sample;
+            bestDelta = delta;
+        }
+    }
+
+    return bestDelta <= toleranceMs ? best : null;
+}
+
+function referenceDatasets(samples, cookStartedAt, likeSessionId) {
+    if (!likeSessionId || typeof appState === "undefined") return [];
+
+    const reference = appState.sessions?.find(session => session.id === likeSessionId);
+    const start = Date.parse(cookStartedAt);
+    const referenceStart = Date.parse(reference?.startedAt);
+    if (!reference?.temperatureHistory?.length || Number.isNaN(start) || Number.isNaN(referenceStart)) {
+        return [];
+    }
+
+    const dome = [];
+    const meat = [];
+    let any = false;
+
+    for (const sample of samples) {
+        const match = nearestReferenceSample(
+            reference.temperatureHistory,
+            referenceStart + (sample.timestamp - start),
+            4 * 60 * 1000
+        );
+        dome.push(match && Number.isFinite(match.dome) ? match.dome : null);
+        meat.push(match && Number.isFinite(match.meat) ? match.meat : null);
+        if (match) any = true;
+    }
+
+    if (!any) return [];
+
+    const dashed = (label, color, data) => ({
+        label,
+        data,
+        isExtra: true,
+        borderColor: color,
+        borderDash: [4, 4],
+        borderWidth: 1.5,
+        pointRadius: 0,
+        tension: .25,
+        fill: false
+    });
+
+    return [
+        dashed("Last dome", "rgba(229,169,61,.55)", dome),
+        dashed("Last core", "rgba(77,182,165,.55)", meat)
+    ];
+}
+
 function renderHistoryDetailChart() {
 
     const session =
@@ -661,7 +903,8 @@ function renderHistoryDetailChart() {
 
                 ].concat(
                     targetDataset("Dome target", domeTarget, domeColor),
-                    targetDataset("Core target", coreTarget, coreColor)
+                    targetDataset("Core target", coreTarget, coreColor),
+                    lidEventDataset(samples, session.events)
                 )
             },
 
@@ -683,16 +926,15 @@ function renderHistoryDetailChart() {
                     },
 
                     tooltip: {
-                        filter: context => !context.dataset.isTargetLine,
+                        filter: chartTooltipFilter,
                         callbacks: {
-                            label: context => {
-                                const value = context.parsed.y;
-                                return value == null
-                                    ? context.dataset.label
-                                    : `${context.dataset.label}: ${Number(value).toFixed(1)}°C`;
-                            }
+                            label: chartTooltipLabel
                         }
                     }
+                },
+
+                onClick(event, elements) {
+                    openLidEventFromChart(this, elements, session.id);
                 },
 
                 scales: {
@@ -729,6 +971,7 @@ function renderHistoryDetailChart() {
     historyDetailChart._bbqSampleCount = rawSampleCount;
     historyDetailChart._bbqDomeTarget = session.domeTarget;
     historyDetailChart._bbqMeatTarget = session.meatTarget;
+    historyDetailChart._bbqEvents = eventSignature(session);
 
     bindChartTooltipDismiss(canvas, () => historyDetailChart);
 }
@@ -820,6 +1063,278 @@ function renderStars(rating) {
     return [1, 2, 3, 4, 5]
         .map(n => n <= rating ? "★" : "☆")
         .join("");
+}
+
+function renderLidEventList(session) {
+    const events = (session?.events || []).filter(event => event.type === "lid");
+    if (!events.length) return "";
+
+    return `
+    <div class="card">
+        <h3>Lid openings</h3>
+        ${events.map(event => `
+            <button type="button" class="event-flag" onclick="explainLidEvent('${session.id}', '${event.id}')">
+                <span class="event-flag-title">Lid · ${new Date(event.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                <small>${escapeHtmlText(event.reason || "Add why it was opened")}</small>
+            </button>
+        `).join("")}
+    </div>`;
+}
+
+async function explainLidEvent(sessionId, eventId) {
+    const session = findSession(sessionId) || (typeof getCurrentSession === "function" ? getCurrentSession() : null);
+    const event = session?.events?.find(item => item.id === eventId);
+    if (!event) return;
+
+    const reason = await askText(
+        "Why was the lid opened?",
+        event.reason || "",
+        { placeholder: "Checked the bark, added wood…" }
+    );
+    if (!reason) return;
+
+    event.reason = reason;
+    touchSession(session);
+    render();
+}
+
+async function cookLikeThis(sessionId) {
+    const source = findSession(sessionId);
+    if (!source || typeof startCookSession !== "function") return;
+
+    if (appState.cook?.active) {
+        const confirmed = await askConfirm(
+            "Start a new cook?",
+            "The current cook will be saved first. The new one uses the same targets and phases.",
+            { confirmText: "Start" }
+        );
+        if (!confirmed) return;
+        finishCookSession();
+    }
+
+    const settings = settingsFromCook(source);
+    appState.cook.active = true;
+    appState.cook.name = settings.name;
+    appState.cook.recipe = settings.recipe;
+    appState.cook.domeTarget = settings.domeTarget;
+    appState.cook.meatTarget = settings.meatTarget;
+    appState.cook.phases = settings.phases;
+    appState.cook.phase = 0;
+    appState.cook.completedPhases = [];
+    appState.cook.duration = "";
+    appState.cook.startedAt = new Date().toISOString();
+    appState.cook.lastPhaseChange = appState.cook.startedAt;
+    appState.cook.likeSessionId = settings.likeSessionId;
+
+    if (typeof syncWakeLockState === "function") {
+        syncWakeLockState();
+    }
+
+    startCookSession();
+    appState.selectedHistory = null;
+    appState.screen = "dashboard";
+
+    if (typeof saveAppState === "function") {
+        saveAppState();
+    }
+
+    render();
+}
+
+function loadShareImage(src) {
+    return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(new Error("Unable to load photo"));
+        image.src = src;
+    });
+}
+
+async function sharePhoto(session) {
+    const photo = (session.photos || [])[0];
+    if (!photo) return null;
+
+    try {
+        if (String(photo).startsWith("data:")) {
+            return await loadShareImage(photo);
+        }
+
+        const src = getPhotoSrc(photo);
+        if (!src) return null;
+        const response = await fetch(src);
+        if (!response.ok) return null;
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        try {
+            return await loadShareImage(url);
+        } finally {
+            URL.revokeObjectURL(url);
+        }
+    } catch (error) {
+        console.warn("Share photo skipped", error);
+        return null;
+    }
+}
+
+function drawShareSparkline(ctx, history, x, y, width, height) {
+    const samples = (history || []).filter(sample => Number.isFinite(sample.dome) || Number.isFinite(sample.meat));
+    if (samples.length < 2) return;
+
+    const values = samples.flatMap(sample => [sample.dome, sample.meat].filter(Number.isFinite));
+    const min = Math.min(...values) - 4;
+    const max = Math.max(...values) + 4;
+    const span = Math.max(1, max - min);
+
+    const plot = (key, color) => {
+        ctx.beginPath();
+        let started = false;
+        samples.forEach((sample, index) => {
+            if (!Number.isFinite(sample[key])) return;
+            const px = x + (index / (samples.length - 1)) * width;
+            const py = y + height - ((sample[key] - min) / span) * height;
+            if (!started) {
+                ctx.moveTo(px, py);
+                started = true;
+            } else {
+                ctx.lineTo(px, py);
+            }
+        });
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+    };
+
+    plot("dome", "#E5A93D");
+    plot("meat", "#4DB6A5");
+}
+
+function roundedRect(ctx, x, y, width, height, radius) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.arcTo(x + width, y, x + width, y + height, radius);
+    ctx.arcTo(x + width, y + height, x, y + height, radius);
+    ctx.arcTo(x, y + height, x, y, radius);
+    ctx.arcTo(x, y, x + width, y, radius);
+    ctx.closePath();
+}
+
+async function renderShareCard(session) {
+    const canvas = document.createElement("canvas");
+    canvas.width = 800;
+    canvas.height = 1000;
+    const ctx = canvas.getContext("2d");
+    const photo = await sharePhoto(session);
+    const peaks = cookPeaks(session);
+
+    ctx.fillStyle = "#171511";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#C88B3D";
+    ctx.fillRect(0, 0, canvas.width, 8);
+
+    ctx.fillStyle = "#E2B36C";
+    ctx.font = "700 14px sans-serif";
+    ctx.fillText("HERMANOS", 56, 72);
+
+    ctx.fillStyle = "#F5F4F0";
+    ctx.font = "800 42px sans-serif";
+    const name = session.name || session.recipe || "Cook";
+    ctx.fillText(name.slice(0, 28), 56, 140);
+
+    ctx.fillStyle = "#9DA5A5";
+    ctx.font = "400 22px sans-serif";
+    const when = session.startedAt
+        ? new Date(session.startedAt).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric" })
+        : "";
+    ctx.fillText([when, session.duration].filter(Boolean).join("  ·  "), 56, 184);
+
+    if (session.rating) {
+        ctx.fillStyle = "#E2B36C";
+        ctx.font = "400 28px sans-serif";
+        ctx.fillText(renderStars(session.rating), 56, 232);
+    }
+
+    const stats = [
+        ["Dome peak", peaks.dome != null ? `${peaks.dome.toFixed(0)}°C` : "—"],
+        ["Core peak", peaks.meat != null ? `${peaks.meat.toFixed(0)}°C` : "—"]
+    ];
+    stats.forEach((stat, index) => {
+        const x = 56 + index * 340;
+        ctx.fillStyle = "#23201C";
+        roundedRect(ctx, x, 270, 310, 120, 18);
+        ctx.fill();
+        ctx.fillStyle = "#9DA5A5";
+        ctx.font = "700 16px sans-serif";
+        ctx.fillText(stat[0], x + 24, 314);
+        ctx.fillStyle = index === 0 ? "#E5A93D" : "#4DB6A5";
+        ctx.font = "800 36px sans-serif";
+        ctx.fillText(stat[1], x + 24, 362);
+    });
+
+    drawShareSparkline(ctx, session.temperatureHistory, 56, 430, 688, 120);
+
+    if (photo) {
+        const frame = { x: 56, y: 580, width: 688, height: 300 };
+        ctx.save();
+        roundedRect(ctx, frame.x, frame.y, frame.width, frame.height, 18);
+        ctx.clip();
+        const scale = Math.max(frame.width / photo.width, frame.height / photo.height);
+        const width = photo.width * scale;
+        const height = photo.height * scale;
+        ctx.drawImage(photo, frame.x + (frame.width - width) / 2, frame.y + (frame.height - height) / 2, width, height);
+        ctx.restore();
+    }
+
+    ctx.fillStyle = "#9DA5A5";
+    ctx.font = "400 16px sans-serif";
+    ctx.fillText("Hermanos Grill Companion", 56, 940);
+
+    return new Promise(resolve => canvas.toBlob(blob => resolve(blob), "image/png"));
+}
+
+function downloadShareCard(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function shareCook(sessionId) {
+    const session = findSession(sessionId);
+    if (!session) return;
+
+    const text = shareCookText(session);
+    const filename = `${(session.name || "cook").replace(/[^\w]+/g, "-").replace(/^-|-$/g, "") || "cook"}.png`;
+
+    try {
+        const blob = await renderShareCard(session);
+        if (!blob) throw new Error("Empty share card");
+
+        const file = new File([blob], filename, { type: "image/png" });
+        const canShareFile = navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }));
+
+        if (canShareFile) {
+            await navigator.share({
+                files: [file],
+                title: session.name || "Cook",
+                text
+            });
+            return;
+        }
+
+        downloadShareCard(blob, filename);
+        if (navigator.share) {
+            await navigator.share({ title: session.name || "Cook", text });
+            return;
+        }
+
+        showNotice("Cook card saved", "Sharing isn't available in this browser, so the card was downloaded.");
+    } catch (error) {
+        if (error?.name === "AbortError") return;
+        console.warn("Share failed", error);
+        showNotice("Couldn't share", "The cook card could not be shared.");
+    }
 }
 
 function renderDomeSummaryCard(session) {

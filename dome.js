@@ -206,11 +206,123 @@ function summarizeDomeSession(history, target) {
     };
 }
 
+const LID_EVENT_MATCH_MS = 60 * 1000;
+
+// Keeps a reason the user already typed if the same opening is detected again.
+function mergeLidEvents(events, detected) {
+    const next = (events || []).map(event => ({ ...event }));
+    let changed = false;
+
+    for (const item of detected || []) {
+        const start = item.start ?? item.timestamp;
+        if (!Number.isFinite(start)) continue;
+
+        const match = next.find(event =>
+            event.type === "lid" && Math.abs(event.timestamp - start) < LID_EVENT_MATCH_MS
+        );
+        if (match) continue;
+
+        next.push({
+            id: `lid-${start}`,
+            type: "lid",
+            timestamp: start,
+            reason: ""
+        });
+        changed = true;
+    }
+
+    next.sort((left, right) => left.timestamp - right.timestamp);
+    return { events: next, changed };
+}
+
+function ventAdvice(analysis, { target = null, current = null, limit = 8 } = {}) {
+    if (!analysis) return null;
+
+    if (analysis.lidOpen) {
+        return {
+            title: "Lid open",
+            short: "Lid open · leave the vents",
+            body: "Leave the bottom vent and the top daisy wheel as they are until the lid is closed."
+        };
+    }
+
+    if (analysis.recovering) {
+        return {
+            title: "Lid just closed",
+            short: "Lid closed · wait before touching the vents",
+            body: "The lid is shut. Give the dome a few minutes before changing the vents."
+        };
+    }
+
+    const knownTarget = Number.isFinite(target) ? target : null;
+    const knownCurrent = Number.isFinite(current) ? current : null;
+    const aboveTarget = knownTarget != null && knownCurrent != null && knownCurrent >= knownTarget;
+
+    if (analysis.overshootRisk) {
+        if (aboveTarget) {
+            return {
+                title: "Dome too hot",
+                short: "Too hot · close both vents",
+                body: "Close the bottom vent and shut the top daisy wheel. The ceramic will keep climbing for a while after that."
+            };
+        }
+        return {
+            title: "Dome rising fast",
+            short: "Rising fast · close the bottom vent",
+            body: `Close the bottom vent to a crack${knownTarget != null ? ` before it reaches ${knownTarget}°C` : ""}. The ceramic keeps heating after the vent is closed.`
+        };
+    }
+
+    if (knownTarget != null && knownCurrent != null && knownCurrent > knownTarget + limit) {
+        return {
+            title: "Dome too hot",
+            short: "Too hot · close both vents",
+            body: "Close the bottom vent and narrow the top daisy wheel. The ceramic will take a while to come down."
+        };
+    }
+
+    if (knownTarget != null && knownCurrent != null && knownCurrent < knownTarget - limit) {
+        return {
+            title: "Dome too cold",
+            short: "Too cold · open the bottom vent",
+            body: "Open the bottom vent wider. Check the top daisy wheel has not been blown closed."
+        };
+    }
+
+    if (analysis.offset != null && analysis.offset >= 3) {
+        return {
+            title: "Dome drifting high",
+            short: "A little hot · close the bottom vent a touch",
+            body: `Averaging ${Math.abs(analysis.offset).toFixed(0)}°C above target. Close the bottom vent a touch and leave the top daisy wheel.`
+        };
+    }
+
+    if (analysis.offset != null && analysis.offset <= -3) {
+        return {
+            title: "Dome drifting low",
+            short: "A little low · open the bottom vent",
+            body: `Averaging ${Math.abs(analysis.offset).toFixed(0)}°C below target. Open the bottom vent about a pencil width. Leave the top daisy wheel.`
+        };
+    }
+
+    return null;
+}
+
 if (typeof window !== "undefined") {
     window.analyzeDome = analyzeDome;
     window.summarizeDomeSession = summarizeDomeSession;
+    window.detectLidEvents = detectLidEvents;
+    window.mergeLidEvents = mergeLidEvents;
+    window.ventAdvice = ventAdvice;
 }
 
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { analyzeDome, summarizeDomeSession, detectLidEvents, DOME_CONFIG };
+    module.exports = {
+        analyzeDome,
+        summarizeDomeSession,
+        detectLidEvents,
+        mergeLidEvents,
+        ventAdvice,
+        DOME_CONFIG
+    };
 }

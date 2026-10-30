@@ -501,6 +501,13 @@ function recordTemperatureHistory() {
     session.temperatureHistory.push(sample);
     unsavedTemperatureSamples++;
 
+    if (typeof syncSessionLidEvents === "function" && syncSessionLidEvents(session)) {
+        saveSessions();
+        if (typeof render === "function") {
+            render();
+        }
+    }
+
     /*
         Save every 20 measurements
         to reduce writes.

@@ -89,26 +89,28 @@ function getDomeAnalysis() {
 function renderDomeStatusHtml(analysis) {
     if (!analysis) return "";
 
-    if (analysis.lidOpen) {
-        const minutes = Math.max(1, Math.round(analysis.lidOpenMs / 60000));
-        return `<span class="dome-pill dome-lid">Lid open · ${minutes} min</span>`;
-    }
-    if (analysis.recovering) {
-        return `<span class="dome-pill dome-lid">Recovering after lid</span>`;
-    }
+    const dome = appState.probes.find(probe => probe.type === "dome");
+    const current = Number(dome?.temperature);
+    const advice = typeof ventAdvice === "function"
+        ? ventAdvice(analysis, {
+            target: Number(appState.cook.domeTarget),
+            current: Number.isFinite(current) ? current : null,
+            limit: Number(appState.alerts?.domeDeviation) || 8
+        })
+        : null;
 
     const parts = [];
-    if (analysis.overshootRisk) {
-        parts.push(`<span class="dome-pill dome-warn">Rising fast · close vents</span>`);
-    }
-    if (analysis.swing != null) {
+    if (analysis.lidOpen) {
+        const minutes = Math.max(1, Math.round(analysis.lidOpenMs / 60000));
+        parts.push(`<span class="dome-pill dome-lid">Lid open · ${minutes} min · leave the vents</span>`);
+    } else if (advice) {
+        const text = typeof escapeHtmlText === "function" ? escapeHtmlText(advice.short) : advice.short;
+        parts.push(`<span class="dome-pill dome-warn">${text}</span>`);
+    } else if (analysis.swing != null) {
         const level = analysis.swing <= 5 ? "dome-ok" : "dome-warn";
         parts.push(`<span class="dome-pill ${level}">±${analysis.swing.toFixed(1)}° · ${analysis.rating}</span>`);
-    } else {
+    } else if (!analysis.lidOpen) {
         parts.push(`<span class="eta-sub">Measuring stability…</span>`);
-    }
-    if (analysis.offset != null && Math.abs(analysis.offset) >= 3) {
-        parts.push(`<span class="eta-sub">avg ${Math.abs(analysis.offset).toFixed(0)}° ${analysis.offset < 0 ? "below" : "above"} target</span>`);
     }
     return parts.join("");
 }
@@ -351,6 +353,16 @@ function formatElapsedTime() {
 }
 
 function renderCookPanel() {
+    const currentSession = typeof getCurrentSession === "function" ? getCurrentSession() : null;
+    if (
+        currentSession &&
+        typeof syncSessionLidEvents === "function" &&
+        syncSessionLidEvents(currentSession) &&
+        typeof saveSessions === "function"
+    ) {
+        saveSessions();
+    }
+
     if (!appState.cook.active) {
         return `
       <div class="card cook-card">
@@ -495,8 +507,21 @@ function renderCookPanel() {
         <canvas id="activeCookChart"></canvas>
     </div>
 
+    ${renderCookLikeNote()}
+    ${typeof renderLidEventList === "function" ? renderLidEventList(currentSession) : ""}
+
 </div>
   `;
+}
+
+function renderCookLikeNote() {
+    const id = appState.cook.likeSessionId;
+    if (!id) return "";
+
+    const source = appState.sessions?.find(session => session.id === id);
+    const name = source?.name || source?.recipe || "the last cook";
+    const safeName = typeof escapeHtmlText === "function" ? escapeHtmlText(name) : name;
+    return `<p class="cook-like-note">Same settings as ${safeName}. Dashed lines are that cook.</p>`;
 }
 
 function dashboardView() {
@@ -839,16 +864,27 @@ function ensureActiveCookChart() {
             animation: false,
             interaction: { mode: "index", intersect: false },
             plugins: {
-                legend: { labels: { color: "#F2EBDD" } },
-                tooltip: {
-                    callbacks: {
-                        label: context => {
-                            const value = context.parsed.y;
-                            return value == null
-                                ? context.dataset.label
-                                : `${context.dataset.label}: ${Number(value).toFixed(1)}°C`;
-                        }
+                legend: {
+                    labels: {
+                        color: "#F2EBDD",
+                        filter: item => item.text !== "Lid"
                     }
+                },
+                tooltip: {
+                    filter: context => typeof chartTooltipFilter === "function"
+                        ? chartTooltipFilter(context)
+                        : context.parsed.y != null,
+                    callbacks: {
+                        label: context => typeof chartTooltipLabel === "function"
+                            ? chartTooltipLabel(context)
+                            : context.dataset.label
+                    }
+                }
+            },
+            onClick(event, elements) {
+                const session = typeof getCurrentSession === "function" ? getCurrentSession() : null;
+                if (session && typeof openLidEventFromChart === "function") {
+                    openLidEventFromChart(this, elements, session.id);
                 }
             },
             scales: {
@@ -891,8 +927,9 @@ function updateActiveCookChart() {
         return;
     }
 
+    const signature = `${history.length}|${typeof eventSignature === "function" ? eventSignature(session) : ""}|${appState.cook.likeSessionId || ""}`;
     const chart = ensureActiveCookChart();
-    if (!chart || chart._bbqSampleCount === history.length) {
+    if (!chart || chart._bbqSignature === signature) {
         return;
     }
 
@@ -905,9 +942,20 @@ function updateActiveCookChart() {
     );
     chart.data.datasets[0].data = samples.map(s => s.dome);
     chart.data.datasets[1].data = samples.map(s => s.meat);
+    chart.data.datasets = chart.data.datasets
+        .filter(dataset => !dataset.isExtra && !dataset.isEvent)
+        .concat(
+            typeof referenceDatasets === "function"
+                ? referenceDatasets(samples, appState.cook.startedAt, appState.cook.likeSessionId)
+                : [],
+            typeof lidEventDataset === "function"
+                ? lidEventDataset(samples, session.events)
+                : []
+        );
     chart.update("none");
 
     chart._bbqSampleCount = history.length;
+    chart._bbqSignature = signature;
 }
 
 setInterval(() => {
