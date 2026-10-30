@@ -228,6 +228,7 @@ function applyCurrentPhaseTargets() {
     if (session) {
         session.domeTarget = appState.cook.domeTarget;
         session.meatTarget = appState.cook.meatTarget;
+        session.updatedAt = new Date().toISOString();
         if (typeof saveSessions === "function") {
             saveSessions();
         }

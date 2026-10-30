@@ -181,6 +181,7 @@ function handleBluetoothNotification(event){
 
 
             probe.temperature = null;
+            probe.online = false;
 
 
             return;

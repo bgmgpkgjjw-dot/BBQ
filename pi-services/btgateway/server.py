@@ -48,12 +48,12 @@ def decode_ble_packet(data):
 
     probes = {}
     probe_slots = [
-        {"id": 1, "offset": 2},
-        {"id": 2, "offset": 4},
-        {"id": 3, "offset": 6},
-        {"id": 4, "offset": 8},
-        {"id": 5, "offset": 10},
-        {"id": 6, "offset": 12}
+        {"id": 1, "offset": 2, "key": "dome"},
+        {"id": 2, "offset": 4, "key": "probe1"},
+        {"id": 3, "offset": 6, "key": "probe2"},
+        {"id": 4, "offset": 8, "key": "probe3"},
+        {"id": 5, "offset": 10, "key": "probe4"},
+        {"id": 6, "offset": 12, "key": "probe5"}
     ]
 
     for slot in probe_slots:
@@ -65,26 +65,17 @@ def decode_ble_packet(data):
 
         raw = (high << 8) | low
 
-        # Skip invalid values
-        if raw == 0xFFFF or raw == 0:
+        # 0 is a dropout sample: omit it so the last good reading is kept.
+        # 0xFFFF means the probe is gone: send null so clients clear it.
+        if raw == 0:
+            continue
+        if raw == 0xFFFF:
+            probes[slot["key"]] = None
+            print(f"Probe {probe_id}: disconnected")
             continue
 
         temperature = raw / 10
-
-        # Map probe ID to network format
-        # Probe 1 → dome, Probe 2 → probe1, Probe 3 → probe2, etc.
-        if probe_id == 1:
-            probes["dome"] = raw
-        elif probe_id == 2:
-            probes["probe1"] = raw
-        elif probe_id == 3:
-            probes["probe2"] = raw
-        elif probe_id == 4:
-            probes["probe3"] = raw
-        elif probe_id == 5:
-            probes["probe4"] = raw
-        elif probe_id == 6:
-            probes["probe5"] = raw
+        probes[slot["key"]] = raw
 
         print(f"Probe {probe_id}: {temperature}°C (raw: {raw})")
 

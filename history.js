@@ -218,11 +218,17 @@ function openHistorySession(id) {
         appState.cook?.active &&
         session.id === appState.currentSessionId
     ) {
-        session.domeTarget = appState.cook.domeTarget;
-        session.meatTarget = appState.cook.meatTarget;
+        if (
+            session.domeTarget !== appState.cook.domeTarget ||
+            session.meatTarget !== appState.cook.meatTarget
+        ) {
+            session.domeTarget = appState.cook.domeTarget;
+            session.meatTarget = appState.cook.meatTarget;
+            session.updatedAt = new Date().toISOString();
 
-        if (typeof saveSessions === "function") {
-            saveSessions();
+            if (typeof saveSessions === "function") {
+                saveSessions();
+            }
         }
     }
 
@@ -236,11 +242,38 @@ function openHistorySession(id) {
 
 }
 
+// Pi sync replaces session objects. Keep the open detail pointed at the live one
+// so the chart and target lines are not stuck on a stale copy.
+function getOpenHistorySession() {
+    const selected = appState.selectedHistory;
+    if (!selected) {
+        return null;
+    }
+
+    const live = appState.sessions?.find(session => session.id === selected.id);
+    if (live && live !== selected) {
+        appState.selectedHistory = live;
+    }
+
+    return live || selected;
+}
+
+function historyChartIsCurrent(chart, canvas, session, sampleCount) {
+    return Boolean(
+        chart &&
+        chart.canvas === canvas &&
+        chart._bbqSessionId === session.id &&
+        chart._bbqSampleCount === sampleCount &&
+        chart._bbqDomeTarget === session.domeTarget &&
+        chart._bbqMeatTarget === session.meatTarget
+    );
+}
+
 function historyDetailView() {
 
 
     const selected =
-        appState.selectedHistory;
+        getOpenHistorySession();
 
 
     if (!selected) {
@@ -511,7 +544,7 @@ function downsampleTemperatureSamples(samples, maxPoints = 600) {
 function renderHistoryDetailChart() {
 
     const session =
-        appState.selectedHistory;
+        getOpenHistorySession();
 
     if (!session) {
         return;
@@ -537,11 +570,7 @@ function renderHistoryDetailChart() {
     // Skip rebuilding when the same session's data hasn't changed since last draw,
     // so background events (WS ticks, unrelated renders) don't churn the chart.
     const rawSampleCount = (session.temperatureHistory || []).length;
-    if (
-        historyDetailChart &&
-        historyDetailChart._bbqSessionId === session.id &&
-        historyDetailChart._bbqSampleCount === rawSampleCount
-    ) {
+    if (historyChartIsCurrent(historyDetailChart, canvas, session, rawSampleCount)) {
         return;
     }
 
@@ -698,33 +727,53 @@ function renderHistoryDetailChart() {
 
     historyDetailChart._bbqSessionId = session.id;
     historyDetailChart._bbqSampleCount = rawSampleCount;
+    historyDetailChart._bbqDomeTarget = session.domeTarget;
+    historyDetailChart._bbqMeatTarget = session.meatTarget;
 
-    setupHistoryChartTooltipDismiss(canvas);
+    bindChartTooltipDismiss(canvas, () => historyDetailChart);
 }
 
-let historyChartTooltipDismissBound = false;
+let chartTooltipDismissBound = false;
 
-// Chart.js tooltips (mode "index") have no touch equivalent of "mouse left the
-// canvas", so on mobile they stay stuck after a tap unless dismissed manually.
-function setupHistoryChartTooltipDismiss(canvas) {
-    if (historyChartTooltipDismissBound) {
+function hideChartTooltip(chart) {
+    if (!chart?.tooltip || chart.tooltip.opacity === 0) {
         return;
     }
 
-    historyChartTooltipDismissBound = true;
+    chart.setActiveElements([]);
+    chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+    chart.update("none");
+}
 
-    document.addEventListener("touchstart", event => {
-        const activeCanvas = document.getElementById("historyChart");
+// Index tooltips have no "finger left the chart" event, so they stay open and
+// look like a stuck data popup. Hide on an outside tap, and shortly after the
+// finger lifts.
+function bindChartTooltipDismiss(canvas, getChart) {
+    if (!canvas || canvas.dataset.tooltipBound) {
+        return;
+    }
 
-        if (
-            historyDetailChart &&
-            activeCanvas &&
-            !activeCanvas.contains(event.target)
-        ) {
-            historyDetailChart.setActiveElements([]);
-            historyDetailChart.tooltip.setActiveElements([], { x: 0, y: 0 });
-            historyDetailChart.update();
-        }
+    canvas.dataset.tooltipBound = "true";
+    canvas._chartGetter = getChart;
+    canvas.addEventListener("pointerup", () => {
+        clearTimeout(canvas._tooltipHide);
+        canvas._tooltipHide = setTimeout(() => hideChartTooltip(getChart()), 1200);
+    });
+
+    if (chartTooltipDismissBound) {
+        return;
+    }
+
+    chartTooltipDismissBound = true;
+    document.addEventListener("pointerdown", event => {
+        document.querySelectorAll("canvas[data-tooltip-bound]").forEach(boundCanvas => {
+            if (boundCanvas.contains(event.target)) {
+                return;
+            }
+
+            clearTimeout(boundCanvas._tooltipHide);
+            hideChartTooltip(boundCanvas._chartGetter?.());
+        });
     });
 }
 

@@ -88,9 +88,17 @@ function connectToBtgateway() {
     btgw.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
-            latestData = data;
+            // Merge instead of replacing. An omitted slot is a dropout (keep the
+            // last value); an explicit null is a disconnected probe.
+            if (data && typeof data === "object") {
+                for (const [key, value] of Object.entries(data)) {
+                    if (key === "dome" || key.startsWith("probe")) {
+                        latestData[key] = value ?? null;
+                    }
+                }
+            }
             lastReceivedAt = Date.now();
-            recordReading(data);
+            recordReading(latestData);
             console.log("Received from btgateway:", data);
         } catch (e) {
             console.error("Invalid JSON from btgateway:", e);

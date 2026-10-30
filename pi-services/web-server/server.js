@@ -54,9 +54,12 @@ const server = (tlsOptions ? https : http).createServer(tlsOptions || {}, (reque
         relativePath = "/index.html";
     }
 
-    // Prevent path traversal outside the served root.
-    const filePath = path.normalize(path.join(root, relativePath));
-    if (!filePath.startsWith(path.normalize(root))) {
+    // Prevent path traversal outside the served root, including sibling
+    // directories whose names share the root as a prefix.
+    const rootPath = path.resolve(root);
+    const filePath = path.resolve(rootPath, `.${relativePath}`);
+    const fromRoot = path.relative(rootPath, filePath);
+    if (fromRoot.startsWith("..") || path.isAbsolute(fromRoot)) {
         response.writeHead(403).end("Forbidden");
         return;
     }
@@ -68,7 +71,12 @@ const server = (tlsOptions ? https : http).createServer(tlsOptions || {}, (reque
         }
 
         const contentType = MIME_TYPES[path.extname(filePath)] || "application/octet-stream";
-        response.writeHead(200, { "Content-Type": contentType });
+        // no-cache so the browser revalidates. Otherwise a heuristic cache can
+        // pin sw.js and the app shell, and the service worker never sees updates.
+        response.writeHead(200, {
+            "Content-Type": contentType,
+            "Cache-Control": "no-cache"
+        });
         response.end(request.method === "HEAD" ? undefined : data);
     });
 });

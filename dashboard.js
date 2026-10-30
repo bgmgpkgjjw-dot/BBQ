@@ -719,6 +719,7 @@ function updateDomeTarget(value) {
     const session = typeof getCurrentSession === "function" ? getCurrentSession() : null;
     if (session) {
         session.domeTarget = target;
+        session.updatedAt = new Date().toISOString();
     }
 
     if (typeof saveAppState === "function") {
@@ -748,6 +749,7 @@ function updateMeatTarget(value) {
     const session = typeof getCurrentSession === "function" ? getCurrentSession() : null;
     if (session) {
         session.meatTarget = appState.cook.meatTarget;
+        session.updatedAt = new Date().toISOString();
     }
 
     if (typeof saveAppState === "function") {
@@ -864,6 +866,9 @@ function ensureActiveCookChart() {
     });
 
     activeCookChart._bbqSampleCount = 0;
+    if (typeof bindChartTooltipDismiss === "function") {
+        bindChartTooltipDismiss(canvas, () => activeCookChart);
+    }
 
     return activeCookChart;
 }

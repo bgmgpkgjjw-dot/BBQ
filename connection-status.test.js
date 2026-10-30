@@ -61,6 +61,20 @@ test("dashboard distinguishes Pi connectivity from thermometer readings", () => 
     assertStatus(app, "Pi connected · Live", "status live");
     assert.equal(app.appState.probes[0].temperature, 120);
 
+    app.context.processNetworkPayload({ probe1: 500 });
+    assert.equal(app.appState.probes[0].temperature, 120);
+    assert.equal(app.appState.probes[1].temperature, 50);
+
+    app.appState.probes[0].lastSeen = Date.now() - 11000;
+    app.context.processNetworkPayload({ probe1: 510 });
+    assert.equal(app.appState.probes[0].temperature, null);
+    assert.equal(app.appState.probes[1].temperature, 51);
+
+    app.context.processNetworkPayload({ dome: 0xFFFF, probe1: 0 });
+    assert.equal(app.appState.probes[0].temperature, null);
+    assert.equal(app.appState.probes[1].temperature, null);
+    assert.equal(app.appState.probes[0].online, false);
+
     app.context.processNetworkPayload({ dome: null, probe1: null, probe2: null });
     assertStatus(app, "Pi connected · Thermometer not connected or no readings", "status stale");
     assert.equal(app.appState.probes[0].temperature, null);

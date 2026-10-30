@@ -157,75 +157,51 @@ function processNetworkPayload(payload) {
     let updated = false;
     let hasReadings = false;
 
-    // Map dome temperature to Probe 1
-    // Network format: raw value (like Bluetooth), divide by 10 to get Celsius
-    if (payload.dome === null) {
-        const probe = appState.probes.find(p => p.id === 1);
-        if (probe) {
+    // A present key is a reading for that slot. null, 0 and 0xFFFF are "no probe",
+    // not a temperature to keep on screen. A missing key is left alone so a dropout
+    // sample does not wipe the last good reading.
+    for (const [key, probeId] of [["dome", 1], ["probe1", 2], ["probe2", 3]]) {
+        if (!Object.prototype.hasOwnProperty.call(payload, key)) {
+            continue;
+        }
+
+        const probe = appState.probes.find(p => p.id === probeId);
+        if (!probe) {
+            continue;
+        }
+
+        const raw = Number(payload[key]);
+        if (payload[key] == null || Number.isNaN(raw) || raw === 0 || raw === 0xFFFF) {
             probe.temperature = null;
             probe.online = false;
             updated = true;
+            continue;
         }
-    } else if (payload.dome !== undefined) {
-        const probe = appState.probes.find(p => p.id === 1);
-        if (probe) {
-            const raw = Number(payload.dome);
-            if (!Number.isNaN(raw) && raw !== 0xFFFF && raw !== 0) {
-                const temp = raw / 10;
-                probe.temperature = temp;
-                probe.lastSeen = Date.now();
-                probe.online = true;
-                updated = true;
-                hasReadings = true;
-                console.log("Network: Dome temperature", temp, "°C (raw:", raw, ")");
-            }
-        }
+
+        probe.temperature = raw / 10;
+        probe.lastSeen = Date.now();
+        probe.online = true;
+        updated = true;
+        hasReadings = true;
     }
 
-    // Map probe1 temperature to Probe 2 (Meat)
-    if (payload.probe1 === null) {
-        const probe = appState.probes.find(p => p.id === 2);
-        if (probe) {
-            probe.temperature = null;
-            probe.online = false;
-            updated = true;
-        }
-    } else if (payload.probe1 !== undefined) {
-        const probe = appState.probes.find(p => p.id === 2);
-        if (probe) {
-            const raw = Number(payload.probe1);
-            if (!Number.isNaN(raw) && raw !== 0xFFFF && raw !== 0) {
-                const temp = raw / 10;
-                probe.temperature = temp;
-                probe.lastSeen = Date.now();
-                probe.online = true;
-                updated = true;
-                hasReadings = true;
-                console.log("Network: Probe 1 (Meat) temperature", temp, "°C (raw:", raw, ")");
+    // Other probes are still reporting, but this slot has been missing long enough
+    // to be a disconnect rather than a one-packet dropout.
+    if (hasReadings) {
+        for (const [key, probeId] of [["dome", 1], ["probe1", 2], ["probe2", 3]]) {
+            if (Object.prototype.hasOwnProperty.call(payload, key)) {
+                continue;
             }
-        }
-    }
 
-    // Map probe2 temperature to Probe 3
-    if (payload.probe2 === null) {
-        const probe = appState.probes.find(p => p.id === 3);
-        if (probe) {
-            probe.temperature = null;
-            probe.online = false;
-            updated = true;
-        }
-    } else if (payload.probe2 !== undefined) {
-        const probe = appState.probes.find(p => p.id === 3);
-        if (probe) {
-            const raw = Number(payload.probe2);
-            if (!Number.isNaN(raw) && raw !== 0xFFFF && raw !== 0) {
-                const temp = raw / 10;
-                probe.temperature = temp;
-                probe.lastSeen = Date.now();
-                probe.online = true;
-                updated = true;
-                hasReadings = true;
-                console.log("Network: Probe 2 temperature", temp, "°C (raw:", raw, ")");
+            const probe = appState.probes.find(p => p.id === probeId);
+            if (
+                probe &&
+                probe.temperature != null &&
+                Number.isFinite(probe.lastSeen) &&
+                Date.now() - probe.lastSeen > NETWORK_PACKET_STALE_MS
+            ) {
+                probe.temperature = null;
+                probe.online = false;
             }
         }
     }

@@ -1,12 +1,18 @@
-const CACHE_NAME = 'bbq-pwa-v24';
+const CACHE_NAME = 'bbq-pwa-v25';
 const ASSETS = [
   './',
   './index.html',
   './styles.css',
   './manifest.json',
+  './icons/apple-touch-icon.png',
+  './icons/icon-180.png',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon-maskable.png',
   './app.js',
   './dashboard.js',
   './recipes.js',
+  './recipes-data.js',
   './settings.js',
   './simulator.js',
   './onboarding.js',
@@ -14,7 +20,13 @@ const ASSETS = [
   './forecast.js',
   './dome.js',
   './dialogs.js',
-  './networksocket.js'
+  './history.js',
+  './storage.js',
+  './bluetooth.js',
+  './networksocket.js',
+  './ai.js',
+  './icons.js',
+  './notifications.js'
 ];
 
 self.addEventListener('install', event => {
