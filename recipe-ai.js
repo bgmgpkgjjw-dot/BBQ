@@ -13,6 +13,9 @@ const DEFAULT_MODELS = [
     "nvidia/nemotron-3.5-super-vl:free",
     "xingchen-agi/xing4.0-29b-a4b:free",
     "google/gemma-4-31b-it:free",
+    "google/gemma-4-26b-a4b-it:free",
+    "nvidia/nemotron-3-ultra-550b-a55b:free",
+    "poolside/laguna-s-2.1:free",
     "openrouter/free"
 ];
 
@@ -204,7 +207,7 @@ function stringList(value, max) {
 }
 
 function validateIdeas(raw) {
-    const list = Array.isArray(raw) ? raw : raw?.ideas;
+    const list = Array.isArray(raw) ? raw : raw?.ideas ?? raw?.recipes ?? raw?.suggestions;
     const ideas = (Array.isArray(list) ? list : [])
         .map(item => ({
             title: cleanText(item?.title, 80),
@@ -212,7 +215,7 @@ function validateIdeas(raw) {
             duration: cleanText(item?.duration, 40) || "—"
         }))
         .filter(idea => idea.title);
-    if (ideas.length < 2) throw new RecipeAiError("The model returned too few ideas");
+    if (ideas.length < 1) throw new RecipeAiError("The model returned no usable ideas");
     return ideas.slice(0, 5);
 }
 

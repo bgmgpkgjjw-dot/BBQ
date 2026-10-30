@@ -72,8 +72,8 @@ test("absurd dome temperatures are clamped and recipes without steps are rejecte
     assert.throws(() => ai.validateRecipe({ ...goodRecipe, steps: [] }), /steps/);
 });
 
-test("ideas need at least two usable entries", () => {
-    assert.throws(() => ai.validateIdeas({ ideas: [{ title: "One" }] }), /few/);
+test("ideas need at least one usable entry", () => {
+    assert.throws(() => ai.validateIdeas({ ideas: [{ summary: "no title" }] }), /no usable/);
     assert.equal(ai.validateIdeas({ ideas: [{ title: "A", summary: "x" }, { title: "B" }] }).length, 2);
 });
 
