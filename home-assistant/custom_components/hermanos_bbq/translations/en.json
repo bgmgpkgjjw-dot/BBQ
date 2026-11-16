@@ -1,0 +1,19 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect a BBQ thermometer",
+        "description": "Enter the thermometer's Bluetooth MAC address. Stop the old BBQ Bluetooth gateway before connecting.",
+        "data": {
+          "address": "Bluetooth MAC address"
+        }
+      }
+    },
+    "error": {
+      "invalid_address": "Enter a Bluetooth MAC address, for example AA:BB:CC:DD:EE:FF."
+    },
+    "abort": {
+      "already_configured": "This thermometer is already configured."
+    }
+  }
+}
